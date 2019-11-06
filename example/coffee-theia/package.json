@@ -1,0 +1,47 @@
+{
+  "name": "@modelserver/coffee-theia",
+  "license": "(EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0)",
+  "keywords": [
+    "theia-extension",
+    "model-server",
+    "glsp",
+    "modeling"
+  ],
+  "homepage": "https://github.com/eclipse/emfcloud-modelserver-theia",
+  "bugs": "https://github.com/eclipse/emfcloud-modelserver-theia/issues",
+  "version": "0.0.1",
+  "files": [
+    "build",
+    "lib",
+    "src"
+  ],
+  "author": {
+    "name": "EclipseSource"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipse/emfcloud-modelserver-theia.git"
+  },
+  "dependencies": {
+    "@theia/core": "^0.7.1",
+    "@theia/workspace": "^0.7.1",
+    "@modelserver/theia": "0.0.1"
+  },
+  "devDependencies": {
+    "rimraf": "latest",
+    "typescript": "latest"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "tsc && yarn run download-server && yarn run lint",
+    "download-server": "cd ./scripts && ./download-server.sh",
+    "lint": "tslint -c ../../configs/tslint.json --project ./tsconfig.json",
+    "watch": "tsc -w"
+  },
+  "theiaExtensions": [
+    {
+      "backend": "lib/node/backend-module"
+    }
+  ]
+}
