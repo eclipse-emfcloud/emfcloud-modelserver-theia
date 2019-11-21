@@ -13,8 +13,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-import { ModelServerSubscriptionService } from "@modelserver/theia/lib/browser";
-import { ModelServerClient, ModelServerCommand, ModelServerCommandUtil, Response } from "@modelserver/theia/lib/common";
+import { ModelServerSubscriptionService } from "@eclipse-emfcloud/modelserver-theia/lib/browser";
+import {
+  ModelServerClient,
+  ModelServerCommand,
+  ModelServerCommandUtil,
+  Response
+} from "@eclipse-emfcloud/modelserver-theia/lib/common";
 import {
   Command,
   CommandContribution,

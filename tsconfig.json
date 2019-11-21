@@ -4,9 +4,7 @@
     "skipLibCheck": false,
     "baseUrl": ".",
     "paths": {
-      "@modelserver/theia": [
-        "modelserver-theia/src/*"
-      ],
+      "@eclipse-emfcloud/modelserver-theia": ["modelserver-theia/src/*"]
     },
     "plugins": [
       {
@@ -14,7 +12,5 @@
       }
     ]
   },
-  "include": [
-    "modelserver-theia/*/src"
-  ]
+  "include": ["modelserver-theia/*/src"]
 }
