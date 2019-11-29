@@ -7,9 +7,10 @@
     "glsp",
     "modeling"
   ],
-  "homepage": "https://github.com/eclipse/emfcloud-modelserver-theia",
-  "bugs": "https://github.com/eclipse/emfcloud-modelserver-theia/issues",
-  "version": "0.0.1",
+  "private": true,
+  "homepage": "https://www.eclipse.org/emfcloud/",
+  "bugs": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia/issues",
+  "version": "0.7.0",
   "files": [
     "build",
     "lib",
@@ -20,12 +21,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/eclipse/emfcloud-modelserver-theia.git"
+    "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
   },
   "dependencies": {
-    "@theia/core": "^0.7.1",
-    "@theia/workspace": "^0.7.1",
-    "@modelserver/theia": "0.0.1"
+    "@theia/core": "next",
+    "@theia/workspace": "next",
+    "@eclipse-emfcloud/modelserver-theia": "0.7.0"
   },
   "devDependencies": {
     "rimraf": "latest",

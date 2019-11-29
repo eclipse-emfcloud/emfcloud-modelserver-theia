@@ -8,8 +8,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { ModelServerSubscriptionService } from "@modelserver/theia/lib/browser";
-import { ModelServerClient, ModelServerCommand, ModelServerCommandUtil, Response } from "@modelserver/theia/lib/common";
+import { ModelServerSubscriptionService } from "@eclipse-emfcloud/modelserver-theia/lib/browser";
+import {
+  ModelServerClient,
+  ModelServerCommand,
+  ModelServerCommandUtil,
+  Response
+} from "@eclipse-emfcloud/modelserver-theia/lib/common";
 import {
   Command,
   CommandContribution,

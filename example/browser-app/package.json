@@ -1,26 +1,26 @@
 {
   "private": true,
   "name": "browser-app",
-  "version": "0.0.0",
+  "version": "0.7.0",
   "dependencies": {
-    "@theia/core": "^0.7.1",
-    "@theia/filesystem": "^0.7.1",
-    "@theia/workspace": "^0.7.1",
-    "@theia/preferences": "^0.7.1",
-    "@theia/navigator": "^0.7.1",
-    "@theia/process": "^0.7.1",
-    "@theia/terminal": "^0.7.1",
-    "@theia/editor": "^0.7.1",
-    "@theia/languages": "^0.7.1",
-    "@theia/markers": "^0.7.1",
-    "@theia/monaco": "^0.7.1",
-    "@theia/textmate-grammars": "^0.7.1",
-    "@theia/typescript": "^0.7.1",
-    "@theia/messages": "^0.7.1",
-    "@modelserver/dev-example": "0.0.1"
+    "@theia/core": "next",
+    "@theia/filesystem": "next",
+    "@theia/workspace": "next",
+    "@theia/preferences": "next",
+    "@theia/navigator": "next",
+    "@theia/process": "next",
+    "@theia/terminal": "next",
+    "@theia/editor": "next",
+    "@theia/languages": "next",
+    "@theia/markers": "next",
+    "@theia/monaco": "next",
+    "@theia/textmate-grammars": "next",
+    "@theia/typescript": "next",
+    "@theia/messages": "next",
+    "@modelserver/dev-example": "0.7.0"
   },
   "devDependencies": {
-    "@theia/cli": "^0.7.1"
+    "@theia/cli": "next"
   },
   "scripts": {
     "prepare": "theia build --mode development",

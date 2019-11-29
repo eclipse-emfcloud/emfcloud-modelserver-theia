@@ -1,5 +1,5 @@
 {
-  "name": "@modelserver/theia",
+  "name": "@eclipse-emfcloud/modelserver-theia",
   "main": "lib/common/index.js",
   "license": "(EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0)",
   "keywords": [
@@ -8,9 +8,9 @@
     "glsp",
     "modeling"
   ],
-  "homepage": "https://github.com/eclipse/emfcloud-modelserver-theia",
-  "bugs": "https://github.com/eclipse/emfcloud-modelserver-theia/issues",
-  "version": "0.0.1",
+  "homepage": "https://www.eclipse.org/emfcloud/",
+  "bugs": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia/issues",
+  "version": "0.7.0",
   "files": [
     "lib",
     "src"
@@ -20,16 +20,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/eclipse/emfcloud-modelserver-theia.git"
+    "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
   },
   "dependencies": {
-    "@theia/core": "^0.7.1",
-    "@theia/workspace": "^0.7.1",
+    "@theia/core": "next",
+    "@theia/process": "next",
+    "@theia/workspace": "next",
     "node-fetch": "2.6.0",
     "ws": "7.1.1"
   },
   "devDependencies": {
     "rimraf": "latest",
+    "semver": "^6.3.0",
+    "tslint": "^5.20.0",
     "typescript": "latest"
   },
   "scripts": {
@@ -37,7 +40,9 @@
     "clean": "rimraf lib",
     "build": "tsc && yarn run lint",
     "lint": "tslint -c ../configs/tslint.json --project ./tsconfig.json",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "publish:latest": "yarn publish --tag latest",
+    "publish:next": "yarn publish --new-version \"$(semver $npm_package_version -i minor)-next.$(git rev-parse --short HEAD)\" --tag next"
   },
   "theiaExtensions": [
     {

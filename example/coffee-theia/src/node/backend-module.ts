@@ -8,7 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { LaunchOptions } from "@modelserver/theia";
+import { LaunchOptions } from "@eclipse-emfcloud/modelserver-theia";
 import { ContainerModule, injectable } from "inversify";
 import { join, resolve } from "path";
 
