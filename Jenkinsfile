@@ -4,7 +4,7 @@ kind: Pod
 spec:
   containers:
   - name: node
-    image: node:8.12
+    image: node:10.18
     tty: true
     resources:
       limits:
@@ -19,8 +19,13 @@ spec:
     - mountPath: "/home/jenkins"
       name: "jenkins-home"
       readOnly: false
+    - mountPath: "/.yarn"
+      name: "yarn-global"
+      readOnly: false
   volumes:
   - name: "jenkins-home"
+    emptyDir: {}
+  - name: "yarn-global"
     emptyDir: {}
 """
 
@@ -31,10 +36,16 @@ pipeline {
             yaml kubernetes_config
         }
     }
+    
     options {
         buildDiscarder logRotator(numToKeepStr: '15')
     }
     
+    environment {
+        YARN_CACHE_FOLDER = "${env.WORKSPACE}/yarn-cache"
+        SPAWN_WRAP_SHIM_ROOT = "${env.WORKSPACE}"
+    }
+
     stages {
         stage('Build package') {
             steps {
@@ -45,21 +56,11 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Deploy (master only)') {
             when { branch 'master' }
             steps {
-                container('node') {
-                    dir('modelserver-theia') {
-                        sh 'echo master deploy triggered'
-                        withCredentials([string(credentialsId: 'npmjs-token', variable: 'NPM_AUTH_TOKEN')]) {
-                            sh 'printf "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n" >> /home/jenkins/.npmrc'
-                        }
-                        sh 'git config user.email "eclipse-emfcloud-bot@eclipse.org"'
-                        sh 'git config user.name "eclipse-emfcloud-bot"'
-                        sh 'yarn publish:next'
-                    }
-                }
+                build job: 'deploy-emfcloud-modelserver-theia-npm', wait: false
             }
         }
     }

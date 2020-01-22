@@ -1,5 +1,7 @@
-# Model Server Theia
-[Model server](https://github.com/eclipse-emfcloud/emfcloud-modelserver) integration for Theia
+# Model Server Theia ![build-status](https://img.shields.io/jenkins/build?jobUrl=https://ci.eclipse.org/emfcloud/job/eclipse-emfcloud/job/emfcloud-modelserver-theia/job/master/) ![build-status-server](https://img.shields.io/jenkins/build?jobUrl=https://ci.eclipse.org/emfcloud/job/deploy-emfcloud-modelserver-theia-npm/&label=publish)
+[Model server](https://github.com/eclipse-emfcloud/emfcloud-modelserver) integration for Theia.
+
+- <i>Snapshots: </i> https://www.npmjs.com/package/@eclipse-emfcloud/modelserver-theia
 
 ## Getting started
 
@@ -9,8 +11,8 @@ Install [nvm](https://github.com/creationix/nvm#install-script).
 
 Install npm and node.
 
-    nvm install 8
-    nvm use 8
+    nvm install 10.11.0
+    nvm use 10.11.0
 
 Install yarn.
 
