@@ -23,9 +23,9 @@
     "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
   },
   "dependencies": {
-    "@theia/core": "next",
-    "@theia/process": "next",
-    "@theia/workspace": "next",
+    "@theia/core": "latest",
+    "@theia/process": "latest",
+    "@theia/workspace": "latest",
     "node-fetch": "2.6.0",
     "ws": "7.1.1"
   },
