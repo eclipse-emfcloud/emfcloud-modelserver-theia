@@ -3,7 +3,7 @@
 
 - <i>Snapshots: </i> https://www.npmjs.com/package/@eclipse-emfcloud/modelserver-theia
 
-For more information, please visit the EMF.cloud Website (https://www.eclipse.org/emfcloud/). If you have questions, contact us on our spectrum chat (https://spectrum.chat/emfcloud/) and have a look at our communication and support options (https://www.eclipse.org/emfcloud/contact/).
+For more information, please visit the [EMF.cloud Website](https://www.eclipse.org/emfcloud/). If you have questions, contact us on our [spectrum chat](https://spectrum.chat/emfcloud/) and have a look at our [communication and support options](https://www.eclipse.org/emfcloud/contact/).
 
 ## Getting started
 
