@@ -13,6 +13,7 @@ export namespace ModelServerPaths {
 
   export const MODEL_URIS = 'modeluris';
   export const MODEL_CRUD = 'models';
+  export const MODEL_ELEMENT = 'modelelement';
 
   export const SCHEMA = 'schema';
   export const TYPE_SCHEMA = 'typeschema';

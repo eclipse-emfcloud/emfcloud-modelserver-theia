@@ -59,6 +59,23 @@ export class DefaultModelServerClient implements ModelServerClient {
       .get<{ data: string }>(ModelServerPaths.MODEL_CRUD)
       .then(r => r.mapBody(b => b.data));
   }
+
+  getElementById(modelUri: string, elementId: string): Promise<Response<string>> {
+    return this.restClient
+      .get<{ data: string }>(
+        `${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementid=${elementId}`
+      )
+      .then(r => r.mapBody(b => b.data));
+  }
+
+  getElementByName(modelUri: string, elementName: string): Promise<Response<string>> {
+    return this.restClient
+      .get<{ data: string }>(
+        `${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementname=${elementName}`
+      )
+      .then(r => r.mapBody(b => b.data));
+  }
+
   delete(modelUri: string): Promise<Response<boolean>> {
     return this.restClient
       .remove<{ type: string }>(
