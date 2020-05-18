@@ -71,6 +71,9 @@ export interface ModelServerClient
     modelUri: string,
     command: ModelServerCommand
   ): Promise<Response<boolean>>;
+
+  getTypeSchema(modelUri: string): Promise<Response<string>>;
+  getUISchema(schemaname: string): Promise<Response<string>>;
 }
 
 export const LaunchOptions = Symbol('LaunchOptions');

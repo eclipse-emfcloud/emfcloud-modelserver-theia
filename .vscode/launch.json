@@ -13,7 +13,8 @@
         "--loglevel=debug",
         "--port=3000",
         "--no-cluster",
-        "--root-dir=../example-workspace"
+        "--root-dir=${workspaceRoot}/example/workspace",
+        "--app-project-path=${workspaceRoot}/example/browser-app"
       ],
       "env": {
         "NODE_ENV": "development"
@@ -27,6 +28,17 @@
       "smartStep": true,
       "internalConsoleOptions": "openOnSessionStart",
       "outputCapture": "std"
+    },
+    {
+      "name": "Launch Browser Frontend",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000/",
+      "sourceMaps": true,
+      "webRoot": "${workspaceRoot}",
+      "sourceMapPathOverrides": {
+        "./src/*": "${workspaceFolder}/src/*"
+      }
     },
     {
       "type": "node",

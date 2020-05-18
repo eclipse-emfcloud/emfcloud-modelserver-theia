@@ -69,6 +69,15 @@ export const SaveCommand: Command = {
   id: 'ApiTest.Save',
   label: 'save(SuperBrewer3000.coffee)'
 };
+export const GetTypeSchemaCommand: Command = {
+  id: 'ApiTest.GetTypeSchema',
+  label: 'getTypeSchema(SuperBrewer3000.coffee)'
+};
+
+export const GetUISchemaCommand: Command = {
+  id: 'ApiTest.GetUISchema',
+  label: 'getUISchema(ControlUnitView)'
+};
 
 export const API_TEST_MENU = [...MAIN_MENU_BAR, '9_API_TEST_MENU'];
 export const PING = [...API_TEST_MENU, PingCommand.label];
@@ -81,6 +90,8 @@ export const EDIT_SET = [...API_TEST_MENU, EditSetCommand.label];
 export const EDIT_REMOVE = [...API_TEST_MENU, EditRemoveCommand.label];
 export const EDIT_ADD = [...API_TEST_MENU, EditAddCommand.label];
 export const SAVE = [...API_TEST_MENU, SaveCommand.label];
+export const GET_TYPESCHEMA = [...API_TEST_MENU, GetTypeSchemaCommand.label];
+export const GET_UISCHEMA = [...API_TEST_MENU, GetUISchemaCommand.label];
 
 const exampleFilePatch = {
   'eClass':
@@ -247,6 +258,20 @@ export class ApiTestMenuContribution
         this.modelServerClient.save('SuperBrewer3000.coffee');
       }
     });
+
+    commands.registerCommand(GetTypeSchemaCommand, {
+      execute: () => {
+        this.modelServerClient
+          .getTypeSchema('SuperBrewer3000.coffee')
+          .then(response => this.messageService.info(printResponse(response)));
+      }
+    });
+
+    commands.registerCommand(GetUISchemaCommand, {
+      execute: () => {
+        this.modelServerClient.getUISchema('controlunit').then(response => this.messageService.info(printResponse(response)));
+      }
+    });
   }
   registerMenus(menus: MenuModelRegistry): void {
     menus.registerSubmenu(API_TEST_MENU, 'ModelServer');
@@ -262,6 +287,8 @@ export class ApiTestMenuContribution
     menus.registerMenuAction(API_TEST_MENU, { commandId: EditRemoveCommand.id });
     menus.registerMenuAction(API_TEST_MENU, { commandId: EditAddCommand.id });
     menus.registerMenuAction(API_TEST_MENU, { commandId: SaveCommand.id });
+    menus.registerMenuAction(API_TEST_MENU, { commandId: GetTypeSchemaCommand.id });
+    menus.registerMenuAction(API_TEST_MENU, { commandId: GetUISchemaCommand.id });
   }
 }
 
