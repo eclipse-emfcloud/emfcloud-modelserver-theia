@@ -71,7 +71,7 @@ export const SaveCommand: Command = {
 };
 export const GetTypeSchemaCommand: Command = {
   id: 'ApiTest.GetTypeSchema',
-  label: 'getTypeSchema(SuperBrewer3000.coffee)'
+  label: 'getTypeSchema(Coffee.ecore)'
 };
 
 export const GetUISchemaCommand: Command = {
@@ -262,7 +262,7 @@ export class ApiTestMenuContribution
     commands.registerCommand(GetTypeSchemaCommand, {
       execute: () => {
         this.modelServerClient
-          .getTypeSchema('SuperBrewer3000.coffee')
+          .getTypeSchema('Coffee.ecore')
           .then(response => this.messageService.info(printResponse(response)));
       }
     });
