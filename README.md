@@ -41,6 +41,4 @@ Start watching of the browser example.
     cd example/browser-app
     yarn watch
 
-Launch `Start Browser Backend` configuration from VS code.
-
-Open http://localhost:3000 in the browser.
+Launch `Start Browser Backend` and `Launch Browser Frontend` configuration from VS code.

@@ -54,6 +54,10 @@ export interface ModelServerClient
 
   get(modelUri: string): Promise<Response<string>>;
   getAll(): Promise<Response<string[] | string>>;
+
+  getElementById(modelUri: string, elementid: string): Promise<Response<string>>;
+  getElementByName(modelUri: string, elementname: string): Promise<Response<string>>;
+
   delete(modelUri: string): Promise<Response<boolean>>;
   // snapshot update
   update(modelUri: string, newModel: any): Promise<Response<string>>;
@@ -71,6 +75,9 @@ export interface ModelServerClient
     modelUri: string,
     command: ModelServerCommand
   ): Promise<Response<boolean>>;
+
+  getTypeSchema(modelUri: string): Promise<Response<string>>;
+  getUISchema(schemaname: string): Promise<Response<string>>;
 }
 
 export const LaunchOptions = Symbol('LaunchOptions');
