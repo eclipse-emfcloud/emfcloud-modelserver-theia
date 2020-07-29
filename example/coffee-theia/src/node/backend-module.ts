@@ -8,9 +8,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { LaunchOptions } from "@eclipse-emfcloud/modelserver-theia";
-import { ContainerModule, injectable } from "inversify";
-import { join, resolve } from "path";
+import { LaunchOptions } from '@eclipse-emfcloud/modelserver-theia';
+import { ContainerModule, injectable } from 'inversify';
+import { join, resolve } from 'path';
 
 export default new ContainerModule(bind => {
     bind(LaunchOptions).to(SimpleLaunchOptions).inSingletonScope();
@@ -19,10 +19,10 @@ export default new ContainerModule(bind => {
 @injectable()
 export class SimpleLaunchOptions implements LaunchOptions {
     isRunning = false;
-    baseURL: string = "api/v1/";
-    serverPort: number = 8081;
-    hostname: string = "localhost";
+    baseURL = 'api/v1/';
+    serverPort = 8081;
+    hostname = 'localhost';
     jarPath = resolve(join(__dirname, '..', '..', 'build', 'com.eclipsesource.modelserver.example-0.0.1-SNAPSHOT-standalone.jar'));
-    additionalArgs = ["--errorsOnly"];
+    additionalArgs = ['--errorsOnly'];
 }
 

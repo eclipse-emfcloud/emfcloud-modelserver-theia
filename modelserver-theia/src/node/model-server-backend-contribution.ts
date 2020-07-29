@@ -8,16 +8,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { BackendApplicationContribution } from "@theia/core/lib/node";
-import { ProcessErrorEvent } from "@theia/process/lib/node/process";
-import { ProcessManager } from "@theia/process/lib/node/process-manager";
-import { RawProcess, RawProcessFactory } from "@theia/process/lib/node/raw-process";
-import * as cp from "child_process";
-import { inject, injectable, optional } from "inversify";
+import { BackendApplicationContribution } from '@theia/core/lib/node';
+import { ProcessErrorEvent } from '@theia/process/lib/node/process';
+import { ProcessManager } from '@theia/process/lib/node/process-manager';
+import { RawProcess, RawProcessFactory } from '@theia/process/lib/node/raw-process';
+import * as cp from 'child_process';
+import { inject, injectable, optional } from 'inversify';
 
-import { DEFAULT_LAUNCH_OPTIONS, LaunchOptions, ModelServerClient } from "../common/model-server-client";
+import { DEFAULT_LAUNCH_OPTIONS, LaunchOptions, ModelServerClient } from '../common/model-server-client';
 
-export const ModelServerLauncher = Symbol("ModelServerLauncher");
+export const ModelServerLauncher = Symbol('ModelServerLauncher');
 
 export interface ModelServerLauncher {
     startServer(): boolean;
@@ -31,17 +31,17 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
     @inject(ProcessManager) protected readonly processManager: ProcessManager;
     @inject(ModelServerClient) protected readonly modelserverClient: ModelServerClient;
 
-    initialize() {
+    initialize(): void {
         this.modelserverClient.initialize().then(initialized => {
             if (initialized) {
                 this.modelserverClient.ping().then(alive => {
                     if (!alive) {
-                        this.logError("Error during model server startup");
+                        this.logError('Error during model server startup');
                     } else {
-                        this.logInfo("Modelserver is already running");
+                        this.logInfo('Modelserver is already running');
                     }
                 }).catch(() => {
-                    this.logInfo("Starting modelserver from jar");
+                    this.logInfo('Starting modelserver from jar');
                     this.startServer();
 
                 });
@@ -51,13 +51,13 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
 
     startServer(): boolean {
         if (this.launchOptions.jarPath) {
-            let args = ["-jar", this.launchOptions.jarPath, "--port", `${this.launchOptions.serverPort}`];
+            let args = ['-jar', this.launchOptions.jarPath, '--port', `${this.launchOptions.serverPort}`];
             if (this.launchOptions.additionalArgs) {
                 args = [...args, ...this.launchOptions.additionalArgs];
             }
-            this.spawnProcessAsync("java", args);
+            this.spawnProcessAsync('java', args);
         } else {
-            this.logError("Could not start model server. No path to executable is specified");
+            this.logError('Could not start model server. No path to executable is specified');
         }
         return true;
     }
@@ -85,21 +85,23 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
         this.logError(error.message);
     }
 
-    protected logError(data: string | Buffer) {
+    protected logError(data: string | Buffer): void {
         if (data) {
             console.error(`ModelServerBackendContribution: ${data}`);
         }
     }
 
-    protected logInfo(data: string | Buffer) {
+    protected logInfo(data: string | Buffer): void {
         if (data) {
             console.info(`ModelServerBackendContribution: ${data}`);
         }
     }
 
-    dispose() { }
+    dispose(): void {
+        // nothing to do
+    }
 
-    onStop() {
+    onStop(): void {
         this.dispose();
     }
 

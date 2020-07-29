@@ -11,16 +11,20 @@
     "publish:next": "lerna publish --exact --canary=next --npm-tag=next --yes"
   },
   "devDependencies": {
-    "lerna": "2.4.0",
-    "tslint": "^5.5.0",
-    "tslint-loader": "^3.4.3"
+    "@typescript-eslint/eslint-plugin": "^2.16.0",
+    "@typescript-eslint/parser": "^2.16.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-header": "^3.0.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-no-null": "^1.0.2",
+    "lerna": "2.4.0"
   },
   "@comment workspaces": [
     "We do not add 'example/electron-app' to the workspaces as it requires X11/Xvfb which is not available on our Eclipse Jenkins CI by default.",
     "For more information, see https://github.com/electron/electron/blob/master/docs/tutorial/testing-on-headless-ci.md."
   ],
   "workspaces": [
-  	"modelserver-theia",
+    "modelserver-theia",
     "example/browser-app",
     "example/coffee-theia",
     "example/dev-example"

@@ -11,21 +11,21 @@
 
 export namespace ModelServerPaths {
 
-  export const MODEL_URIS = 'modeluris';
-  export const MODEL_CRUD = 'models';
-  export const MODEL_ELEMENT = 'modelelement';
+    export const MODEL_URIS = 'modeluris';
+    export const MODEL_CRUD = 'models';
+    export const MODEL_ELEMENT = 'modelelement';
 
-  export const SCHEMA = 'schema';
-  export const TYPE_SCHEMA = 'typeschema';
-  export const UI_SCHEMA = 'uischema';
+    export const SCHEMA = 'schema';
+    export const TYPE_SCHEMA = 'typeschema';
+    export const UI_SCHEMA = 'uischema';
 
-  export const SERVER_CONFIGURE = 'server/configure';
-  export const SERVER_PING = 'server/ping';
+    export const SERVER_CONFIGURE = 'server/configure';
+    export const SERVER_PING = 'server/ping';
 
-  export const SUBSCRIPTION = 'subscribe'; // accepts query parameter "modeluri"
+    export const SUBSCRIPTION = 'subscribe'; // accepts query parameter "modeluri"
 
-  export const COMMANDS = 'edit';
+    export const COMMANDS = 'edit';
 
-  export const SAVE = 'save';
+    export const SAVE = 'save';
 
 }

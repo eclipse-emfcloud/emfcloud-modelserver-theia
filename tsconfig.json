@@ -1,16 +1,14 @@
 {
   "extends": "./configs/base.tsconfig",
   "compilerOptions": {
-    "skipLibCheck": false,
     "baseUrl": ".",
     "paths": {
-      "@eclipse-emfcloud/modelserver-theia": ["modelserver-theia/src/*"]
-    },
-    "plugins": [
-      {
-        "name": "tslint-language-service"
-      }
-    ]
+      "@eclipse-emfcloud/modelserver-theia": [
+        "modelserver-theia/src/*"
+      ]
+    }
   },
-  "include": ["modelserver-theia/*/src"]
+  "include": [
+    "modelserver-theia/src"
+  ]
 }

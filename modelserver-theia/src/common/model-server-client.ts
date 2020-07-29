@@ -8,103 +8,102 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { JsonRpcServer } from "@theia/core/lib/common/messaging";
-
+import { JsonRpcServer } from '@theia/core/lib/common/messaging';
 
 export const MODEL_SERVER_CLIENT_SERVICE_PATH = '/services/modelserverclient';
 
 export type DataValueType = boolean | number | string;
 export interface ModelServerObject {
-  eClass: string;
+    eClass: string;
 }
 export interface ModelServerReferenceDescription extends ModelServerObject {
-  $ref: string;
+    $ref: string;
 }
 export interface ModelServerCommand {
-  eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//Command';
-  type: 'compound' | 'add' | 'remove' | 'set' | 'replace' | 'move';
-  owner: ModelServerReferenceDescription;
-  feature: string;
-  indices?: number[];
-  dataValues?: DataValueType[];
-  objectValues?: ModelServerReferenceDescription[];
-  objectsToAdd?: ModelServerObject[];
-  commands?: ModelServerCommand[];
+    eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//Command';
+    type: 'compound' | 'add' | 'remove' | 'set' | 'replace' | 'move';
+    owner: ModelServerReferenceDescription;
+    feature: string;
+    indices?: number[];
+    dataValues?: DataValueType[];
+    objectValues?: ModelServerReferenceDescription[];
+    objectsToAdd?: ModelServerObject[];
+    commands?: ModelServerCommand[];
 }
 
 export interface ModelServerMessage {
-  type: "dirtyState" | "incrementalUpdate" | "fullUpdate" | "success" | "error";
-  data: any;
+    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error';
+    data: any;
 }
 export const ModelServerFrontendClient = Symbol('ModelServerFrontendClient');
 export interface ModelServerFrontendClient {
-  onOpen(): void;
+    onOpen(): void;
 
-  onMessage(message: ModelServerMessage): void;
+    onMessage(message: ModelServerMessage): void;
 
-  onClosed(code: number, reason: string): void;
+    onClosed(code: number, reason: string): void;
 
-  onError(error: Error): void;
+    onError(error: Error): void;
 }
 
 export const ModelServerClient = Symbol('ModelServerClient');
 export interface ModelServerClient
-  extends JsonRpcServer<ModelServerFrontendClient> {
-  initialize(): Promise<boolean>;
+    extends JsonRpcServer<ModelServerFrontendClient> {
+    initialize(): Promise<boolean>;
 
-  get(modelUri: string): Promise<Response<string>>;
-  getAll(): Promise<Response<string[] | string>>;
+    get(modelUri: string): Promise<Response<string>>;
+    getAll(): Promise<Response<string[] | string>>;
 
-  getElementById(modelUri: string, elementid: string): Promise<Response<string>>;
-  getElementByName(modelUri: string, elementname: string): Promise<Response<string>>;
+    getElementById(modelUri: string, elementid: string): Promise<Response<string>>;
+    getElementByName(modelUri: string, elementname: string): Promise<Response<string>>;
 
-  delete(modelUri: string): Promise<Response<boolean>>;
-  // snapshot update
-  update(modelUri: string, newModel: any): Promise<Response<string>>;
+    delete(modelUri: string): Promise<Response<boolean>>;
+    // snapshot update
+    update(modelUri: string, newModel: any): Promise<Response<string>>;
 
-  configure(configuration?: ServerConfiguration): Promise<Response<boolean>>;
-  ping(): Promise<Response<boolean>>;
-  save(modelUri: string): Promise<Response<boolean>>;
+    configure(configuration?: ServerConfiguration): Promise<Response<boolean>>;
+    ping(): Promise<Response<boolean>>;
+    save(modelUri: string): Promise<Response<boolean>>;
 
-  getLaunchOptions(): Promise<LaunchOptions>;
-  // subscribe
-  subscribe(modelUri: string): void;
-  unsubscribe(modelUri: string): void;
+    getLaunchOptions(): Promise<LaunchOptions>;
+    // subscribe
+    subscribe(modelUri: string): void;
+    unsubscribe(modelUri: string): void;
 
-  edit(
-    modelUri: string,
-    command: ModelServerCommand
-  ): Promise<Response<boolean>>;
+    edit(
+        modelUri: string,
+        command: ModelServerCommand
+    ): Promise<Response<boolean>>;
 
-  getTypeSchema(modelUri: string): Promise<Response<string>>;
-  getUISchema(schemaname: string): Promise<Response<string>>;
+    getTypeSchema(modelUri: string): Promise<Response<string>>;
+    getUISchema(schemaname: string): Promise<Response<string>>;
 }
 
 export const LaunchOptions = Symbol('LaunchOptions');
 export interface LaunchOptions {
-  baseURL: string;
-  serverPort: number;
-  hostname: string;
-  jarPath?: string;
-  additionalArgs?: string[];
+    baseURL: string;
+    serverPort: number;
+    hostname: string;
+    jarPath?: string;
+    additionalArgs?: string[];
 }
 export const DEFAULT_LAUNCH_OPTIONS: LaunchOptions = {
-  baseURL: 'api/v1',
-  serverPort: 8081,
-  hostname: 'localhost'
+    baseURL: 'api/v1',
+    serverPort: 8081,
+    hostname: 'localhost'
 };
 
 export interface ServerConfiguration {
-  workspaceRoot: string;
+    workspaceRoot: string;
 }
 export class Response<T> {
-  constructor(
-    readonly body: T,
-    readonly statusCode: number,
-    readonly statusMessage: string
-  ) { }
+    constructor(
+        readonly body: T,
+        readonly statusCode: number,
+        readonly statusMessage: string
+    ) { }
 
-  public mapBody<U>(mapper: (body: T) => U): Response<U> {
-    return new Response(mapper(this.body), this.statusCode, this.statusMessage);
-  }
+    public mapBody<U>(mapper: (body: T) => U): Response<U> {
+        return new Response(mapper(this.body), this.statusCode, this.statusMessage);
+    }
 }

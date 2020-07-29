@@ -8,12 +8,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { MaybePromise } from "@theia/core";
-import { FrontendApplication, FrontendApplicationContribution } from "@theia/core/lib/browser";
-import { WorkspaceService } from "@theia/workspace/lib/browser";
-import { inject, injectable } from "inversify";
+import { MaybePromise } from '@theia/core';
+import { FrontendApplication, FrontendApplicationContribution } from '@theia/core/lib/browser';
+import { WorkspaceService } from '@theia/workspace/lib/browser';
+import { inject, injectable } from 'inversify';
 
-import { ModelServerClient } from "../common";
+import { ModelServerClient } from '../common';
 
 @injectable()
 export class ModelServerFrontendContribution implements FrontendApplicationContribution {
