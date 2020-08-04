@@ -8,10 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { CommandContribution, MenuContribution } from "@theia/core";
-import { ContainerModule } from "inversify";
+import { CommandContribution, MenuContribution } from '@theia/core';
+import { ContainerModule } from 'inversify';
 
-import { ApiTestMenuContribution } from "./api-test-menu";
+import { ApiTestMenuContribution } from './api-test-menu';
 
 export default new ContainerModule(bind => {
     bind(ApiTestMenuContribution).toSelf().inSingletonScope();

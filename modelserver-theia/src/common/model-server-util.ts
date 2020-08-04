@@ -13,18 +13,17 @@ import {
     ModelServerCommand,
     ModelServerObject,
     ModelServerReferenceDescription
-} from "./model-server-client";
+} from './model-server-client';
 
-const isNumberArray = (array: number[] | ModelServerReferenceDescription[]): array is number[] => {
-    return array.every((e: number | ModelServerReferenceDescription) => typeof e === 'number');
-};
+const isNumberArray =
+    (array: number[] | ModelServerReferenceDescription[]): array is number[] => array.every((e: number | ModelServerReferenceDescription) => typeof e === 'number');
 
-const isModelServerObjectArray = (array: DataValueType[] | ModelServerObject[]): array is ModelServerObject[] => {
-    return array.every((e: any) => typeof e === 'object' && e.eClass !== undefined);
-};
-const isModelServerReferenceDescriptionArray = (array: DataValueType[] | ModelServerReferenceDescription[]): array is ModelServerReferenceDescription[] => {
-    return array.every((e: any) => typeof e === 'object' && e.eClass !== undefined && e.$ref !== undefined);
-};
+const isModelServerObjectArray =
+    (array: DataValueType[] | ModelServerObject[]): array is ModelServerObject[] => array.every((e: any) => typeof e === 'object' && e.eClass !== undefined);
+
+const isModelServerReferenceDescriptionArray = (array: DataValueType[] | ModelServerReferenceDescription[]):
+    array is ModelServerReferenceDescription[] => array.every((e: any) => typeof e === 'object' && e.eClass !== undefined && e.$ref !== undefined);
+
 export namespace ModelServerCommandUtil {
     export function createRemoveCommand(owner: ModelServerReferenceDescription, feature: string, indices: number[]): ModelServerCommand;
     export function createRemoveCommand(owner: ModelServerReferenceDescription, feature: string, objectValues: ModelServerReferenceDescription[]): ModelServerCommand;
@@ -63,7 +62,7 @@ export namespace ModelServerCommandUtil {
             command.indices = [index];
         }
         if (isModelServerObjectArray(toAdd)) {
-            const objectValues: ModelServerReferenceDescription[] = toAdd.map((o, i) => { return { eClass: o.eClass, $ref: `//@objectsToAdd.${i}` }; });
+            const objectValues: ModelServerReferenceDescription[] = toAdd.map((o, i) => ({ eClass: o.eClass, $ref: `//@objectsToAdd.${i}` }));
             command.objectsToAdd = toAdd;
             command.objectValues = objectValues;
         } else {

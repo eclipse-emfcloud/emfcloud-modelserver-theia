@@ -8,19 +8,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { Event } from "@theia/core";
+import { Event } from '@theia/core';
 
 export const ModelServerSubscriptionService = Symbol(
-  'ModelServerSubscriptionService'
+    'ModelServerSubscriptionService'
 );
 export interface ModelServerSubscriptionService {
-  readonly onOpenListener: Event<void>;
-  readonly onClosedListener: Event<string>;
-  readonly onErrorListener: Event<Error>;
+    readonly onOpenListener: Event<void>;
+    readonly onClosedListener: Event<string>;
+    readonly onErrorListener: Event<Error>;
 
-  readonly onDirtyStateListener: Event<boolean>;
-  readonly onIncrementalUpdateListener: Event<Object>;
-  readonly onFullUpdateListener: Event<Object>;
-  readonly onSuccessListener: Event<string>;
-  readonly onUnknownMessageListener: Event<string>;
+    readonly onDirtyStateListener: Event<boolean>;
+    readonly onIncrementalUpdateListener: Event<object>;
+    readonly onFullUpdateListener: Event<object>;
+    readonly onSuccessListener: Event<string>;
+    readonly onUnknownMessageListener: Event<string>;
 }

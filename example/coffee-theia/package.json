@@ -37,7 +37,7 @@
     "clean": "rimraf lib",
     "build": "tsc && yarn run download-server && yarn run lint",
     "download-server": "cd ./scripts && ./download-server.sh",
-    "lint": "tslint -c ../../configs/tslint.json --project ./tsconfig.json",
+    "lint": "eslint -c ./.eslintrc.js --ext .ts ./src",
     "watch": "tsc -w"
   },
   "theiaExtensions": [
