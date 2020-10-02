@@ -1,5 +1,5 @@
 # Model Server Theia
-[Model server](https://github.com/eclipse/emfcloud-modelserver) integration for Theia
+[Model server](https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia) integration for Theia
 
 ## Getting started
 
