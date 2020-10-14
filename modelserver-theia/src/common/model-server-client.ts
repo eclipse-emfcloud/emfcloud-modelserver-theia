@@ -95,6 +95,7 @@ export const DEFAULT_LAUNCH_OPTIONS: LaunchOptions = {
 
 export interface ServerConfiguration {
     workspaceRoot: string;
+    uiSchemaFolder?: string;
 }
 export class Response<T> {
     constructor(

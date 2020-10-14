@@ -98,9 +98,10 @@ export class DefaultModelServerClient implements ModelServerClient {
     }
 
     configure(configuration: ServerConfiguration): Promise<Response<boolean>> {
-        const cleanPath = configuration.workspaceRoot.replace('file://', '');
+        const workspaceRoot = configuration.workspaceRoot.replace('file://', '');
+        const uiSchemaFolder = configuration.uiSchemaFolder?.replace('file://', '');
         return this.restClient
-            .put<{ type: string }>(ModelServerPaths.SERVER_CONFIGURE, JSON.stringify({ workspaceRoot: cleanPath }))
+            .put<{ type: string }>(ModelServerPaths.SERVER_CONFIGURE, JSON.stringify({ workspaceRoot, uiSchemaFolder }))
             .then(r => r.mapBody(b => b.type === 'success'));
     }
 
