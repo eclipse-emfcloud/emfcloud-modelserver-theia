@@ -155,10 +155,10 @@ export class DefaultModelServerClient implements ModelServerClient {
             .then(r => r.mapBody(b => b.data));
     }
 
-    getUISchema(schemaname: string): Promise<Response<string>> {
+    getUiSchema(schemaName: string): Promise<Response<string>> {
         return this.restClient
             .get<{ data: string }>(
-                `${ModelServerPaths.UI_SCHEMA}?schemaname=${schemaname}`
+                `${ModelServerPaths.UI_SCHEMA}?schemaname=${schemaName}`
             )
             .then(r => r.mapBody(b => b.data));
     }
