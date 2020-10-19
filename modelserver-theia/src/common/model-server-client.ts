@@ -76,7 +76,7 @@ export interface ModelServerClient
     ): Promise<Response<boolean>>;
 
     getTypeSchema(modelUri: string): Promise<Response<string>>;
-    getUISchema(schemaname: string): Promise<Response<string>>;
+    getUiSchema(schemaName: string): Promise<Response<string>>;
 }
 
 export const LaunchOptions = Symbol('LaunchOptions');
@@ -95,6 +95,7 @@ export const DEFAULT_LAUNCH_OPTIONS: LaunchOptions = {
 
 export interface ServerConfiguration {
     workspaceRoot: string;
+    uiSchemaFolder?: string;
 }
 export class Response<T> {
     constructor(

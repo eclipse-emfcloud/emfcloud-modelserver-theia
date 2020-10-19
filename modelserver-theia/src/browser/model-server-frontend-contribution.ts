@@ -25,9 +25,11 @@ export class ModelServerFrontendContribution implements FrontendApplicationContr
     }
 
     async setup(): Promise<void> {
-        this.workspaceService.onWorkspaceChanged(e => {
-            if (e[0] && e[0].uri) {
-                this.modelServerClient.configure({ workspaceRoot: e[0].uri });
+        this.workspaceService.onWorkspaceChanged(workspace => {
+            if (workspace[0] && workspace[0].uri) {
+                const workspaceRoot = workspace[0].uri;
+                const uiSchemaFolder = workspaceRoot + '/.ui-schemas';
+                this.modelServerClient.configure({ workspaceRoot, uiSchemaFolder });
             }
         });
     }

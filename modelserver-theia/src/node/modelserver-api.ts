@@ -98,9 +98,10 @@ export class DefaultModelServerClient implements ModelServerClient {
     }
 
     configure(configuration: ServerConfiguration): Promise<Response<boolean>> {
-        const cleanPath = configuration.workspaceRoot.replace('file://', '');
+        const workspaceRoot = configuration.workspaceRoot.replace('file://', '');
+        const uiSchemaFolder = configuration.uiSchemaFolder?.replace('file://', '');
         return this.restClient
-            .put<{ type: string }>(ModelServerPaths.SERVER_CONFIGURE, JSON.stringify({ workspaceRoot: cleanPath }))
+            .put<{ type: string }>(ModelServerPaths.SERVER_CONFIGURE, JSON.stringify({ workspaceRoot, uiSchemaFolder }))
             .then(r => r.mapBody(b => b.type === 'success'));
     }
 
@@ -154,10 +155,10 @@ export class DefaultModelServerClient implements ModelServerClient {
             .then(r => r.mapBody(b => b.data));
     }
 
-    getUISchema(schemaname: string): Promise<Response<string>> {
+    getUiSchema(schemaName: string): Promise<Response<string>> {
         return this.restClient
             .get<{ data: string }>(
-                `${ModelServerPaths.UI_SCHEMA}?schemaname=${schemaname}`
+                `${ModelServerPaths.UI_SCHEMA}?schemaname=${schemaName}`
             )
             .then(r => r.mapBody(b => b.data));
     }

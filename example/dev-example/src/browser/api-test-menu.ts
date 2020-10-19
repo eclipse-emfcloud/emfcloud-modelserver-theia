@@ -73,9 +73,9 @@ export const GetTypeSchemaCommand: Command = {
     id: 'ApiTest.GetTypeSchema',
     label: 'getTypeSchema(Coffee.ecore)'
 };
-export const GetUISchemaCommand: Command = {
-    id: 'ApiTest.GetUISchema',
-    label: 'getUISchema(ControlUnitView)'
+export const GetUiSchemaCommand: Command = {
+    id: 'ApiTest.GetUiSchema',
+    label: 'getUiSchema(ControlUnitView)'
 };
 export const GetModelElementByIdCommand: Command = {
     id: 'ApiTest.GetModelElementById',
@@ -98,7 +98,7 @@ export const EDIT_REMOVE = [...API_TEST_MENU, EditRemoveCommand.label];
 export const EDIT_ADD = [...API_TEST_MENU, EditAddCommand.label];
 export const SAVE = [...API_TEST_MENU, SaveCommand.label];
 export const GET_TYPESCHEMA = [...API_TEST_MENU, GetTypeSchemaCommand.label];
-export const GET_UISCHEMA = [...API_TEST_MENU, GetUISchemaCommand.label];
+export const GET_UISCHEMA = [...API_TEST_MENU, GetUiSchemaCommand.label];
 export const GET_ELEMENTBYID = [...API_TEST_MENU, GetModelElementByIdCommand.label];
 export const GET_ELEMENTBYNAME = [...API_TEST_MENU, GetModelElementByNameCommand.label];
 
@@ -275,9 +275,9 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             }
         });
 
-        commands.registerCommand(GetUISchemaCommand, {
+        commands.registerCommand(GetUiSchemaCommand, {
             execute: () => {
-                this.modelServerClient.getUISchema('controlunit').then(response => this.messageService.info(printResponse(response)));
+                this.modelServerClient.getUiSchema('controlunit').then(response => this.messageService.info(printResponse(response)));
             }
         });
 
@@ -310,7 +310,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(API_TEST_MENU, { commandId: EditAddCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: SaveCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: GetTypeSchemaCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetUISchemaCommand.id });
+        menus.registerMenuAction(API_TEST_MENU, { commandId: GetUiSchemaCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelElementByIdCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelElementByNameCommand.id });
     }
