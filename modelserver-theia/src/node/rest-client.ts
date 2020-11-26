@@ -16,14 +16,14 @@ const fetch = require('node-fetch');
 /**
  * A simple helper class for performing REST requests
  */
-export class RestClient {
+export class RestClient<BODY> {
     constructor(protected baseUrl: string) { }
 
-    private async performRequest<T>(
+    private async performRequest(
         verb: string,
         path: string,
         body?: string
-    ): Promise<Response<T>> {
+    ): Promise<Response<BODY>> {
         const response = await fetch(this.baseUrl + path, {
             headers: {
                 'Accept': 'application/json',
@@ -32,44 +32,44 @@ export class RestClient {
             method: verb,
             body
         });
-        const json = (await response.json()) as T;
+        const json = (await response.json()) as BODY;
         return new Response(json, response.status, response.statusText);
     }
 
-    async get<T>(
+    async get(
         path: string,
         parameters?: Map<string, string>
-    ): Promise<Response<T>> {
+    ): Promise<Response<BODY>> {
         let getUrl = path;
         if (parameters) {
             const urlParameters = this.encodeURLParameters(parameters);
             getUrl = getUrl.concat(urlParameters);
         }
-        return this.performRequest<T>('get', getUrl);
+        return this.performRequest('get', getUrl);
     }
 
-    async post<T>(url: string, body?: string): Promise<Response<T>> {
-        return this.performRequest<T>('post', url, body);
+    async post(url: string, body?: string): Promise<Response<BODY>> {
+        return this.performRequest('post', url, body);
     }
 
-    async put<T>(url: string, body?: string): Promise<Response<T>> {
-        return this.performRequest<T>('PUT', url, body);
+    async put(url: string, body?: string): Promise<Response<BODY>> {
+        return this.performRequest('PUT', url, body);
     }
 
-    async patch<T>(url: string, body?: string): Promise<Response<T>> {
-        return this.performRequest<T>('patch', url, body);
+    async patch(url: string, body?: string): Promise<Response<BODY>> {
+        return this.performRequest('patch', url, body);
     }
 
-    async remove<T>(
+    async remove(
         url: string,
         parameters?: Map<string, string>
-    ): Promise<Response<T>> {
+    ): Promise<Response<BODY>> {
         let deleteUrl = url;
         if (parameters) {
             const urlParameters = this.encodeURLParameters(parameters);
             deleteUrl = deleteUrl.concat(urlParameters);
         }
-        return this.performRequest<T>('delete', deleteUrl);
+        return this.performRequest('delete', deleteUrl);
     }
 
     private encodeURLParameters(parameters: Map<string, string>): string {

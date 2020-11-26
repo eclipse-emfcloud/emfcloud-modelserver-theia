@@ -14,10 +14,13 @@ import * as WebSocket from 'ws';
 import {
     DEFAULT_LAUNCH_OPTIONS,
     LaunchOptions,
+    Model,
     ModelServerClient,
     ModelServerCommand,
     ModelServerFrontendClient,
+    RequestBody,
     Response,
+    ResponseBody,
     ServerConfiguration
 } from '../common/model-server-client';
 import { ModelServerPaths } from '../common/model-server-paths';
@@ -25,142 +28,109 @@ import { RestClient } from './rest-client';
 
 @injectable()
 export class DefaultModelServerClient implements ModelServerClient {
-    @inject(LaunchOptions)
-    @optional()
-    protected readonly options: LaunchOptions = DEFAULT_LAUNCH_OPTIONS;
-    private restClient: RestClient;
-    private openSockets: { [modelUri: string]: WebSocket } = {};
+    @inject(LaunchOptions) @optional() protected readonly options: LaunchOptions = DEFAULT_LAUNCH_OPTIONS;
+
+    private restClient: RestClient<ResponseBody>;
+    private openSockets: Map<string, WebSocket> = new Map();
     private baseUrl: string;
     private client: ModelServerFrontendClient;
 
-    initialize(): Promise<boolean> {
+    async initialize(): Promise<boolean> {
         this.prepareBaseUrl();
         this.restClient = new RestClient(this.baseUrl);
-        return Promise.resolve(true);
+        return true;
     }
+
     prepareBaseUrl(): void {
         this.baseUrl = `http://${this.options.hostname}:${this.options.serverPort}/${this.options.baseURL}`;
         if (!this.baseUrl.endsWith('/')) {
             this.baseUrl = this.baseUrl + '/';
         }
     }
-    get(modelUri: string): Promise<Response<string>> {
-        return this.restClient
-            .get<{ data: string }>(
-                `${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}`
-            )
-            .then(r => r.mapBody(b => b.data));
+
+    async get(modelUri: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.asString);
     }
 
-    getAll(): Promise<Response<string[] | string>> {
-        return this.restClient
-            .get<{ data: string }>(ModelServerPaths.MODEL_CRUD)
-            .then(r => r.mapBody(b => b.data));
+    async getAll(): Promise<Response<Model[]>> {
+        const response = await this.restClient.get(ModelServerPaths.MODEL_CRUD);
+        return response.mapBody(ResponseBody.asModelArray);
     }
 
-    getElementById(modelUri: string, elementId: string): Promise<Response<string>> {
-        return this.restClient
-            .get<{ data: string }>(
-                `${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementid=${elementId}`
-            )
-            .then(r => r.mapBody(b => b.data));
+    async getModelUris(): Promise<Response<string[]>> {
+        const response = await this.restClient.get(ModelServerPaths.MODEL_URIS);
+        return response.mapBody(ResponseBody.asStringArray);
     }
 
-    getElementByName(modelUri: string, elementName: string): Promise<Response<string>> {
-        return this.restClient
-            .get<{ data: string }>(
-                `${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementname=${elementName}`
-            )
-            .then(r => r.mapBody(b => b.data));
+    async getElementById(modelUri: string, elementId: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementid=${elementId}`);
+        return response.mapBody(ResponseBody.asString);
     }
 
-    delete(modelUri: string): Promise<Response<boolean>> {
-        return this.restClient
-            .remove<{ type: string }>(
-                `${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}`
-            )
-            .then(r => r.mapBody(b => b.type === 'success'));
-    }
-    save(modelUri: string): Promise<Response<boolean>> {
-        return this.restClient
-            .get<{ type: string }>(
-                `${ModelServerPaths.SAVE}?modeluri=${modelUri}`
-            )
-            .then(r => r.mapBody(b => b.type === 'success'));
-    }
-    update(modelUri: string, newModel: any): Promise<Response<string>> {
-        return this.restClient
-            .patch<{ data: string }>(
-                `${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}`,
-                JSON.stringify({ data: newModel })
-            )
-            .then(r => r.mapBody(b => b.data));
+    async getElementByName(modelUri: string, elementName: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementname=${elementName}`);
+        return response.mapBody(ResponseBody.asString);
     }
 
-    configure(configuration: ServerConfiguration): Promise<Response<boolean>> {
+    async delete(modelUri: string): Promise<Response<boolean>> {
+        const response = await this.restClient.remove(`${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.isSuccess);
+    }
+
+    async save(modelUri: string): Promise<Response<boolean>> {
+        const response = await this.restClient.get(`${ModelServerPaths.SAVE}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.isSuccess);
+    }
+
+    async update(modelUri: string, newModel: any): Promise<Response<string>> {
+        const response = await this.restClient.patch(`${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}`, RequestBody.fromData(newModel));
+        return response.mapBody(ResponseBody.asString);
+    }
+
+    async configure(configuration: ServerConfiguration): Promise<Response<boolean>> {
         const workspaceRoot = configuration.workspaceRoot.replace('file://', '');
         const uiSchemaFolder = configuration.uiSchemaFolder?.replace('file://', '');
-        return this.restClient
-            .put<{ type: string }>(ModelServerPaths.SERVER_CONFIGURE, JSON.stringify({ workspaceRoot, uiSchemaFolder }))
-            .then(r => r.mapBody(b => b.type === 'success'));
+        const response = await this.restClient.put(ModelServerPaths.SERVER_CONFIGURE, RequestBody.from({ workspaceRoot, uiSchemaFolder }));
+        return response.mapBody(ResponseBody.isSuccess);
     }
 
-    ping(): Promise<Response<boolean>> {
-        return this.restClient
-            .get<{ type: string }>(ModelServerPaths.SERVER_PING)
-            .then(r => r.mapBody(b => b.type === 'success'));
+    async ping(): Promise<Response<boolean>> {
+        const response = await this.restClient.get(ModelServerPaths.SERVER_PING);
+        return response.mapBody(ResponseBody.isSuccess);
+    }
+
+    async edit(modelUri: string, command: ModelServerCommand): Promise<Response<boolean>> {
+        const response = await this.restClient.patch(`${ModelServerPaths.COMMANDS}?modeluri=${modelUri}`, RequestBody.fromData(command));
+        return response.mapBody(ResponseBody.isSuccess);
+    }
+
+    async getTypeSchema(modelUri: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.TYPE_SCHEMA}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.asString);
+    }
+
+    async getUiSchema(schemaName: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.UI_SCHEMA}?schemaName=${schemaName}`);
+        return response.mapBody(ResponseBody.asString);
     }
 
     subscribe(modelUri: string): void {
         const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}`;
         const socket = new WebSocket(path);
-        socket.on('message', data => {
-            this.client.onMessage(JSON.parse(data.toString()));
-        });
-        socket.on('close', (code, reason) => {
-            this.client.onClosed(code, reason);
-        });
-        socket.on('error', error => {
-            this.client.onError(error);
-        });
-        socket.on('open', () => {
-            this.client.onOpen();
-        });
-        this.openSockets[modelUri] = socket;
+        socket.on('message', data => this.client.onMessage(JSON.parse(data.toString())));
+        socket.on('close', (code, reason) => this.client.onClosed(code, reason));
+        socket.on('error', error => this.client.onError(error));
+        socket.on('open', () => this.client.onOpen());
+        this.openSockets.set(modelUri, socket);
     }
+
     unsubscribe(modelUri: string): void {
-        const socket = this.openSockets[modelUri];
-        if (socket) {
-            socket.close();
+        const openSocket = this.openSockets.get(modelUri);
+        if (openSocket) {
+            openSocket.close();
+            this.openSockets.delete(modelUri);
         }
-    }
-
-    edit(
-        modelUri: string,
-        command: ModelServerCommand
-    ): Promise<Response<boolean>> {
-        return this.restClient
-            .patch<{ type: string }>(
-                `${ModelServerPaths.COMMANDS}?modeluri=${modelUri}`,
-                JSON.stringify({ data: command })
-            )
-            .then(r => r.mapBody(b => b.type === 'success'));
-    }
-
-    getTypeSchema(modelUri: string): Promise<Response<string>> {
-        return this.restClient
-            .get<{ data: string }>(
-                `${ModelServerPaths.TYPE_SCHEMA}?modeluri=${modelUri}`
-            )
-            .then(r => r.mapBody(b => b.data));
-    }
-
-    getUiSchema(schemaName: string): Promise<Response<string>> {
-        return this.restClient
-            .get<{ data: string }>(
-                `${ModelServerPaths.UI_SCHEMA}?schemaname=${schemaName}`
-            )
-            .then(r => r.mapBody(b => b.data));
     }
 
     setClient(client: ModelServerFrontendClient): void {
@@ -168,7 +138,7 @@ export class DefaultModelServerClient implements ModelServerClient {
     }
 
     dispose(): void {
-        // FIXME implement
+        Array.from(this.openSockets.values()).forEach(openSocket => openSocket.close());
     }
 
     getLaunchOptions(): Promise<LaunchOptions> {
