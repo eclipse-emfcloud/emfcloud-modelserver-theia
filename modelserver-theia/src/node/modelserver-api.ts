@@ -111,7 +111,7 @@ export class DefaultModelServerClient implements ModelServerClient {
     }
 
     async getUiSchema(schemaName: string): Promise<Response<string>> {
-        const response = await this.restClient.get(`${ModelServerPaths.UI_SCHEMA}?schemaName=${schemaName}`);
+        const response = await this.restClient.get(`${ModelServerPaths.UI_SCHEMA}?schemaname=${schemaName}`);
         return response.mapBody(ResponseBody.asString);
     }
 
