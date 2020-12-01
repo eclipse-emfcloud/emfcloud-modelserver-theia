@@ -41,46 +41,62 @@ export const GetAllCommand: Command = {
     id: 'ApiTest.GetAll',
     label: 'getAll()'
 };
+
+export const GetModelUrisCommand: Command = {
+    id: 'ApiTest.GetModelUris',
+    label: 'getModelUris()'
+};
+
 export const PatchCommand: Command = {
     id: 'ApiTest.Patch',
     label: 'patch(SuperBrewer3000.coffee)'
 };
+
 export const SubscribeCommand: Command = {
     id: 'ApiTest.Subscribe',
     label: 'subscribe(SuperBrewer3000.coffee)'
 };
+
 export const UnsubscribeCommand: Command = {
     id: 'ApiTest.Unsubscribe',
     label: 'unsubscribe(SuperBrewer3000.coffee)'
 };
+
 export const EditSetCommand: Command = {
     id: 'ApiTest.EditSet',
     label: 'edit(SuperBrewer3000.coffee,{type:set})'
 };
+
 export const EditAddCommand: Command = {
     id: 'ApiTest.EditAdd',
     label: 'edit(SuperBrewer3000.coffee,{type:add})'
 };
+
 export const EditRemoveCommand: Command = {
     id: 'ApiTest.EditRemove',
     label: 'edit(SuperBrewer3000.coffee,{type:remove})'
 };
+
 export const SaveCommand: Command = {
     id: 'ApiTest.Save',
     label: 'save(SuperBrewer3000.coffee)'
 };
+
 export const GetTypeSchemaCommand: Command = {
     id: 'ApiTest.GetTypeSchema',
     label: 'getTypeSchema(Coffee.ecore)'
 };
+
 export const GetUiSchemaCommand: Command = {
     id: 'ApiTest.GetUiSchema',
     label: 'getUiSchema(ControlUnitView)'
 };
+
 export const GetModelElementByIdCommand: Command = {
     id: 'ApiTest.GetModelElementById',
     label: 'getModelElementById(SuperBrewer3000.coffee, //@workflows.0)'
 };
+
 export const GetModelElementByNameCommand: Command = {
     id: 'ApiTest.GetModelElementByName',
     label: 'getModelElementByName(SuperBrewer3000.coffee, BrewingFlow)'
@@ -90,6 +106,7 @@ export const API_TEST_MENU = [...MAIN_MENU_BAR, '9_API_TEST_MENU'];
 export const PING = [...API_TEST_MENU, PingCommand.label];
 export const GET_MODEL = [...API_TEST_MENU, GetModelCommand.label];
 export const GET_ALL = [...API_TEST_MENU, GetAllCommand.label];
+export const GET_MODEL_URIS = [...API_TEST_MENU, GetModelUrisCommand.label];
 export const PATCH = [...API_TEST_MENU, PatchCommand.label];
 export const SUBSCRIBE = [...API_TEST_MENU, SubscribeCommand.label];
 export const UNSUBSCRIBE = [...API_TEST_MENU, UnsubscribeCommand.label];
@@ -159,7 +176,6 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 this.workspaceUri = e[0].uri.replace('file://', 'file:');
             }
         });
-
     }
 
     registerCommands(commands: CommandRegistry): void {
@@ -177,11 +193,17 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then(response => this.messageService.info(printResponse(response)));
             }
         });
-
         commands.registerCommand(GetAllCommand, {
             execute: () => {
                 this.modelServerClient
                     .getAll()
+                    .then(response => this.messageService.info(printResponse(response)));
+            }
+        });
+        commands.registerCommand(GetModelUrisCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .getModelUris()
                     .then(response => this.messageService.info(printResponse(response)));
             }
         });
@@ -194,23 +216,14 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeCommand, {
             execute: () => {
-                this.modelServerSubscriptionService.onOpenListener(() =>
-                    this.messageService.info('Subscription opened!')
-                );
+                this.modelServerSubscriptionService.onOpenListener(() => this.messageService.info('Subscription opened!'));
                 this.modelServerSubscriptionService.onDirtyStateListener(dirtyState => this.messageService.info(`DirtyState ${dirtyState}`));
-                this.modelServerSubscriptionService.onIncrementalUpdateListener(
-                    incrementalUpdate => this.messageService.info(`IncrementalUpdate ${JSON.stringify(incrementalUpdate)}`));
+                this.modelServerSubscriptionService.onIncrementalUpdateListener(update => this.messageService.info(`IncrementalUpdate ${JSON.stringify(update)}`));
                 this.modelServerSubscriptionService.onFullUpdateListener(fullUpdate => this.messageService.info(`FullUpdate ${JSON.stringify(fullUpdate)}`));
                 this.modelServerSubscriptionService.onSuccessListener(successMessage => this.messageService.info(`Success ${successMessage}`));
                 this.modelServerSubscriptionService.onUnknownMessageListener(message => this.messageService.warn(`Unknown Message ${JSON.stringify(message)}`));
-
-                this.modelServerSubscriptionService.onClosedListener(reason =>
-                    this.messageService.info(`Closed!
-        Reason: ${reason}`)
-                );
-                this.modelServerSubscriptionService.onErrorListener(error =>
-                    this.messageService.error(JSON.stringify(error))
-                );
+                this.modelServerSubscriptionService.onClosedListener(reason => this.messageService.info(`Closed! Reason: ${reason}`));
+                this.modelServerSubscriptionService.onErrorListener(error => this.messageService.error(JSON.stringify(error)));
                 this.modelServerClient.subscribe('SuperBrewer3000.coffee');
             }
         });
@@ -230,7 +243,9 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
                 const setCommand: ModelServerCommand = ModelServerCommandUtil.createSetCommand(owner, feature, changedValues);
-                this.modelServerClient.edit('SuperBrewer3000.coffee', setCommand);
+                this.modelServerClient
+                    .edit('SuperBrewer3000.coffee', setCommand)
+                    .then(response => this.messageService.info(printResponse(response)));
             }
         });
         commands.registerCommand(EditRemoveCommand, {
@@ -244,7 +259,9 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const feature = 'nodes';
                 const indices = [0];
                 const removeCommand: ModelServerCommand = ModelServerCommandUtil.createRemoveCommand(owner, feature, indices);
-                this.modelServerClient.edit('SuperBrewer3000.coffee', removeCommand);
+                this.modelServerClient
+                    .edit('SuperBrewer3000.coffee', removeCommand)
+                    .then(response => this.messageService.info(printResponse(response)));
             }
         });
         commands.registerCommand(EditAddCommand, {
@@ -258,12 +275,16 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];
                 const addCommand: ModelServerCommand = ModelServerCommandUtil.createAddCommand(owner, feature, toAdd);
-                this.modelServerClient.edit('SuperBrewer3000.coffee', addCommand);
+                this.modelServerClient
+                    .edit('SuperBrewer3000.coffee', addCommand)
+                    .then(response => this.messageService.info(printResponse(response)));
             }
         });
         commands.registerCommand(SaveCommand, {
             execute: () => {
-                this.modelServerClient.save('SuperBrewer3000.coffee');
+                this.modelServerClient
+                    .save('SuperBrewer3000.coffee')
+                    .then(response => this.messageService.info(printResponse(response)));
             }
         });
 
@@ -302,6 +323,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(API_TEST_MENU, { commandId: PingCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: GetAllCommand.id });
+        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelUrisCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: PatchCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: SubscribeCommand.id });
         menus.registerMenuAction(API_TEST_MENU, { commandId: UnsubscribeCommand.id });
