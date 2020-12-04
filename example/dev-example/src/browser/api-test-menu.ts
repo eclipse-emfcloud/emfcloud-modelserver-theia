@@ -54,7 +54,12 @@ export const PatchCommand: Command = {
 
 export const SubscribeCommand: Command = {
     id: 'ApiTest.Subscribe',
-    label: 'subscribe(SuperBrewer3000.coffee)'
+    label: 'subscribe(SuperBrewer3000.coffee, 60000)'
+};
+
+export const KeepSubscriptionAliveCommand: Command = {
+    id: 'ApiTest.KeepSubscriptionAlive',
+    label: 'sendKeepAlive(SuperBrewer3000.coffee)'
 };
 
 export const UnsubscribeCommand: Command = {
@@ -103,21 +108,33 @@ export const GetModelElementByNameCommand: Command = {
 };
 
 export const API_TEST_MENU = [...MAIN_MENU_BAR, '9_API_TEST_MENU'];
-export const PING = [...API_TEST_MENU, PingCommand.label];
-export const GET_MODEL = [...API_TEST_MENU, GetModelCommand.label];
-export const GET_ALL = [...API_TEST_MENU, GetAllCommand.label];
-export const GET_MODEL_URIS = [...API_TEST_MENU, GetModelUrisCommand.label];
+export const SERVER_SECTION = [...API_TEST_MENU, '1_API_TEST_MENU_SERVER_SECTION'];
+export const PING = [...SERVER_SECTION, PingCommand.label];
+
+export const GET_SECTION = [...API_TEST_MENU, '2_API_TEST_MENU_GET_SECTION'];
+export const GET_MODEL = [...GET_SECTION, GetModelCommand.label];
+export const GET_ALL = [...GET_SECTION, GetAllCommand.label];
+export const GET_MODEL_URIS = [...GET_SECTION, GetModelUrisCommand.label];
+export const GET_ELEMENTBYID = [...GET_SECTION, GetModelElementByIdCommand.label];
+export const GET_ELEMENTBYNAME = [...GET_SECTION, GetModelElementByNameCommand.label];
+
+export const EDIT_SECTION = [...API_TEST_MENU, '3_API_TEST_MENU_EDIT_SECTION'];
+export const EDIT_SET = [...EDIT_SECTION, EditSetCommand.label];
+export const EDIT_REMOVE = [...EDIT_SECTION, EditRemoveCommand.label];
+export const EDIT_ADD = [...EDIT_SECTION, EditAddCommand.label];
 export const PATCH = [...API_TEST_MENU, PatchCommand.label];
-export const SUBSCRIBE = [...API_TEST_MENU, SubscribeCommand.label];
-export const UNSUBSCRIBE = [...API_TEST_MENU, UnsubscribeCommand.label];
-export const EDIT_SET = [...API_TEST_MENU, EditSetCommand.label];
-export const EDIT_REMOVE = [...API_TEST_MENU, EditRemoveCommand.label];
-export const EDIT_ADD = [...API_TEST_MENU, EditAddCommand.label];
-export const SAVE = [...API_TEST_MENU, SaveCommand.label];
-export const GET_TYPESCHEMA = [...API_TEST_MENU, GetTypeSchemaCommand.label];
-export const GET_UISCHEMA = [...API_TEST_MENU, GetUiSchemaCommand.label];
-export const GET_ELEMENTBYID = [...API_TEST_MENU, GetModelElementByIdCommand.label];
-export const GET_ELEMENTBYNAME = [...API_TEST_MENU, GetModelElementByNameCommand.label];
+
+export const SAVE_SECTION = [...API_TEST_MENU, '4_API_TEST_MENU_SAVE_SECTION'];
+export const SAVE = [...SAVE_SECTION, SaveCommand.label];
+
+export const SCHEMA_SECTION = [...API_TEST_MENU, '5_API_TEST_MENU_SCHEMA_SECTION'];
+export const GET_TYPESCHEMA = [...SCHEMA_SECTION, GetTypeSchemaCommand.label];
+export const GET_UISCHEMA = [...SCHEMA_SECTION, GetUiSchemaCommand.label];
+
+export const WEBSOCKET_SECTION = [...API_TEST_MENU, '6_API_TEST_MENU_WEBSOCKET_SECTION'];
+export const SUBSCRIBE = [...WEBSOCKET_SECTION, SubscribeCommand.label];
+export const KEEPALIVE = [...WEBSOCKET_SECTION, KeepSubscriptionAliveCommand.label];
+export const UNSUBSCRIBE = [...WEBSOCKET_SECTION, UnsubscribeCommand.label];
 
 const exampleFilePatch = {
     'eClass':
@@ -163,11 +180,11 @@ const exampleFilePatch = {
 
 @injectable()
 export class ApiTestMenuContribution implements MenuContribution, CommandContribution {
+
     @inject(MessageService) protected readonly messageService: MessageService;
-    @inject(ModelServerClient)
-    protected readonly modelServerClient: ModelServerClient;
-    @inject(ModelServerSubscriptionService)
-    protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
+    @inject(ModelServerClient) protected readonly modelServerClient: ModelServerClient;
+    @inject(ModelServerSubscriptionService) protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
+
     private workspaceUri: string;
 
     constructor(@inject(WorkspaceService) protected readonly workspaceService: WorkspaceService) {
@@ -179,6 +196,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     }
 
     registerCommands(commands: CommandRegistry): void {
+        let intervalId: NodeJS.Timeout;
+
         commands.registerCommand(PingCommand, {
             execute: () => {
                 this.modelServerClient
@@ -222,9 +241,21 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 this.modelServerSubscriptionService.onFullUpdateListener(fullUpdate => this.messageService.info(`FullUpdate ${JSON.stringify(fullUpdate)}`));
                 this.modelServerSubscriptionService.onSuccessListener(successMessage => this.messageService.info(`Success ${successMessage}`));
                 this.modelServerSubscriptionService.onUnknownMessageListener(message => this.messageService.warn(`Unknown Message ${JSON.stringify(message)}`));
-                this.modelServerSubscriptionService.onClosedListener(reason => this.messageService.info(`Closed! Reason: ${reason}`));
-                this.modelServerSubscriptionService.onErrorListener(error => this.messageService.error(JSON.stringify(error)));
-                this.modelServerClient.subscribe('SuperBrewer3000.coffee');
+                this.modelServerSubscriptionService.onClosedListener(reason => {
+                    clearInterval(intervalId);
+                    this.messageService.info(`Subscription closed! Reason: ${reason}`);
+                });
+                this.modelServerSubscriptionService.onErrorListener(error => {
+                    clearInterval(intervalId);
+                    this.messageService.error(`Error! ${JSON.stringify(error)}`);
+                });
+                this.modelServerClient.subscribe('SuperBrewer3000.coffee', 60000);
+                intervalId = setInterval(() => this.modelServerClient.sendKeepAlive('SuperBrewer3000.coffee'), 59000);
+            }
+        });
+        commands.registerCommand(KeepSubscriptionAliveCommand, {
+            execute: () => {
+                this.modelServerClient.sendKeepAlive('SuperBrewer3000.coffee');
             }
         });
         commands.registerCommand(UnsubscribeCommand, {
@@ -320,21 +351,28 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     }
     registerMenus(menus: MenuModelRegistry): void {
         menus.registerSubmenu(API_TEST_MENU, 'ModelServer');
-        menus.registerMenuAction(API_TEST_MENU, { commandId: PingCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetAllCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelUrisCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: PatchCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: SubscribeCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: UnsubscribeCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: EditSetCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: EditRemoveCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: EditAddCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: SaveCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetTypeSchemaCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetUiSchemaCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelElementByIdCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelElementByNameCommand.id });
+
+        menus.registerMenuAction(SERVER_SECTION, { commandId: PingCommand.id });
+
+        menus.registerMenuAction(GET_SECTION, { commandId: GetModelUrisCommand.id, order: 'a' });
+        menus.registerMenuAction(GET_SECTION, { commandId: GetAllCommand.id, order: 'b' });
+        menus.registerMenuAction(GET_SECTION, { commandId: GetModelCommand.id, order: 'c' });
+        menus.registerMenuAction(GET_SECTION, { commandId: GetModelElementByIdCommand.id, order: 'd' });
+        menus.registerMenuAction(GET_SECTION, { commandId: GetModelElementByNameCommand.id, order: 'e' });
+
+        menus.registerMenuAction(EDIT_SECTION, { commandId: EditSetCommand.id });
+        menus.registerMenuAction(EDIT_SECTION, { commandId: EditRemoveCommand.id });
+        menus.registerMenuAction(EDIT_SECTION, { commandId: EditAddCommand.id });
+        menus.registerMenuAction(EDIT_SECTION, { commandId: PatchCommand.id });
+
+        menus.registerMenuAction(SAVE_SECTION, { commandId: SaveCommand.id });
+
+        menus.registerMenuAction(SCHEMA_SECTION, { commandId: GetTypeSchemaCommand.id });
+        menus.registerMenuAction(SCHEMA_SECTION, { commandId: GetUiSchemaCommand.id });
+
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: SubscribeCommand.id, order: 'a' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'b' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: UnsubscribeCommand.id, order: 'c' });
     }
 }
 

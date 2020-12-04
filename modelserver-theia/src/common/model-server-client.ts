@@ -32,7 +32,7 @@ export interface ModelServerCommand {
 }
 
 export interface ModelServerMessage {
-    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error';
+    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error' | 'keepAlive';
     data: any;
 }
 export const ModelServerFrontendClient = Symbol('ModelServerFrontendClient');
@@ -72,14 +72,16 @@ export interface ModelServerClient
     save(modelUri: string): Promise<Response<boolean>>;
 
     getLaunchOptions(): Promise<LaunchOptions>;
-    // subscribe
-    subscribe(modelUri: string): void;
-    unsubscribe(modelUri: string): void;
 
     edit(modelUri: string, command: ModelServerCommand): Promise<Response<boolean>>;
 
     getTypeSchema(modelUri: string): Promise<Response<string>>;
     getUiSchema(schemaName: string): Promise<Response<string>>;
+
+    // WebSocket connection
+    subscribe(modelUri: string, timeout?: number): void;
+    sendKeepAlive(modelUri: string): void;
+    unsubscribe(modelUri: string): void;
 }
 
 export const LaunchOptions = Symbol('LaunchOptions');

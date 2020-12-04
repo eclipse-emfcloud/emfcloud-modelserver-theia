@@ -18,6 +18,7 @@ import {
     ModelServerClient,
     ModelServerCommand,
     ModelServerFrontendClient,
+    ModelServerMessage,
     RequestBody,
     Response,
     ResponseBody,
@@ -115,14 +116,22 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.asString);
     }
 
-    subscribe(modelUri: string): void {
-        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}`;
+    subscribe(modelUri: string, timeout?: number): void {
+        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}${timeout ? '&timeout=' + timeout : ''}`;
         const socket = new WebSocket(path);
         socket.on('message', data => this.client.onMessage(JSON.parse(data.toString())));
         socket.on('close', (code, reason) => this.client.onClosed(code, reason));
         socket.on('error', error => this.client.onError(error));
         socket.on('open', () => this.client.onOpen());
         this.openSockets.set(modelUri, socket);
+    }
+
+    sendKeepAlive(modelUri: string): void {
+        const openSocket = this.openSockets.get(modelUri);
+        if (openSocket) {
+            const msg: ModelServerMessage = { type: 'keepAlive', data: '' };
+            openSocket.send(JSON.stringify(msg));
+        }
     }
 
     unsubscribe(modelUri: string): void {
