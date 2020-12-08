@@ -79,6 +79,16 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.isSuccess);
     }
 
+    async undo(modelUri: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.UNDO}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.asString);
+    }
+
+    async redo(modelUri: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.REDO}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.asString);
+    }
+
     async save(modelUri: string): Promise<Response<boolean>> {
         const response = await this.restClient.get(`${ModelServerPaths.SAVE}?modeluri=${modelUri}`);
         return response.mapBody(ResponseBody.isSuccess);

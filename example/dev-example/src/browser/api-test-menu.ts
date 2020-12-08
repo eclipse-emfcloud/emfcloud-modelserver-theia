@@ -102,6 +102,16 @@ export const EditRemoveCommand: Command = {
     label: 'edit(SuperBrewer3000.coffee,{type:remove})'
 };
 
+export const UndoCommand: Command = {
+    id: 'ApiTest.Undo',
+    label: 'undo(SuperBrewer3000.coffee)'
+};
+
+export const RedoCommand: Command = {
+    id: 'ApiTest.Redo',
+    label: 'redo(SuperBrewer3000.coffee)'
+};
+
 export const SaveCommand: Command = {
     id: 'ApiTest.Save',
     label: 'save(SuperBrewer3000.coffee)'
@@ -343,6 +353,23 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then(response => this.messageService.info(printResponse(response)));
             }
         });
+
+        commands.registerCommand(UndoCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .undo('SuperBrewer3000.coffee')
+                    .then(response => this.messageService.info(printResponse(response)));
+            }
+        });
+
+        commands.registerCommand(RedoCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .redo('SuperBrewer3000.coffee')
+                    .then(response => this.messageService.info(printResponse(response)));
+            }
+        });
+
         commands.registerCommand(SaveCommand, {
             execute: () => {
                 this.modelServerClient
