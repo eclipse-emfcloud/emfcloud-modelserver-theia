@@ -28,4 +28,7 @@ export namespace ModelServerPaths {
 
     export const SAVE = 'save';
 
+    export const UNDO = 'undo';
+    export const REDO = 'redo';
+
 }

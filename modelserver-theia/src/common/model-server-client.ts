@@ -69,6 +69,9 @@ export interface ModelServerClient
 
     configure(configuration?: ServerConfiguration): Promise<Response<boolean>>;
     ping(): Promise<Response<boolean>>;
+
+    undo(modelUri: string): Promise<Response<string>>;
+    redo(modelUri: string): Promise<Response<string>>;
     save(modelUri: string): Promise<Response<boolean>>;
 
     getLaunchOptions(): Promise<LaunchOptions>;
