@@ -34,7 +34,8 @@ export class ModelServerFrontendClientImpl implements ModelServerFrontendClient,
                 this.onIncrementalUpdateEmitter.fire(message.data);
                 break;
             }
-            case 'success': {
+            case 'success':
+            case 'keepAlive': {
                 this.onSuccessEmitter.fire(message.data);
                 break;
             }
@@ -49,7 +50,16 @@ export class ModelServerFrontendClientImpl implements ModelServerFrontendClient,
     }
 
     onClosed(code: number, reason: string): void {
-        this.onClosedEmitter.fire(reason);
+        let closeReason = reason;
+        switch (code) {
+            case 1005: {
+                closeReason = 'Connection closed by peer'; break;
+            }
+            case 1006: {
+                closeReason = 'Server shutdown'; break;
+            }
+        }
+        this.onClosedEmitter.fire(code + ': ' + closeReason);
     }
 
     onError(error: Error): void {

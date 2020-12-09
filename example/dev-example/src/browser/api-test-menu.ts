@@ -62,6 +62,31 @@ export const UnsubscribeCommand: Command = {
     label: 'unsubscribe(SuperBrewer3000.coffee)'
 };
 
+export const SubscribeAndKeepAliveCommand: Command = {
+    id: 'ApiTest.SubscribeAndKeepAlive',
+    label: 'subscribeAndKeepAlive(Coffee.ecore, 60000)'
+};
+
+export const UnsubscribeKeepAliveCommand: Command = {
+    id: 'ApiTest.UnsubscribeKeepAlive',
+    label: 'unsubscribe(Coffee.ecore)'
+};
+
+export const SubscribeWithTimeoutCommand: Command = {
+    id: 'ApiTest.SubscribeWithTimeout',
+    label: 'subscribeWithTimeout(SuperBrewer3000.json, 10000)'
+};
+
+export const KeepSubscriptionAliveCommand: Command = {
+    id: 'ApiTest.KeepSubscriptionAlive',
+    label: 'sendKeepAlive(SuperBrewer3000.json)'
+};
+
+export const UnsubscribeTimeoutCommand: Command = {
+    id: 'ApiTest.UnsubscribeTimeout',
+    label: 'unsubscribe(SuperBrewer3000.json)'
+};
+
 export const EditSetCommand: Command = {
     id: 'ApiTest.EditSet',
     label: 'edit(SuperBrewer3000.coffee,{type:set})'
@@ -103,21 +128,37 @@ export const GetModelElementByNameCommand: Command = {
 };
 
 export const API_TEST_MENU = [...MAIN_MENU_BAR, '9_API_TEST_MENU'];
-export const PING = [...API_TEST_MENU, PingCommand.label];
-export const GET_MODEL = [...API_TEST_MENU, GetModelCommand.label];
-export const GET_ALL = [...API_TEST_MENU, GetAllCommand.label];
-export const GET_MODEL_URIS = [...API_TEST_MENU, GetModelUrisCommand.label];
+export const SERVER_SECTION = [...API_TEST_MENU, '1_API_TEST_MENU_SERVER_SECTION'];
+export const PING = [...SERVER_SECTION, PingCommand.label];
+
+export const GET_SECTION = [...API_TEST_MENU, '2_API_TEST_MENU_GET_SECTION'];
+export const GET_MODEL = [...GET_SECTION, GetModelCommand.label];
+export const GET_ALL = [...GET_SECTION, GetAllCommand.label];
+export const GET_MODEL_URIS = [...GET_SECTION, GetModelUrisCommand.label];
+export const GET_ELEMENTBYID = [...GET_SECTION, GetModelElementByIdCommand.label];
+export const GET_ELEMENTBYNAME = [...GET_SECTION, GetModelElementByNameCommand.label];
+
+export const EDIT_SECTION = [...API_TEST_MENU, '3_API_TEST_MENU_EDIT_SECTION'];
+export const EDIT_SET = [...EDIT_SECTION, EditSetCommand.label];
+export const EDIT_REMOVE = [...EDIT_SECTION, EditRemoveCommand.label];
+export const EDIT_ADD = [...EDIT_SECTION, EditAddCommand.label];
 export const PATCH = [...API_TEST_MENU, PatchCommand.label];
-export const SUBSCRIBE = [...API_TEST_MENU, SubscribeCommand.label];
-export const UNSUBSCRIBE = [...API_TEST_MENU, UnsubscribeCommand.label];
-export const EDIT_SET = [...API_TEST_MENU, EditSetCommand.label];
-export const EDIT_REMOVE = [...API_TEST_MENU, EditRemoveCommand.label];
-export const EDIT_ADD = [...API_TEST_MENU, EditAddCommand.label];
-export const SAVE = [...API_TEST_MENU, SaveCommand.label];
-export const GET_TYPESCHEMA = [...API_TEST_MENU, GetTypeSchemaCommand.label];
-export const GET_UISCHEMA = [...API_TEST_MENU, GetUiSchemaCommand.label];
-export const GET_ELEMENTBYID = [...API_TEST_MENU, GetModelElementByIdCommand.label];
-export const GET_ELEMENTBYNAME = [...API_TEST_MENU, GetModelElementByNameCommand.label];
+
+export const SAVE_SECTION = [...API_TEST_MENU, '4_API_TEST_MENU_SAVE_SECTION'];
+export const SAVE = [...SAVE_SECTION, SaveCommand.label];
+
+export const SCHEMA_SECTION = [...API_TEST_MENU, '5_API_TEST_MENU_SCHEMA_SECTION'];
+export const GET_TYPESCHEMA = [...SCHEMA_SECTION, GetTypeSchemaCommand.label];
+export const GET_UISCHEMA = [...SCHEMA_SECTION, GetUiSchemaCommand.label];
+
+export const WEBSOCKET_SECTION = [...API_TEST_MENU, '6_API_TEST_MENU_WEBSOCKET_SECTION'];
+export const SUBSCRIBE = [...WEBSOCKET_SECTION, SubscribeCommand.label];
+export const UNSUBSCRIBE = [...WEBSOCKET_SECTION, UnsubscribeCommand.label];
+export const SUBSCRIBE_KEEPALIVE = [...WEBSOCKET_SECTION, SubscribeAndKeepAliveCommand.label];
+export const UNSUBSCRIBE_COFFEE = [...WEBSOCKET_SECTION, UnsubscribeKeepAliveCommand.label];
+export const SUBSCRIBE_TIMEOUT = [...WEBSOCKET_SECTION, SubscribeWithTimeoutCommand.label];
+export const KEEPALIVE = [...WEBSOCKET_SECTION, KeepSubscriptionAliveCommand.label];
+export const UNSUBSCRIBE_TIMEOUT = [...WEBSOCKET_SECTION, UnsubscribeTimeoutCommand.label];
 
 const exampleFilePatch = {
     'eClass':
@@ -163,12 +204,13 @@ const exampleFilePatch = {
 
 @injectable()
 export class ApiTestMenuContribution implements MenuContribution, CommandContribution {
+
     @inject(MessageService) protected readonly messageService: MessageService;
-    @inject(ModelServerClient)
-    protected readonly modelServerClient: ModelServerClient;
-    @inject(ModelServerSubscriptionService)
-    protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
+    @inject(ModelServerClient) protected readonly modelServerClient: ModelServerClient;
+    @inject(ModelServerSubscriptionService) protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
+
     private workspaceUri: string;
+    private intervalId: NodeJS.Timeout;
 
     constructor(@inject(WorkspaceService) protected readonly workspaceService: WorkspaceService) {
         workspaceService.onWorkspaceChanged(e => {
@@ -216,20 +258,41 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeCommand, {
             execute: () => {
-                this.modelServerSubscriptionService.onOpenListener(() => this.messageService.info('Subscription opened!'));
-                this.modelServerSubscriptionService.onDirtyStateListener(dirtyState => this.messageService.info(`DirtyState ${dirtyState}`));
-                this.modelServerSubscriptionService.onIncrementalUpdateListener(update => this.messageService.info(`IncrementalUpdate ${JSON.stringify(update)}`));
-                this.modelServerSubscriptionService.onFullUpdateListener(fullUpdate => this.messageService.info(`FullUpdate ${JSON.stringify(fullUpdate)}`));
-                this.modelServerSubscriptionService.onSuccessListener(successMessage => this.messageService.info(`Success ${successMessage}`));
-                this.modelServerSubscriptionService.onUnknownMessageListener(message => this.messageService.warn(`Unknown Message ${JSON.stringify(message)}`));
-                this.modelServerSubscriptionService.onClosedListener(reason => this.messageService.info(`Closed! Reason: ${reason}`));
-                this.modelServerSubscriptionService.onErrorListener(error => this.messageService.error(JSON.stringify(error)));
+                this.initializeWebSocket();
                 this.modelServerClient.subscribe('SuperBrewer3000.coffee');
             }
         });
         commands.registerCommand(UnsubscribeCommand, {
             execute: () => {
                 this.modelServerClient.unsubscribe('SuperBrewer3000.coffee');
+            }
+        });
+        commands.registerCommand(SubscribeAndKeepAliveCommand, {
+            execute: () => {
+                this.initializeWebSocket(true);
+                this.modelServerClient.subscribeWithTimeout('Coffee.ecore', 60000);
+                this.intervalId = setInterval(() => this.modelServerClient.sendKeepAlive('Coffee.ecore'), 59000);
+            }
+        });
+        commands.registerCommand(UnsubscribeKeepAliveCommand, {
+            execute: () => {
+                this.modelServerClient.unsubscribe('Coffee.ecore');
+            }
+        });
+        commands.registerCommand(SubscribeWithTimeoutCommand, {
+            execute: () => {
+                this.initializeWebSocket();
+                this.modelServerClient.subscribeWithTimeout('SuperBrewer3000.json', 10000);
+            }
+        });
+        commands.registerCommand(KeepSubscriptionAliveCommand, {
+            execute: () => {
+                this.modelServerClient.sendKeepAlive('SuperBrewer3000.json');
+            }
+        });
+        commands.registerCommand(UnsubscribeTimeoutCommand, {
+            execute: () => {
+                this.modelServerClient.unsubscribe('SuperBrewer3000.json');
             }
         });
         commands.registerCommand(EditSetCommand, {
@@ -318,23 +381,56 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             }
         });
     }
+
     registerMenus(menus: MenuModelRegistry): void {
         menus.registerSubmenu(API_TEST_MENU, 'ModelServer');
-        menus.registerMenuAction(API_TEST_MENU, { commandId: PingCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetAllCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelUrisCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: PatchCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: SubscribeCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: UnsubscribeCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: EditSetCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: EditRemoveCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: EditAddCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: SaveCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetTypeSchemaCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetUiSchemaCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelElementByIdCommand.id });
-        menus.registerMenuAction(API_TEST_MENU, { commandId: GetModelElementByNameCommand.id });
+
+        menus.registerMenuAction(SERVER_SECTION, { commandId: PingCommand.id });
+
+        menus.registerMenuAction(GET_SECTION, { commandId: GetModelUrisCommand.id, order: 'a' });
+        menus.registerMenuAction(GET_SECTION, { commandId: GetAllCommand.id, order: 'b' });
+        menus.registerMenuAction(GET_SECTION, { commandId: GetModelCommand.id, order: 'c' });
+        menus.registerMenuAction(GET_SECTION, { commandId: GetModelElementByIdCommand.id, order: 'd' });
+        menus.registerMenuAction(GET_SECTION, { commandId: GetModelElementByNameCommand.id, order: 'e' });
+
+        menus.registerMenuAction(EDIT_SECTION, { commandId: EditSetCommand.id });
+        menus.registerMenuAction(EDIT_SECTION, { commandId: EditRemoveCommand.id });
+        menus.registerMenuAction(EDIT_SECTION, { commandId: EditAddCommand.id });
+        menus.registerMenuAction(EDIT_SECTION, { commandId: PatchCommand.id });
+
+        menus.registerMenuAction(SAVE_SECTION, { commandId: SaveCommand.id });
+
+        menus.registerMenuAction(SCHEMA_SECTION, { commandId: GetTypeSchemaCommand.id });
+        menus.registerMenuAction(SCHEMA_SECTION, { commandId: GetUiSchemaCommand.id });
+
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: SubscribeCommand.id, order: 'a' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: UnsubscribeCommand.id, order: 'b' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: SubscribeAndKeepAliveCommand.id, order: 'c' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: UnsubscribeKeepAliveCommand.id, order: 'd' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: SubscribeWithTimeoutCommand.id, order: 'e' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'f' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: UnsubscribeTimeoutCommand.id, order: 'g' });
+    }
+
+    private initializeWebSocket(clearIntervalId = false): void {
+        this.modelServerSubscriptionService.onOpenListener(() => this.messageService.info('Subscription opened!'));
+        this.modelServerSubscriptionService.onDirtyStateListener((dirtyState: any) => this.messageService.info(`DirtyState ${dirtyState}`));
+        this.modelServerSubscriptionService.onIncrementalUpdateListener((update: any) => this.messageService.info(`IncrementalUpdate ${JSON.stringify(update)}`));
+        this.modelServerSubscriptionService.onFullUpdateListener((fullUpdate: any) => this.messageService.info(`FullUpdate ${JSON.stringify(fullUpdate)}`));
+        this.modelServerSubscriptionService.onSuccessListener((successMessage: any) => this.messageService.info(`Success ${successMessage}`));
+        this.modelServerSubscriptionService.onUnknownMessageListener((message: any) => this.messageService.warn(`Unknown Message ${JSON.stringify(message)}`));
+        this.modelServerSubscriptionService.onClosedListener((reason: any) => {
+            if (clearIntervalId) {
+                clearInterval(this.intervalId);
+            }
+            this.messageService.info(`Subscription closed! Reason: ${reason}`);
+        });
+        this.modelServerSubscriptionService.onErrorListener((error: any) => {
+            if (clearIntervalId) {
+                clearInterval(this.intervalId);
+            }
+            this.messageService.error(`Error! ${JSON.stringify(error)}`);
+        });
     }
 }
 
