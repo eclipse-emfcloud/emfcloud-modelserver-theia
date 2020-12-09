@@ -116,9 +116,18 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.asString);
     }
 
-    subscribe(modelUri: string, timeout?: number): void {
-        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}${timeout ? '&timeout=' + timeout : ''}`;
-        const socket = new WebSocket(path);
+    subscribe(modelUri: string): void {
+        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}`;
+        this.doSubscribe(modelUri, path);
+    }
+
+    subscribeWithTimeout(modelUri: string, timeout: number): void {
+        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}&timeout=${timeout}`;
+        this.doSubscribe(modelUri, path);
+    }
+
+    private doSubscribe(modelUri: string, path: string): void {
+        const socket = new WebSocket(path.trim());
         socket.on('message', data => this.client.onMessage(JSON.parse(data.toString())));
         socket.on('close', (code, reason) => this.client.onClosed(code, reason));
         socket.on('error', error => this.client.onError(error));

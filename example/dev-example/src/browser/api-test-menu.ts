@@ -54,17 +54,37 @@ export const PatchCommand: Command = {
 
 export const SubscribeCommand: Command = {
     id: 'ApiTest.Subscribe',
-    label: 'subscribe(SuperBrewer3000.coffee, 60000)'
-};
-
-export const KeepSubscriptionAliveCommand: Command = {
-    id: 'ApiTest.KeepSubscriptionAlive',
-    label: 'sendKeepAlive(SuperBrewer3000.coffee)'
+    label: 'subscribe(SuperBrewer3000.coffee)'
 };
 
 export const UnsubscribeCommand: Command = {
     id: 'ApiTest.Unsubscribe',
     label: 'unsubscribe(SuperBrewer3000.coffee)'
+};
+
+export const SubscribeAndKeepAliveCommand: Command = {
+    id: 'ApiTest.SubscribeAndKeepAlive',
+    label: 'subscribeAndKeepAlive(Coffee.ecore, 60000)'
+};
+
+export const UnsubscribeKeepAliveCommand: Command = {
+    id: 'ApiTest.UnsubscribeKeepAlive',
+    label: 'unsubscribe(Coffee.ecore)'
+};
+
+export const SubscribeWithTimeoutCommand: Command = {
+    id: 'ApiTest.SubscribeWithTimeout',
+    label: 'subscribeWithTimeout(SuperBrewer3000.json, 10000)'
+};
+
+export const KeepSubscriptionAliveCommand: Command = {
+    id: 'ApiTest.KeepSubscriptionAlive',
+    label: 'sendKeepAlive(SuperBrewer3000.json)'
+};
+
+export const UnsubscribeTimeoutCommand: Command = {
+    id: 'ApiTest.UnsubscribeTimeout',
+    label: 'unsubscribe(SuperBrewer3000.json)'
 };
 
 export const EditSetCommand: Command = {
@@ -133,8 +153,12 @@ export const GET_UISCHEMA = [...SCHEMA_SECTION, GetUiSchemaCommand.label];
 
 export const WEBSOCKET_SECTION = [...API_TEST_MENU, '6_API_TEST_MENU_WEBSOCKET_SECTION'];
 export const SUBSCRIBE = [...WEBSOCKET_SECTION, SubscribeCommand.label];
-export const KEEPALIVE = [...WEBSOCKET_SECTION, KeepSubscriptionAliveCommand.label];
 export const UNSUBSCRIBE = [...WEBSOCKET_SECTION, UnsubscribeCommand.label];
+export const SUBSCRIBE_KEEPALIVE = [...WEBSOCKET_SECTION, SubscribeAndKeepAliveCommand.label];
+export const UNSUBSCRIBE_COFFEE = [...WEBSOCKET_SECTION, UnsubscribeKeepAliveCommand.label];
+export const SUBSCRIBE_TIMEOUT = [...WEBSOCKET_SECTION, SubscribeWithTimeoutCommand.label];
+export const KEEPALIVE = [...WEBSOCKET_SECTION, KeepSubscriptionAliveCommand.label];
+export const UNSUBSCRIBE_TIMEOUT = [...WEBSOCKET_SECTION, UnsubscribeTimeoutCommand.label];
 
 const exampleFilePatch = {
     'eClass':
@@ -186,6 +210,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     @inject(ModelServerSubscriptionService) protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
 
     private workspaceUri: string;
+    private intervalId: NodeJS.Timeout;
 
     constructor(@inject(WorkspaceService) protected readonly workspaceService: WorkspaceService) {
         workspaceService.onWorkspaceChanged(e => {
@@ -196,8 +221,6 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     }
 
     registerCommands(commands: CommandRegistry): void {
-        let intervalId: NodeJS.Timeout;
-
         commands.registerCommand(PingCommand, {
             execute: () => {
                 this.modelServerClient
@@ -235,32 +258,41 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeCommand, {
             execute: () => {
-                this.modelServerSubscriptionService.onOpenListener(() => this.messageService.info('Subscription opened!'));
-                this.modelServerSubscriptionService.onDirtyStateListener(dirtyState => this.messageService.info(`DirtyState ${dirtyState}`));
-                this.modelServerSubscriptionService.onIncrementalUpdateListener(update => this.messageService.info(`IncrementalUpdate ${JSON.stringify(update)}`));
-                this.modelServerSubscriptionService.onFullUpdateListener(fullUpdate => this.messageService.info(`FullUpdate ${JSON.stringify(fullUpdate)}`));
-                this.modelServerSubscriptionService.onSuccessListener(successMessage => this.messageService.info(`Success ${successMessage}`));
-                this.modelServerSubscriptionService.onUnknownMessageListener(message => this.messageService.warn(`Unknown Message ${JSON.stringify(message)}`));
-                this.modelServerSubscriptionService.onClosedListener(reason => {
-                    clearInterval(intervalId);
-                    this.messageService.info(`Subscription closed! Reason: ${reason}`);
-                });
-                this.modelServerSubscriptionService.onErrorListener(error => {
-                    clearInterval(intervalId);
-                    this.messageService.error(`Error! ${JSON.stringify(error)}`);
-                });
-                this.modelServerClient.subscribe('SuperBrewer3000.coffee', 60000);
-                intervalId = setInterval(() => this.modelServerClient.sendKeepAlive('SuperBrewer3000.coffee'), 59000);
-            }
-        });
-        commands.registerCommand(KeepSubscriptionAliveCommand, {
-            execute: () => {
-                this.modelServerClient.sendKeepAlive('SuperBrewer3000.coffee');
+                this.initializeWebSocket();
+                this.modelServerClient.subscribe('SuperBrewer3000.coffee');
             }
         });
         commands.registerCommand(UnsubscribeCommand, {
             execute: () => {
                 this.modelServerClient.unsubscribe('SuperBrewer3000.coffee');
+            }
+        });
+        commands.registerCommand(SubscribeAndKeepAliveCommand, {
+            execute: () => {
+                this.initializeWebSocket(true);
+                this.modelServerClient.subscribeWithTimeout('Coffee.ecore', 60000);
+                this.intervalId = setInterval(() => this.modelServerClient.sendKeepAlive('Coffee.ecore'), 59000);
+            }
+        });
+        commands.registerCommand(UnsubscribeKeepAliveCommand, {
+            execute: () => {
+                this.modelServerClient.unsubscribe('Coffee.ecore');
+            }
+        });
+        commands.registerCommand(SubscribeWithTimeoutCommand, {
+            execute: () => {
+                this.initializeWebSocket();
+                this.modelServerClient.subscribeWithTimeout('SuperBrewer3000.json', 10000);
+            }
+        });
+        commands.registerCommand(KeepSubscriptionAliveCommand, {
+            execute: () => {
+                this.modelServerClient.sendKeepAlive('SuperBrewer3000.json');
+            }
+        });
+        commands.registerCommand(UnsubscribeTimeoutCommand, {
+            execute: () => {
+                this.modelServerClient.unsubscribe('SuperBrewer3000.json');
             }
         });
         commands.registerCommand(EditSetCommand, {
@@ -349,6 +381,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             }
         });
     }
+
     registerMenus(menus: MenuModelRegistry): void {
         menus.registerSubmenu(API_TEST_MENU, 'ModelServer');
 
@@ -371,8 +404,33 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SCHEMA_SECTION, { commandId: GetUiSchemaCommand.id });
 
         menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: SubscribeCommand.id, order: 'a' });
-        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'b' });
-        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: UnsubscribeCommand.id, order: 'c' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: UnsubscribeCommand.id, order: 'b' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: SubscribeAndKeepAliveCommand.id, order: 'c' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: UnsubscribeKeepAliveCommand.id, order: 'd' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: SubscribeWithTimeoutCommand.id, order: 'e' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'f' });
+        menus.registerMenuAction(WEBSOCKET_SECTION, { commandId: UnsubscribeTimeoutCommand.id, order: 'g' });
+    }
+
+    private initializeWebSocket(clearIntervalId = false): void {
+        this.modelServerSubscriptionService.onOpenListener(() => this.messageService.info('Subscription opened!'));
+        this.modelServerSubscriptionService.onDirtyStateListener((dirtyState: any) => this.messageService.info(`DirtyState ${dirtyState}`));
+        this.modelServerSubscriptionService.onIncrementalUpdateListener((update: any) => this.messageService.info(`IncrementalUpdate ${JSON.stringify(update)}`));
+        this.modelServerSubscriptionService.onFullUpdateListener((fullUpdate: any) => this.messageService.info(`FullUpdate ${JSON.stringify(fullUpdate)}`));
+        this.modelServerSubscriptionService.onSuccessListener((successMessage: any) => this.messageService.info(`Success ${successMessage}`));
+        this.modelServerSubscriptionService.onUnknownMessageListener((message: any) => this.messageService.warn(`Unknown Message ${JSON.stringify(message)}`));
+        this.modelServerSubscriptionService.onClosedListener((reason: any) => {
+            if (clearIntervalId) {
+                clearInterval(this.intervalId);
+            }
+            this.messageService.info(`Subscription closed! Reason: ${reason}`);
+        });
+        this.modelServerSubscriptionService.onErrorListener((error: any) => {
+            if (clearIntervalId) {
+                clearInterval(this.intervalId);
+            }
+            this.messageService.error(`Error! ${JSON.stringify(error)}`);
+        });
     }
 }
 

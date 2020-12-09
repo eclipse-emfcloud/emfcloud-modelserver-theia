@@ -79,7 +79,8 @@ export interface ModelServerClient
     getUiSchema(schemaName: string): Promise<Response<string>>;
 
     // WebSocket connection
-    subscribe(modelUri: string, timeout?: number): void;
+    subscribe(modelUri: string): void;
+    subscribeWithTimeout(modelUri: string, timeout: number): void;
     sendKeepAlive(modelUri: string): void;
     unsubscribe(modelUri: string): void;
 }
