@@ -26,8 +26,8 @@ export class ModelServerFrontendContribution implements FrontendApplicationContr
 
     async setup(): Promise<void> {
         this.workspaceService.onWorkspaceChanged(workspace => {
-            if (workspace[0] && workspace[0].uri) {
-                const workspaceRoot = workspace[0].uri;
+            if (workspace[0] && workspace[0].resource) {
+                const workspaceRoot = workspace[0].resource.toString();
                 const uiSchemaFolder = workspaceRoot + '/.ui-schemas';
                 this.modelServerClient.configure({ workspaceRoot, uiSchemaFolder });
             }

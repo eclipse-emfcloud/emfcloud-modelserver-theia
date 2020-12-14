@@ -156,6 +156,8 @@ export const PATCH = [...API_TEST_MENU, PatchCommand.label];
 
 export const SAVE_SECTION = [...API_TEST_MENU, '4_API_TEST_MENU_SAVE_SECTION'];
 export const SAVE = [...SAVE_SECTION, SaveCommand.label];
+export const UNDO = [...SAVE_SECTION, UndoCommand.label];
+export const REDO = [...SAVE_SECTION, RedoCommand.label];
 
 export const SCHEMA_SECTION = [...API_TEST_MENU, '5_API_TEST_MENU_SCHEMA_SECTION'];
 export const GET_TYPESCHEMA = [...SCHEMA_SECTION, GetTypeSchemaCommand.label];
@@ -223,9 +225,9 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     private intervalId: NodeJS.Timeout;
 
     constructor(@inject(WorkspaceService) protected readonly workspaceService: WorkspaceService) {
-        workspaceService.onWorkspaceChanged(e => {
-            if (e[0] && e[0].uri) {
-                this.workspaceUri = e[0].uri.replace('file://', 'file:');
+        workspaceService.onWorkspaceChanged(workspace => {
+            if (workspace[0] && workspace[0].resource) {
+                this.workspaceUri = workspace[0].resource.toString().replace('file://', 'file:');
             }
         });
     }

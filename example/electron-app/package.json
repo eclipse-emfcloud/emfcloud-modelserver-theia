@@ -3,32 +3,35 @@
   "name": "electron-app",
   "version": "0.7.0",
   "dependencies": {
-    "@theia/core": "next",
-    "@theia/filesystem": "next",
-    "@theia/workspace": "next",
-    "@theia/preferences": "next",
-    "@theia/navigator": "next",
-    "@theia/process": "next",
-    "@theia/terminal": "next",
-    "@theia/editor": "next",
-    "@theia/languages": "next",
-    "@theia/markers": "next",
-    "@theia/monaco": "next",
-    "@theia/textmate-grammars": "next",
-    "@theia/typescript": "next",
-    "@theia/messages": "next",
-    "@theia/electron": "next",
+    "@theia/core": "latest",
+    "@theia/editor": "latest",
+    "@theia/electron": "latest",
+    "@theia/filesystem": "latest",
+    "@theia/markers": "latest",
+    "@theia/messages": "latest",
+    "@theia/monaco": "latest",
+    "@theia/navigator": "latest",
+    "@theia/plugin-ext-vscode": "latest",
+    "@theia/preferences": "latest",
+    "@theia/process": "latest",
+    "@theia/terminal": "latest",
+    "@theia/workspace": "latest",
     "@modelserver/coffee-theia": "0.7.0"
   },
   "devDependencies": {
-    "@theia/cli": "next"
+    "@theia/cli": "latest"
   },
   "scripts": {
     "prepare": "theia build --mode development",
-    "start": "theia start --root-dir=../example-workspace",
+    "start": "theia start --plugins=local-dir:../../plugins --root-dir=../example-workspace",
     "watch": "theia build --watch --mode development"
   },
   "theia": {
-    "target": "electron"
+    "target": "electron",
+    "frontend": {
+      "config": {
+        "applicationName": "modelserver-theia Electron Example"
+      }
+    }
   }
 }

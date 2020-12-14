@@ -31,10 +31,7 @@
     "ws": "7.1.1"
   },
   "devDependencies": {
-    "rimraf": "latest",
-    "semver": "^6.3.0",
-    "eslint": "^6.8.0",
-    "typescript": "latest"
+    "semver": "^6.3.0"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",

@@ -27,10 +27,6 @@
     "@theia/workspace": "latest",
     "@modelserver/coffee-theia": "0.7.0"
   },
-  "devDependencies": {
-    "rimraf": "latest",
-    "typescript": "latest"
-  },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",

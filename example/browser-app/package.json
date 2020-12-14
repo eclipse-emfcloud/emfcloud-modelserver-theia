@@ -4,30 +4,34 @@
   "version": "0.7.0",
   "dependencies": {
     "@theia/core": "latest",
+    "@theia/editor": "latest",
     "@theia/filesystem": "latest",
-    "@theia/workspace": "latest",
-    "@theia/preferences": "latest",
+    "@theia/markers": "latest",
+    "@theia/messages": "latest",
+    "@theia/monaco": "latest",
     "@theia/navigator": "latest",
+    "@theia/plugin-ext-vscode": "latest",
+    "@theia/preferences": "latest",
     "@theia/process": "latest",
     "@theia/terminal": "latest",
-    "@theia/editor": "latest",
-    "@theia/languages": "latest",
-    "@theia/markers": "latest",
-    "@theia/monaco": "latest",
-    "@theia/textmate-grammars": "latest",
-    "@theia/typescript": "latest",
-    "@theia/messages": "latest",
+    "@theia/workspace": "latest",
     "@modelserver/dev-example": "0.7.0"
   },
   "devDependencies": {
     "@theia/cli": "latest"
   },
   "scripts": {
-    "prepare": "theia build --mode development",
-    "start": "theia start --root-dir=../example-workspace",
+    "prepare": "yarn run clean && yarn build",
+    "clean": "theia clean",
+    "build": "theia build --mode development",
+    "start": "theia start --plugins=local-dir:../../plugins --root-dir=../example-workspace",
     "watch": "theia build --watch --mode development"
   },
   "theia": {
-    "target": "browser"
+    "frontend": {
+      "config": {
+        "applicationName": "modelserver-theia Browser Example"
+      }
+    }
   }
 }
