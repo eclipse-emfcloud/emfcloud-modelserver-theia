@@ -28,10 +28,6 @@
     "@theia/workspace": "latest",
     "@eclipse-emfcloud/modelserver-theia": "0.7.0"
   },
-  "devDependencies": {
-    "rimraf": "latest",
-    "typescript": "latest"
-  },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
