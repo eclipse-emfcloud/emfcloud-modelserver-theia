@@ -8,12 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import {
-    DataValueType,
-    ModelServerCommand,
-    ModelServerObject,
-    ModelServerReferenceDescription
-} from './model-server-client';
+import { DataValueType, ModelServerCommand, ModelServerObject, ModelServerReferenceDescription } from './model-server-api';
 
 const isNumberArray =
     (array: number[] | ModelServerReferenceDescription[]): array is number[] => array.every((e: number | ModelServerReferenceDescription) => typeof e === 'number');

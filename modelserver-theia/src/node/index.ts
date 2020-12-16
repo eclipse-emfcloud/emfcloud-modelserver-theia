@@ -8,4 +8,5 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-export * from '../node/model-server-backend-contribution';
+export * from './model-server-backend-contribution';
+export * from './model-server-client';

@@ -8,7 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { Response } from '../common/model-server-client';
+import { Response } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetch = require('node-fetch');

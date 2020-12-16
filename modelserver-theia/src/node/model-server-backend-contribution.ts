@@ -15,7 +15,7 @@ import { RawProcess, RawProcessFactory } from '@theia/process/lib/node/raw-proce
 import * as cp from 'child_process';
 import { inject, injectable, optional } from 'inversify';
 
-import { DEFAULT_LAUNCH_OPTIONS, LaunchOptions, ModelServerClient } from '../common/model-server-client';
+import { DEFAULT_LAUNCH_OPTIONS, LaunchOptions, ModelServerClient } from '../common';
 
 export const ModelServerLauncher = Symbol('ModelServerLauncher');
 
