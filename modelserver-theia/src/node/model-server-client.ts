@@ -17,24 +17,25 @@ import {
     Model,
     ModelServerClient,
     ModelServerCommand,
-    ModelServerFrontendClient,
     ModelServerMessage,
+    ModelServerPaths,
+    ModelServerSubscriptionClient,
     RequestBody,
     Response,
     ResponseBody,
     ServerConfiguration
-} from '../common/model-server-client';
-import { ModelServerPaths } from '../common/model-server-paths';
+} from '../common';
 import { RestClient } from './rest-client';
 
 @injectable()
 export class DefaultModelServerClient implements ModelServerClient {
+
     @inject(LaunchOptions) @optional() protected readonly options: LaunchOptions = DEFAULT_LAUNCH_OPTIONS;
 
-    private restClient: RestClient<ResponseBody>;
-    private openSockets: Map<string, WebSocket> = new Map();
-    private baseUrl: string;
-    private client: ModelServerFrontendClient;
+    protected restClient: RestClient<ResponseBody>;
+    protected openSockets: Map<string, WebSocket> = new Map();
+    protected baseUrl: string;
+    protected subscriptionClient: ModelServerSubscriptionClient;
 
     async initialize(): Promise<boolean> {
         this.prepareBaseUrl();
@@ -94,6 +95,11 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.isSuccess);
     }
 
+    async saveAll(): Promise<Response<boolean>> {
+        const response = await this.restClient.get(ModelServerPaths.SAVE_ALL);
+        return response.mapBody(ResponseBody.isSuccess);
+    }
+
     async update(modelUri: string, newModel: any): Promise<Response<string>> {
         const response = await this.restClient.patch(`${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}`, RequestBody.fromData(newModel));
         return response.mapBody(ResponseBody.asString);
@@ -136,13 +142,20 @@ export class DefaultModelServerClient implements ModelServerClient {
         this.doSubscribe(modelUri, path);
     }
 
-    private doSubscribe(modelUri: string, path: string): void {
+    protected doSubscribe(modelUri: string, path: string): void {
         const socket = new WebSocket(path.trim());
-        socket.on('message', data => this.client.onMessage(JSON.parse(data.toString())));
-        socket.on('close', (code, reason) => this.client.onClosed(code, reason));
-        socket.on('error', error => this.client.onError(error));
-        socket.on('open', () => this.client.onOpen());
+        socket.onopen = event => this.subscriptionClient.fireOpenEvent(event, modelUri);
+        socket.onmessage = messageEvent => this.subscriptionClient.fireMessageEvent(messageEvent, modelUri);
+        socket.onclose = closeEvent => {
+            this.subscriptionClient.fireClosedEvent(closeEvent, modelUri);
+            this.openSockets.delete(modelUri);
+        };
+        socket.onerror = errorEvent => this.subscriptionClient.fireErrorEvent(errorEvent, modelUri);
         this.openSockets.set(modelUri, socket);
+    }
+
+    protected isSocketOpen(modelUri: string): boolean {
+        return this.openSockets.get(modelUri) !== undefined;
     }
 
     sendKeepAlive(modelUri: string): void {
@@ -161,8 +174,8 @@ export class DefaultModelServerClient implements ModelServerClient {
         }
     }
 
-    setClient(client: ModelServerFrontendClient): void {
-        this.client = client;
+    setClient(subscriptionClient: ModelServerSubscriptionClient): void {
+        this.subscriptionClient = subscriptionClient;
     }
 
     dispose(): void {

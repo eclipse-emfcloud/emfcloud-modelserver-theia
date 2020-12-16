@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 EclipseSource and others.
+ * Copyright (c) 2020 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,6 +8,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-export * from './frontend-module';
-export * from './model-server-frontend-contribution';
-export * from './model-server-subscription-client';
+import { ModelServerClient } from '@eclipse-emfcloud/modelserver-theia';
+import { ContainerModule } from 'inversify';
+
+import { DevModelServerClient } from './model-server-client';
+
+export default new ContainerModule((bind, unbind, isBound, rebind) => {
+    rebind(ModelServerClient).to(DevModelServerClient).inSingletonScope();
+});

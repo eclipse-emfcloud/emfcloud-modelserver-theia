@@ -27,6 +27,7 @@ export namespace ModelServerPaths {
     export const COMMANDS = 'edit';
 
     export const SAVE = 'save';
+    export const SAVE_ALL = 'saveall';
 
     export const UNDO = 'undo';
     export const REDO = 'redo';

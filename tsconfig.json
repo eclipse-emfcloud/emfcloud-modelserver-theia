@@ -5,10 +5,18 @@
     "paths": {
       "@eclipse-emfcloud/modelserver-theia": [
         "modelserver-theia/src/*"
+      ],
+      "@modelserver/coffee-theia": [
+        "example/coffe-theia/src/*"
+      ],
+      "@modelserver/dev-example": [
+        "example/dev-example/src/*"
       ]
     }
   },
   "include": [
-    "modelserver-theia/src"
+    "modelserver-theia/src",
+    "example/coffee-theia/src",
+    "example/dev-example/src"
   ]
 }

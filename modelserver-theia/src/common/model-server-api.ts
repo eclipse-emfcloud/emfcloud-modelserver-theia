@@ -8,17 +8,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { JsonRpcServer } from '@theia/core/lib/common/messaging';
+import { JsonRpcServer } from '@theia/core';
+import * as WebSocket from 'ws';
 
 export const MODEL_SERVER_CLIENT_SERVICE_PATH = '/services/modelserverclient';
 
 export type DataValueType = boolean | number | string;
+
 export interface ModelServerObject {
     eClass: string;
 }
+
 export interface ModelServerReferenceDescription extends ModelServerObject {
     $ref: string;
 }
+
 export interface ModelServerCommand {
     eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//Command';
     type: 'compound' | 'add' | 'remove' | 'set' | 'replace' | 'move';
@@ -31,19 +35,25 @@ export interface ModelServerCommand {
     commands?: ModelServerCommand[];
 }
 
-export interface ModelServerMessage {
-    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error' | 'keepAlive';
-    data: any;
+export interface WebSocketEvent {
+    target: WebSocket;
 }
-export const ModelServerFrontendClient = Symbol('ModelServerFrontendClient');
-export interface ModelServerFrontendClient {
-    onOpen(): void;
 
-    onMessage(message: ModelServerMessage): void;
+export interface WebSocketMessageEvent extends WebSocketEvent {
+    type: string; // 'open' | 'message' | 'error' | 'close'
+    data: WebSocket.Data; // ModelServerMessage
+}
 
-    onClosed(code: number, reason: string): void;
+export interface WebSocketCloseEvent extends WebSocketEvent {
+    wasClean: boolean;
+    code: number;
+    reason: string;
+}
 
-    onError(error: Error): void;
+export interface WebSocketErrorEvent extends WebSocketEvent {
+    error: any;
+    message: string;
+    type: string;
 }
 
 export interface Model {
@@ -51,9 +61,30 @@ export interface Model {
     content: string;
 }
 
+export const ModelServerSubscriptionClient = Symbol('ModelServerSubscriptionClient');
+export interface ModelServerSubscriptionClient {
+    fireOpenEvent(event: WebSocketEvent, modelUri: string): void;
+    fireMessageEvent(event: WebSocketMessageEvent, modelUri: string): void;
+    fireClosedEvent(event: WebSocketCloseEvent, modelUri: string): void;
+    fireErrorEvent(event: WebSocketErrorEvent, modelUri: string): void;
+    fireUserWarning(warning: string, modelUri: string): void;
+}
+
+export const ModelServerSubscriptionListener = Symbol('ModelServerSubscriptionListener');
+export interface ModelServerSubscriptionListener {
+    onOpened(modelUri: string): void;
+    onClosed(modelUri: string, reason: string): void;
+    onWarning(modelUri: string, warning: string): void;
+    onError(modelUri: string, error: any): void;
+    onDirtyState(modelUri: string, dirtyState: boolean): void;
+    onIncrementalUpdate(modelUri: string, incrementalUpdate: object): void;
+    onFullUpdate(modelUri: string, fullUpdate: object): void;
+    onSuccess(modelUri: string, successMessage: string): void;
+    onUnknownMessage(modelUri: string, message: string): void;
+}
+
 export const ModelServerClient = Symbol('ModelServerClient');
-export interface ModelServerClient
-    extends JsonRpcServer<ModelServerFrontendClient> {
+export interface ModelServerClient extends JsonRpcServer<ModelServerSubscriptionClient> {
     initialize(): Promise<boolean>;
 
     get(modelUri: string): Promise<Response<string>>;
@@ -73,6 +104,7 @@ export interface ModelServerClient
     undo(modelUri: string): Promise<Response<string>>;
     redo(modelUri: string): Promise<Response<string>>;
     save(modelUri: string): Promise<Response<boolean>>;
+    saveAll(): Promise<Response<boolean>>;
 
     getLaunchOptions(): Promise<LaunchOptions>;
 
@@ -108,8 +140,12 @@ export interface ServerConfiguration {
     uiSchemaFolder?: string;
 }
 
-export type ResponseBody = ModelServerMessage;
+export interface ModelServerMessage {
+    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error' | 'keepAlive';
+    data: any;
+}
 
+export type ResponseBody = ModelServerMessage;
 export namespace ResponseBody {
     export function asString(body: ResponseBody): string {
         return body.data as string;
