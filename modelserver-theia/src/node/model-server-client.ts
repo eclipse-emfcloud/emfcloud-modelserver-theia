@@ -50,13 +50,13 @@ export class DefaultModelServerClient implements ModelServerClient {
         }
     }
 
-    async get(modelUri: string): Promise<Response<string>> {
-        const response = await this.restClient.get(`${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}`);
+    async get(modelUri: string, format?: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.MODEL_CRUD}?modeluri=${modelUri}${format ? '&format=' + format : ''}`);
         return response.mapBody(ResponseBody.asString);
     }
 
-    async getAll(): Promise<Response<Model[]>> {
-        const response = await this.restClient.get(ModelServerPaths.MODEL_CRUD);
+    async getAll(format?: string): Promise<Response<Model[]>> {
+        const response = await this.restClient.get(`${ModelServerPaths.MODEL_CRUD}${format ? '?format=' + format : ''}`);
         return response.mapBody(ResponseBody.asModelArray);
     }
 
@@ -65,13 +65,13 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.asStringArray);
     }
 
-    async getElementById(modelUri: string, elementId: string): Promise<Response<string>> {
-        const response = await this.restClient.get(`${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementid=${elementId}`);
+    async getElementById(modelUri: string, elementId: string, format?: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementid=${elementId}${format ? '&format=' + format : ''}`);
         return response.mapBody(ResponseBody.asString);
     }
 
-    async getElementByName(modelUri: string, elementName: string): Promise<Response<string>> {
-        const response = await this.restClient.get(`${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementname=${elementName}`);
+    async getElementByName(modelUri: string, elementName: string, format?: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.MODEL_ELEMENT}?modeluri=${modelUri}&elementname=${elementName}${format ? '&format=' + format : ''}`);
         return response.mapBody(ResponseBody.asString);
     }
 
@@ -137,8 +137,18 @@ export class DefaultModelServerClient implements ModelServerClient {
         this.doSubscribe(modelUri, path);
     }
 
+    subscribeWithFormat(modelUri: string, format: string): void {
+        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}&format=${format}`;
+        this.doSubscribe(modelUri, path);
+    }
+
     subscribeWithTimeout(modelUri: string, timeout: number): void {
         const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}&timeout=${timeout}`;
+        this.doSubscribe(modelUri, path);
+    }
+
+    subscribeWithTimeoutAndFormat(modelUri: string, timeout: number, format: string): void {
+        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}&timeout=${timeout}&format=${format}`;
         this.doSubscribe(modelUri, path);
     }
 

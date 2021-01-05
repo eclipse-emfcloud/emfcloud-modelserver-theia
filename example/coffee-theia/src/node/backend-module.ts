@@ -18,7 +18,6 @@ export default new ContainerModule(bind => {
 
 @injectable()
 export class SimpleLaunchOptions implements LaunchOptions {
-    isRunning = false;
     baseURL = 'api/v1/';
     serverPort = 8081;
     hostname = 'localhost';

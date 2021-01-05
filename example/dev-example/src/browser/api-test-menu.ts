@@ -63,14 +63,29 @@ export const GetModelCoffeeEcoreCommand: Command = {
     label: 'getModel(Coffee.ecore)'
 };
 
+export const GetModelXmiCoffeeEcoreCommand: Command = {
+    id: 'ApiTest.GetModelXmi.CoffeeEcore',
+    label: 'getModel(Coffee.ecore, xmi)'
+};
+
 export const GetModelElementByIdCoffeeEcoreCommand: Command = {
     id: 'ApiTest.GetModelElementById.CoffeeEcore',
     label: 'getModelElementById(Coffee.ecore, //@eClassifiers.2)'
 };
 
+export const GetModelElementByIdXmiCoffeeEcoreCommand: Command = {
+    id: 'ApiTest.GetModelElementByIdXmi.CoffeeEcore',
+    label: 'getModelElementById(Coffee.ecore, //@eClassifiers.2, xmi)'
+};
+
 export const GetModelElementByNameCoffeeEcoreCommand: Command = {
     id: 'ApiTest.GetModelElementByName.CoffeeEcore',
     label: 'getModelElementByName(Coffee.ecore, Machine)'
+};
+
+export const GetModelElementByNameXmiCoffeeEcoreCommand: Command = {
+    id: 'ApiTest.GetModelElementByNameXmi.CoffeeEcore',
+    label: 'getModelElementByName(Coffee.ecore, Machine, xmi)'
 };
 
 export const EditSetCoffeeEcoreCommand: Command = {
@@ -106,6 +121,11 @@ export const SaveCoffeeEcoreCommand: Command = {
 export const SubscribeAndKeepAliveCommand: Command = {
     id: 'ApiTest.SubscribeAndKeepAlive',
     label: 'subscribeAndKeepAlive(Coffee.ecore, 60000)'
+};
+
+export const SubscribeAndKeepAliveXmiCommand: Command = {
+    id: 'ApiTest.SubscribeAndKeepAliveXmi',
+    label: 'subscribeAndKeepAlive(Coffee.ecore, 60000, xmi)'
 };
 
 export const UnsubscribeKeepAliveCommand: Command = {
@@ -238,86 +258,30 @@ export const UnsubscribeTimeoutCommand: Command = {
 /* ModelServer menu */
 export const API_TEST_MENU = [...MAIN_MENU_BAR, '9_0_API_TEST_MENU'];
 export const SERVER_SECTION = [...API_TEST_MENU, '1_API_TEST_MENU_SERVER_SECTION'];
-export const PING = [...SERVER_SECTION, PingCommand.label];
-
 export const GET_SECTION = [...API_TEST_MENU, '2_API_TEST_MENU_GET_SECTION'];
-export const GET_ALL = [...GET_SECTION, GetAllCommand.label];
-export const GET_MODEL_URIS = [...GET_SECTION, GetModelUrisCommand.label];
-
 export const SAVE_SECTION = [...API_TEST_MENU, '3_API_TEST_MENU_SAVE_SECTION'];
-export const SAVE_ALL = [...SAVE_SECTION, SaveAllCommand.label];
-
 export const SCHEMA_SECTION = [...API_TEST_MENU, '4_API_TEST_MENU_SCHEMA_SECTION'];
-export const GET_TYPESCHEMA = [...SCHEMA_SECTION, GetTypeSchemaCommand.label];
-export const GET_UISCHEMA = [...SCHEMA_SECTION, GetUiSchemaCommand.label];
 
 /* Coffee.ecore menu */
 export const COFFEE_TEST_MENU = [...MAIN_MENU_BAR, '9_1_API_TEST_MENU_COFFEE'];
-
 export const COFFEE_GET_SECTION = [...COFFEE_TEST_MENU, '1_API_MENU_COFFEE_GET_SECTION'];
-export const GET_COFFEE_MODEL = [...COFFEE_GET_SECTION, GetModelCoffeeEcoreCommand.label];
-export const GET_COFFEE_ELEMENTBYID = [...COFFEE_GET_SECTION, GetModelElementByIdCoffeeEcoreCommand.label];
-export const GET_COFFEE_ELEMENTBYNAME = [...COFFEE_GET_SECTION, GetModelElementByNameCoffeeEcoreCommand.label];
-
 export const COFFEE_EDIT_SECTION = [...COFFEE_TEST_MENU, '2_API_MENU_COFFEE_EDIT_SECTION'];
-export const EDIT_COFFEE_SET = [...COFFEE_EDIT_SECTION, EditSetCoffeeEcoreCommand.label];
-export const EDIT_COFFEE_REMOVE = [...COFFEE_EDIT_SECTION, EditRemoveCoffeeEcoreCommand.label];
-export const EDIT_COFFEE_ADD = [...COFFEE_EDIT_SECTION, EditAddCoffeeEcoreCommand.label];
-
 export const COFFEE_SAVE_SECTION = [...COFFEE_TEST_MENU, '3_API_MENU_COFFEE_SAVE_SECTION'];
-export const SAVE_COFFEE = [...COFFEE_SAVE_SECTION, SaveCoffeeEcoreCommand.label];
-export const UNDO_COFFEE = [...COFFEE_SAVE_SECTION, UndoCoffeeEcoreCommand.label];
-export const REDO_COFFEE = [...COFFEE_SAVE_SECTION, RedoCoffeeEcoreCommand.label];
-
 export const COFFEE_WEBSOCKET_SECTION = [...COFFEE_TEST_MENU, '4_API_MENU_COFFEE_WEBSOCKET_SECTION'];
-export const SUBSCRIBE_COFFEE = [...COFFEE_WEBSOCKET_SECTION, SubscribeCommand.label];
-export const UNSUBSCRIBE_COFFEE = [...COFFEE_WEBSOCKET_SECTION, UnsubscribeCommand.label];
 
 /* SuperBrewer3000.coffee menu */
 export const SUPERBREWER_TEST_MENU = [...MAIN_MENU_BAR, '9_2_API_TEST_MENU_SUPERBREWER'];
-
 export const SUPERBREWER_GET_SECTION = [...SUPERBREWER_TEST_MENU, '1_API_MENU_SUPERBREWER_GET_SECTION'];
-export const GET_SUPERBREWER_MODEL = [...SUPERBREWER_GET_SECTION, GetModelCommand.label];
-export const GET_SUPERBREWER_ELEMENTBYID = [...SUPERBREWER_GET_SECTION, GetModelElementByIdCommand.label];
-export const GET_SUPERBREWER_ELEMENTBYNAME = [...SUPERBREWER_GET_SECTION, GetModelElementByNameCommand.label];
-
 export const SUPERBREWER_EDIT_SECTION = [...SUPERBREWER_TEST_MENU, '2_API_MENU_SUPERBREWER_EDIT_SECTION'];
-export const EDIT_SET = [...SUPERBREWER_EDIT_SECTION, EditSetCommand.label];
-export const EDIT_REMOVE = [...SUPERBREWER_EDIT_SECTION, EditRemoveCommand.label];
-export const EDIT_ADD = [...SUPERBREWER_EDIT_SECTION, EditAddCommand.label];
-export const PATCH = [...SUPERBREWER_EDIT_SECTION, PatchCommand.label];
-
 export const SUPERBREWER_SAVE_SECTION = [...SUPERBREWER_TEST_MENU, '3_API_MENU_SUPERBREWER_SAVE_SECTION'];
-export const SAVE_SUPERBREWER = [...SUPERBREWER_SAVE_SECTION, SaveCommand.label];
-export const UNDO_SUPERBREWER = [...SUPERBREWER_SAVE_SECTION, UndoCommand.label];
-export const REDO_SUPERBREWER = [...SUPERBREWER_SAVE_SECTION, RedoCommand.label];
-
 export const SUPERBREWER_WEBSOCKET_SECTION = [...SUPERBREWER_TEST_MENU, '4_API_MENU_SUPERBREWER_WEBSOCKET_SECTION'];
-export const SUBSCRIBE = [...SUPERBREWER_WEBSOCKET_SECTION, SubscribeCommand.label];
-export const UNSUBSCRIBE = [...SUPERBREWER_WEBSOCKET_SECTION, UnsubscribeCommand.label];
 
 /* SuperBrewer3000.json menu */
 export const SUPERBREWER_JSON_TEST_MENU = [...MAIN_MENU_BAR, '9_3_API_TEST_MENU_SUPERBREWER_JSON'];
-
 export const SUPERBREWER_JSON_GET_SECTION = [...SUPERBREWER_JSON_TEST_MENU, '1_API_MENU_SUPERBREWER_JSON_GET_SECTION'];
-export const GET_SUPERBREWER_JSON_MODEL = [...SUPERBREWER_JSON_GET_SECTION, GetModelSuperBrewer3000JsonCommand.label];
-export const GET_SUPERBREWER_JSON_ELEMENTBYID = [...SUPERBREWER_JSON_GET_SECTION, GetModelElementByIdSuperBrewer3000JsonCommand.label];
-export const GET_SUPERBREWER_JSON_ELEMENTBYNAME = [...SUPERBREWER_JSON_GET_SECTION, GetModelElementByNameSuperBrewer3000JsonCommand.label];
-
 export const SUPERBREWER_JSON_EDIT_SECTION = [...SUPERBREWER_JSON_TEST_MENU, '2_API_MENU_SUPERBREWER_JSON_EDIT_SECTION'];
-export const EDIT_SET_SUPERBREWER_JSON = [...SUPERBREWER_JSON_EDIT_SECTION, EditSetSuperBrewer3000JsonCommand.label];
-export const EDIT_REMOVE_SUPERBREWER_JSON = [...SUPERBREWER_JSON_EDIT_SECTION, EditRemoveSuperBrewer3000JsonCommand.label];
-export const EDIT_ADD_SUPERBREWER_JSON = [...SUPERBREWER_JSON_EDIT_SECTION, EditAddSuperBrewer3000JsonCommand.label];
-
 export const SUPERBREWER_JSON_SAVE_SECTION = [...SUPERBREWER_JSON_TEST_MENU, '3_API_MENU_SUPERBREWER_JSON_SAVE_SECTION'];
-export const SAVE_SUPERBREWER_JSON = [...SUPERBREWER_JSON_SAVE_SECTION, SaveSuperBrewer3000JsonCommand.label];
-export const UNDO_SUPERBREWER_JSON = [...SUPERBREWER_JSON_SAVE_SECTION, UndoSuperBrewer3000JsonCommand.label];
-export const REDO_SUPERBREWER_JSON = [...SUPERBREWER_JSON_SAVE_SECTION, RedoSuperBrewer3000JsonCommand.label];
-
 export const SUPERBREWER_JSON_WEBSOCKET_SECTION = [...SUPERBREWER_JSON_TEST_MENU, '4_API_MENU_SUPERBREWER_JSON_WEBSOCKET_SECTION'];
-export const SUBSCRIBE_TIMEOUT = [...SUPERBREWER_JSON_WEBSOCKET_SECTION, SubscribeWithTimeoutCommand.label];
-export const KEEPALIVE = [...SUPERBREWER_JSON_WEBSOCKET_SECTION, KeepSubscriptionAliveCommand.label];
-export const UNSUBSCRIBE_TIMEOUT = [...SUPERBREWER_JSON_WEBSOCKET_SECTION, UnsubscribeTimeoutCommand.label];
 
 const superBrewer3000JsonPatch = {
     'eClass':
@@ -537,6 +501,13 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
+        commands.registerCommand(GetModelXmiCoffeeEcoreCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .get('Coffee.ecore', 'xmi')
+                    .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
         commands.registerCommand(GetModelElementByIdCoffeeEcoreCommand, {
             execute: () => {
                 this.modelServerClient
@@ -544,10 +515,24 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
+        commands.registerCommand(GetModelElementByIdXmiCoffeeEcoreCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .getElementById('Coffee.ecore', '//@eClassifiers.2', 'xmi')
+                    .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
         commands.registerCommand(GetModelElementByNameCoffeeEcoreCommand, {
             execute: () => {
                 this.modelServerClient
                     .getElementByName('Coffee.ecore', 'Machine')
+                    .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
+        commands.registerCommand(GetModelElementByNameXmiCoffeeEcoreCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .getElementByName('Coffee.ecore', 'Machine', 'xmi')
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
@@ -623,6 +608,11 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(SubscribeAndKeepAliveCommand, {
             execute: () => {
                 this.modelServerClient.subscribeWithTimeout('Coffee.ecore', 60000);
+            }
+        });
+        commands.registerCommand(SubscribeAndKeepAliveXmiCommand, {
+            execute: () => {
+                this.modelServerClient.subscribeWithTimeoutAndFormat('Coffee.ecore', 60000, 'xmi');
             }
         });
         commands.registerCommand(UnsubscribeKeepAliveCommand, {
@@ -757,8 +747,11 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerSubmenu(COFFEE_TEST_MENU, 'Coffee.ecore');
 
         menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelCoffeeEcoreCommand.id, order: 'a' });
-        menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelElementByIdCoffeeEcoreCommand.id, order: 'b' });
-        menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelElementByNameCoffeeEcoreCommand.id, order: 'c' });
+        menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelXmiCoffeeEcoreCommand.id, order: 'b' });
+        menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelElementByIdCoffeeEcoreCommand.id, order: 'c' });
+        menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelElementByIdXmiCoffeeEcoreCommand.id, order: 'd' });
+        menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelElementByNameCoffeeEcoreCommand.id, order: 'e' });
+        menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelElementByNameXmiCoffeeEcoreCommand.id, order: 'f' });
 
         menus.registerMenuAction(COFFEE_EDIT_SECTION, { commandId: EditSetCoffeeEcoreCommand.id });
         menus.registerMenuAction(COFFEE_EDIT_SECTION, { commandId: EditRemoveCoffeeEcoreCommand.id });
@@ -769,6 +762,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(COFFEE_SAVE_SECTION, { commandId: RedoCoffeeEcoreCommand.id });
 
         menus.registerMenuAction(COFFEE_WEBSOCKET_SECTION, { commandId: SubscribeAndKeepAliveCommand.id });
+        menus.registerMenuAction(COFFEE_WEBSOCKET_SECTION, { commandId: SubscribeAndKeepAliveXmiCommand.id });
         menus.registerMenuAction(COFFEE_WEBSOCKET_SECTION, { commandId: UnsubscribeKeepAliveCommand.id });
 
         /* SuperBrewer3000.coffee */

@@ -19,10 +19,20 @@ export class DevModelServerClient extends DefaultModelServerClient {
 
     subscribeWithTimeout(modelUri: string, timeout: number): void {
         const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}&timeout=${timeout}`;
+        this.setKeepAliveInterval(modelUri, timeout);
+        this.doSubscribe(modelUri, path);
+    }
+
+    subscribeWithTimeoutAndFormat(modelUri: string, timeout: number, format: string): void {
+        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}&timeout=${timeout}&format=${format}`;
+        this.setKeepAliveInterval(modelUri, timeout);
+        this.doSubscribe(modelUri, path);
+    }
+
+    private setKeepAliveInterval(modelUri: string, timeout: number): void {
         if (!this.isSocketOpen(modelUri) && modelUri === 'Coffee.ecore') {
             this.intervalId = setInterval(() => this.sendKeepAlive(modelUri), timeout > 1000 ? timeout - 1000 : 1);
         }
-        this.doSubscribe(modelUri, path);
     }
 
     protected doSubscribe(modelUri: string, path: string): void {
