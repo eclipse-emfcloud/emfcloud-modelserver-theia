@@ -17,10 +17,6 @@ export class DevModelServerSubscriptionListener implements ModelServerSubscripti
 
     @inject(MessageService) protected readonly messageService: MessageService;
 
-    constructor() {
-        console.log('WebWebsocketListener created');
-    }
-
     onOpened(modelUri: string): void {
         this.showSocketInfo('Subscription opened!', modelUri);
     }

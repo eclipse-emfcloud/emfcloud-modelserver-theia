@@ -87,12 +87,12 @@ export const ModelServerClient = Symbol('ModelServerClient');
 export interface ModelServerClient extends JsonRpcServer<ModelServerSubscriptionClient> {
     initialize(): Promise<boolean>;
 
-    get(modelUri: string): Promise<Response<string>>;
-    getAll(): Promise<Response<Model[]>>;
+    get(modelUri: string, format?: string): Promise<Response<string>>;
+    getAll(format?: string): Promise<Response<Model[]>>;
     getModelUris(): Promise<Response<string[]>>;
 
-    getElementById(modelUri: string, elementid: string): Promise<Response<string>>;
-    getElementByName(modelUri: string, elementname: string): Promise<Response<string>>;
+    getElementById(modelUri: string, elementid: string, format?: string): Promise<Response<string>>;
+    getElementByName(modelUri: string, elementname: string, format?: string): Promise<Response<string>>;
 
     delete(modelUri: string): Promise<Response<boolean>>;
     // snapshot update
@@ -115,7 +115,9 @@ export interface ModelServerClient extends JsonRpcServer<ModelServerSubscription
 
     // WebSocket connection
     subscribe(modelUri: string): void;
+    subscribeWithFormat(modelUri: string, format: string): void;
     subscribeWithTimeout(modelUri: string, timeout: number): void;
+    subscribeWithTimeoutAndFormat(modelUri: string, timeout: number, format: string): void;
     sendKeepAlive(modelUri: string): void;
     unsubscribe(modelUri: string): void;
 }
