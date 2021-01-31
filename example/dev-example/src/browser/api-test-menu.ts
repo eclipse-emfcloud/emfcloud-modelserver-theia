@@ -12,6 +12,10 @@ import {
     ModelServerClient,
     ModelServerCommand,
     ModelServerCommandUtil,
+    ModelServerCompoundCommand,
+    ModelServerMessage,
+    ModelServerResponse,
+    ModelServerSubscriptionService,
     Response
 } from '@eclipse-emfcloud/modelserver-theia/lib/common';
 import {
@@ -86,6 +90,11 @@ export const GetModelElementByNameCoffeeEcoreCommand: Command = {
 export const GetModelElementByNameXmiCoffeeEcoreCommand: Command = {
     id: 'ApiTest.GetModelElementByNameXmi.CoffeeEcore',
     label: 'getModelElementByName(Coffee.ecore, Machine, xmi)'
+};
+
+export const EditCompoundCoffeeEcoreCommand: Command = {
+    id: 'ApiTest.EditCompound.CoffeeEcore',
+    label: 'edit(Coffee.ecore,{type:compound})'
 };
 
 export const EditSetCoffeeEcoreCommand: Command = {
@@ -330,6 +339,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
 
     @inject(MessageService) protected readonly messageService: MessageService;
     @inject(ModelServerClient) protected readonly modelServerClient: ModelServerClient;
+    @inject(ModelServerSubscriptionService) protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
 
     private workspaceUri: string;
 
@@ -484,6 +494,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeCommand, {
             execute: () => {
+                this.initializeWebSocket();
                 this.modelServerClient.subscribe('SuperBrewer3000.coffee');
             }
         });
@@ -533,6 +544,35 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             execute: () => {
                 this.modelServerClient
                     .getElementByName('Coffee.ecore', 'Machine', 'xmi')
+                    .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
+        commands.registerCommand(EditCompoundCoffeeEcoreCommand, {
+            execute: () => {
+                const ownerA = {
+                    'eClass':
+                        'http://www.eclipse.org/emf/2002/Ecore#//EClass',
+                    '$ref':
+                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
+                };
+                const featureA = 'name';
+                const changedValuesA = ['ControlUnitNew'];
+                const setCommandA: ModelServerCommand = ModelServerCommandUtil.createSetCommand(ownerA, featureA, changedValuesA);
+
+                const ownerB = {
+                    'eClass':
+                        'http://www.eclipse.org/emf/2002/Ecore#//EClass',
+                    '$ref':
+                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.5`
+                };
+                const featureB = 'name';
+                const changedValuesB = ['WaterTankNew'];
+                const setCommandB: ModelServerCommand = ModelServerCommandUtil.createSetCommand(ownerB, featureB, changedValuesB);
+
+                const compoundCommand: ModelServerCompoundCommand = ModelServerCommandUtil.createCompoundCommand([setCommandA, setCommandB]);
+
+                this.modelServerClient
+                    .edit('Coffee.ecore', compoundCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
@@ -607,11 +647,13 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeAndKeepAliveCommand, {
             execute: () => {
+                this.initializeWebSocket();
                 this.modelServerClient.subscribeWithTimeout('Coffee.ecore', 60000);
             }
         });
         commands.registerCommand(SubscribeAndKeepAliveXmiCommand, {
             execute: () => {
+                this.initializeWebSocket();
                 this.modelServerClient.subscribeWithTimeoutAndFormat('Coffee.ecore', 60000, 'xmi');
             }
         });
@@ -714,6 +756,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeWithTimeoutCommand, {
             execute: () => {
+                this.initializeWebSocket();
                 this.modelServerClient.subscribeWithTimeout('SuperBrewer3000.json', 10000);
             }
         });
@@ -753,6 +796,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelElementByNameCoffeeEcoreCommand.id, order: 'e' });
         menus.registerMenuAction(COFFEE_GET_SECTION, { commandId: GetModelElementByNameXmiCoffeeEcoreCommand.id, order: 'f' });
 
+        menus.registerMenuAction(COFFEE_EDIT_SECTION, { commandId: EditCompoundCoffeeEcoreCommand.id });
         menus.registerMenuAction(COFFEE_EDIT_SECTION, { commandId: EditSetCoffeeEcoreCommand.id });
         menus.registerMenuAction(COFFEE_EDIT_SECTION, { commandId: EditRemoveCoffeeEcoreCommand.id });
         menus.registerMenuAction(COFFEE_EDIT_SECTION, { commandId: EditAddCoffeeEcoreCommand.id });
@@ -803,6 +847,48 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'b' });
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: UnsubscribeTimeoutCommand.id, order: 'c' });
 
+    }
+
+    private initializeWebSocket(clearIntervalId = false): void {
+        this.modelServerSubscriptionService.onOpenListener((response: ModelServerResponse) => {
+            this.showSocketInfo('Subscription opened!', response.modelUri);
+        });
+        this.modelServerSubscriptionService.onDirtyStateListener((response: ModelServerMessage) => {
+            this.showSocketInfo(`DirtyState ${response.data}`, response.modelUri);
+        });
+        this.modelServerSubscriptionService.onIncrementalUpdateListener((response: ModelServerMessage) => {
+            this.showSocketInfo(`IncrementalUpdate ${JSON.stringify(response.data)}`, response.modelUri);
+        });
+        this.modelServerSubscriptionService.onFullUpdateListener((response: ModelServerMessage) => {
+            this.showSocketInfo(`FullUpdate ${JSON.stringify(response.data)}`, response.modelUri);
+        });
+        this.modelServerSubscriptionService.onSuccessListener((response: ModelServerMessage) => {
+            this.showSocketInfo(`Success ${response.data}`, response.modelUri);
+        });
+        this.modelServerSubscriptionService.onUnknownMessageListener((response: ModelServerMessage) => {
+            this.showSocketWarning(`Unknown Message ${JSON.stringify(response.data)}`, response.modelUri);
+        });
+        this.modelServerSubscriptionService.onClosedListener((response: ModelServerMessage) => {
+            this.showSocketInfo(`Subscription closed! Reason: ${response.data}`, response.modelUri);
+        });
+        this.modelServerSubscriptionService.onErrorListener((response: ModelServerMessage) => {
+            this.showSocketError(`Error! ${JSON.stringify(response.data)}`, response.modelUri);
+        });
+    }
+
+    private showSocketInfo(message: string, modelUri = ''): void {
+        const now = new Date(Date.now());
+        this.messageService.info(`${now.toISOString()} | [${modelUri}]: ${message}`);
+    }
+
+    private showSocketWarning(message: string, modelUri = ''): void {
+        const now = new Date(Date.now());
+        this.messageService.warn(`${now.toISOString()} | [${modelUri}]: ${message}`);
+    }
+
+    private showSocketError(message: string, modelUri = ''): void {
+        const now = new Date(Date.now());
+        this.messageService.error(`${now.toISOString()} | [${modelUri}]: ${message}`);
     }
 }
 

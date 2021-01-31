@@ -11,17 +11,25 @@
 import { FrontendApplicationContribution, WebSocketConnectionProvider } from '@theia/core/lib/browser';
 import { ContainerModule } from 'inversify';
 
-import { MODEL_SERVER_CLIENT_SERVICE_PATH, ModelServerClient, ModelServerSubscriptionClient } from '../common';
+import {
+    MODEL_SERVER_CLIENT_SERVICE_PATH,
+    ModelServerClient,
+    ModelServerFrontendClient,
+    ModelServerSubscriptionService
+} from '../common';
 import { ModelServerFrontendContribution } from './model-server-frontend-contribution';
-import { DefaultModelServerSubscriptionClient } from './model-server-subscription-client';
+import { ModelServerSubscriptionClient } from './model-server-subscription-client';
 
 export default new ContainerModule(bind => {
-    bind(FrontendApplicationContribution).to(ModelServerFrontendContribution).inSingletonScope();
-    bind(ModelServerSubscriptionClient).to(DefaultModelServerSubscriptionClient).inSingletonScope();
+    bind(ModelServerFrontendContribution).toSelf().inSingletonScope();
+    bind(FrontendApplicationContribution).toService(ModelServerFrontendContribution);
+    bind(ModelServerSubscriptionClient).toSelf().inSingletonScope();
+    bind(ModelServerFrontendClient).toService(ModelServerSubscriptionClient);
+    bind(ModelServerSubscriptionService).toService(ModelServerSubscriptionClient);
     bind(ModelServerClient)
         .toDynamicValue(ctx => {
             const connection = ctx.container.get(WebSocketConnectionProvider);
-            const client: ModelServerSubscriptionClient = ctx.container.get(ModelServerSubscriptionClient);
+            const client: ModelServerFrontendClient = ctx.container.get(ModelServerFrontendClient);
             return connection.createProxy<ModelServerClient>(MODEL_SERVER_CLIENT_SERVICE_PATH, client);
         }).inSingletonScope();
 });

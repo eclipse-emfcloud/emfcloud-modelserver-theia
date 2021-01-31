@@ -39,7 +39,7 @@ export class DevModelServerClient extends DefaultModelServerClient {
         if (!this.isSocketOpen(modelUri)) {
             super.doSubscribe(modelUri, path);
         } else {
-            this.subscriptionClient.fireUserWarning('Cannot open new socket, already subscribed!', modelUri);
+            console.warn(modelUri + ': Cannot open new socket, already subscribed!');
         }
     }
 
@@ -49,7 +49,7 @@ export class DevModelServerClient extends DefaultModelServerClient {
             openSocket.close();
             this.openSockets.delete(modelUri);
         } else {
-            this.subscriptionClient.fireUserWarning('Cannot unsubscribe, no socket opened!', modelUri);
+            console.warn(modelUri + ': Cannot unsubscribe, no socket opened!');
         }
         if (this.intervalId && modelUri === 'Coffee.ecore') {
             clearInterval(this.intervalId);
