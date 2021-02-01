@@ -28,7 +28,7 @@ import {
     MessageService
 } from '@theia/core';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, postConstruct } from 'inversify';
 
 /* ModelServer commands */
 export const PingCommand: Command = {
@@ -351,6 +351,11 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
     }
 
+    @postConstruct()
+    init(): void {
+        this.initializeWebSocketListener();
+    }
+
     registerCommands(commands: CommandRegistry): void {
         /* ModelServer commands */
         commands.registerCommand(PingCommand, {
@@ -494,7 +499,6 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeCommand, {
             execute: () => {
-                this.initializeWebSocket();
                 this.modelServerClient.subscribe('SuperBrewer3000.coffee');
             }
         });
@@ -647,13 +651,11 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeAndKeepAliveCommand, {
             execute: () => {
-                this.initializeWebSocket();
                 this.modelServerClient.subscribeWithTimeout('Coffee.ecore', 60000);
             }
         });
         commands.registerCommand(SubscribeAndKeepAliveXmiCommand, {
             execute: () => {
-                this.initializeWebSocket();
                 this.modelServerClient.subscribeWithTimeoutAndFormat('Coffee.ecore', 60000, 'xmi');
             }
         });
@@ -756,7 +758,6 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(SubscribeWithTimeoutCommand, {
             execute: () => {
-                this.initializeWebSocket();
                 this.modelServerClient.subscribeWithTimeout('SuperBrewer3000.json', 10000);
             }
         });
@@ -849,7 +850,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
 
     }
 
-    private initializeWebSocket(clearIntervalId = false): void {
+    private initializeWebSocketListener(clearIntervalId = false): void {
         this.modelServerSubscriptionService.onOpenListener((response: ModelServerResponse) => {
             this.showSocketInfo('Subscription opened!', response.modelUri);
         });
