@@ -23,7 +23,7 @@
   },
   "scripts": {
     "prepare": "theia build --mode development",
-    "start": "theia start --plugins=local-dir:../../plugins --root-dir=../example-workspace",
+    "start": "theia start --plugins=local-dir:../../plugins --root-dir=../example/workspace",
     "watch": "theia build --watch --mode development"
   },
   "theia": {

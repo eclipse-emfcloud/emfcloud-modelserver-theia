@@ -17,9 +17,10 @@ import {
     Model,
     ModelServerClient,
     ModelServerCommand,
+    ModelServerCompoundCommand,
+    ModelServerFrontendClient,
     ModelServerMessage,
     ModelServerPaths,
-    ModelServerSubscriptionClient,
     RequestBody,
     Response,
     ResponseBody,
@@ -35,7 +36,7 @@ export class DefaultModelServerClient implements ModelServerClient {
     protected restClient: RestClient<ResponseBody>;
     protected openSockets: Map<string, WebSocket> = new Map();
     protected baseUrl: string;
-    protected subscriptionClient: ModelServerSubscriptionClient;
+    protected subscriptionClient: ModelServerFrontendClient;
 
     async initialize(): Promise<boolean> {
         this.prepareBaseUrl();
@@ -117,7 +118,7 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.isSuccess);
     }
 
-    async edit(modelUri: string, command: ModelServerCommand): Promise<Response<boolean>> {
+    async edit(modelUri: string, command: ModelServerCommand | ModelServerCompoundCommand): Promise<Response<boolean>> {
         const response = await this.restClient.patch(`${ModelServerPaths.COMMANDS}?modeluri=${modelUri}`, RequestBody.fromData(command));
         return response.mapBody(ResponseBody.isSuccess);
     }
@@ -154,13 +155,13 @@ export class DefaultModelServerClient implements ModelServerClient {
 
     protected doSubscribe(modelUri: string, path: string): void {
         const socket = new WebSocket(path.trim());
-        socket.onopen = event => this.subscriptionClient.fireOpenEvent(event, modelUri);
-        socket.onmessage = messageEvent => this.subscriptionClient.fireMessageEvent(messageEvent, modelUri);
-        socket.onclose = closeEvent => {
-            this.subscriptionClient.fireClosedEvent(closeEvent, modelUri);
+        socket.onopen = event => this.subscriptionClient.onOpen(event, modelUri);
+        socket.onmessage = event => this.subscriptionClient.onMessage(event, modelUri);
+        socket.onclose = event => {
+            this.subscriptionClient.onClosed(event, modelUri);
             this.openSockets.delete(modelUri);
         };
-        socket.onerror = errorEvent => this.subscriptionClient.fireErrorEvent(errorEvent, modelUri);
+        socket.onerror = event => this.subscriptionClient.onError(event, modelUri);
         this.openSockets.set(modelUri, socket);
     }
 
@@ -171,7 +172,7 @@ export class DefaultModelServerClient implements ModelServerClient {
     sendKeepAlive(modelUri: string): void {
         const openSocket = this.openSockets.get(modelUri);
         if (openSocket) {
-            const msg: ModelServerMessage = { type: 'keepAlive', data: '' };
+            const msg: ModelServerMessage = { type: 'keepAlive', data: '', modelUri: modelUri };
             openSocket.send(JSON.stringify(msg));
         }
     }
@@ -184,8 +185,8 @@ export class DefaultModelServerClient implements ModelServerClient {
         }
     }
 
-    setClient(subscriptionClient: ModelServerSubscriptionClient): void {
-        this.subscriptionClient = subscriptionClient;
+    setClient(client: ModelServerFrontendClient): void {
+        this.subscriptionClient = client;
     }
 
     dispose(): void {

@@ -23,8 +23,10 @@
       "sourceMaps": true,
       "outFiles": [
         "${workspaceRoot}/node_modules/@theia/*/lib/**/*.js",
-        "${workspaceRoot}/browser-app/lib/**/*.js",
-        "${workspaceRoot}/browser-app/src-gen/**/*.js"
+        "${workspaceRoot}/example/browser-app/lib/**/*.js",
+        "${workspaceRoot}/example/browser-app/src-gen/**/*.js",
+        "${workspaceRoot}/example/dev-example/lib/**/*.js",
+        "${workspaceRoot}/modelserver-theia/lib/**/*.js"
       ],
       "smartStep": true,
       "internalConsoleOptions": "openOnSessionStart",
@@ -36,10 +38,7 @@
       "request": "launch",
       "url": "http://localhost:3000/",
       "sourceMaps": true,
-      "webRoot": "${workspaceRoot}",
-      "sourceMapPathOverrides": {
-        "./src/*": "${workspaceFolder}/src/*"
-      }
+      "webRoot": "${workspaceRoot}"
     },
     {
       "type": "node",
@@ -55,7 +54,7 @@
         "--loglevel=debug",
         "--hostname=localhost",
         "--no-cluster",
-        "--root-dir=../example-workspace"
+        "--root-dir=../example/workspace"
       ],
       "env": {
         "NODE_ENV": "development"

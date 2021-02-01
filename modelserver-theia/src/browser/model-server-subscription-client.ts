@@ -8,75 +8,109 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { injectable, multiInject } from 'inversify';
+import { Emitter, Event } from '@theia/core';
+import { injectable } from 'inversify';
 
 import {
+    ModelServerFrontendClient,
     ModelServerMessage,
-    ModelServerSubscriptionClient,
-    ModelServerSubscriptionListener,
+    ModelServerResponse,
+    ModelServerSubscriptionService,
     WebSocketCloseEvent,
     WebSocketErrorEvent,
     WebSocketEvent,
     WebSocketMessageEvent
-} from '../common';
+} from '../common/model-server-api';
 
 @injectable()
-export class DefaultModelServerSubscriptionClient implements ModelServerSubscriptionClient {
-
-    @multiInject(ModelServerSubscriptionListener) private readonly listeners: ModelServerSubscriptionListener[];
-
-    fireOpenEvent(event: WebSocketEvent, modelUri: string): void {
-        this.listeners.forEach(listener => listener.onOpened(modelUri));
+export class ModelServerSubscriptionClient implements ModelServerFrontendClient, ModelServerSubscriptionService {
+    onOpen(event: WebSocketEvent, modelUri: string): void {
+        this.onOpenEmitter.fire({ modelUri: modelUri, data: undefined });
     }
 
-    fireMessageEvent(event: WebSocketMessageEvent, modelUri: string): void {
+    onMessage(event: WebSocketMessageEvent, modelUri: string): void {
         const message = JSON.parse(event.data.toString()) as ModelServerMessage;
+        message.modelUri = modelUri;
         switch (message.type) {
             case 'dirtyState': {
-                this.listeners.forEach(listener => listener.onDirtyState(modelUri, message.data));
+                this.onDirtyStateEmitter.fire(message);
                 break;
             }
             case 'fullUpdate': {
-                this.listeners.forEach(listener => listener.onFullUpdate(modelUri, message.data));
+                this.onFullUpdateEmitter.fire(message);
                 break;
             }
             case 'incrementalUpdate': {
-                this.listeners.forEach(listener => listener.onIncrementalUpdate(modelUri, message.data));
+                this.onIncrementalUpdateEmitter.fire(message);
                 break;
             }
             case 'success':
             case 'keepAlive': {
-                this.listeners.forEach(listener => listener.onSuccess(modelUri, message.data));
+                this.onSuccessEmitter.fire(message);
                 break;
             }
             case 'error': {
-                this.listeners.forEach(listener => listener.onError(modelUri, message.data));
+                this.onErrorEmitter.fire(message);
                 break;
             }
             default: {
-                this.listeners.forEach(listener => listener.onUnknownMessage(modelUri, message.data));
+                this.onUnknownMessageEmitter.fire(message);
             }
         }
     }
 
-    fireClosedEvent(event: WebSocketCloseEvent, modelUri: string): void {
-        let closeReason = event.reason;
+    onClosed(event: WebSocketCloseEvent, modelUri: string): void {
         switch (event.code) {
             case 1005: {
-                closeReason = 'Connection closed by peer'; break;
+                event.reason = 'Connection closed by peer'; break;
             }
             case 1006: {
-                closeReason = 'Server shutdown'; break;
+                event.reason = 'Server shutdown'; break;
             }
         }
-        this.listeners.forEach(listener => listener.onClosed(modelUri, event.code + ': ' + closeReason));
+        this.onClosedEmitter.fire({ data: event.reason, modelUri: modelUri });
     }
 
-    fireErrorEvent(event: WebSocketErrorEvent, modelUri: string): void {
-        this.listeners.forEach(listener => listener.onError(modelUri, event.error));
+    onError(event: WebSocketErrorEvent, modelUri: string): void {
+        this.onErrorEmitter.fire({ data: event.error, modelUri: modelUri });
     }
 
-    fireUserWarning(warning: string, modelUri: string): void {
-        this.listeners.forEach(listener => listener.onWarning(modelUri, warning));
+    protected onOpenEmitter = new Emitter<Readonly<ModelServerResponse>>();
+    get onOpenListener(): Event<ModelServerResponse> {
+        return this.onOpenEmitter.event;
+    }
+
+    protected onClosedEmitter = new Emitter<Readonly<ModelServerResponse>>();
+    get onClosedListener(): Event<ModelServerResponse> {
+        return this.onClosedEmitter.event;
+    }
+
+    protected onErrorEmitter = new Emitter<Readonly<ModelServerResponse>>();
+    get onErrorListener(): Event<ModelServerResponse> {
+        return this.onErrorEmitter.event;
+    }
+
+    protected onDirtyStateEmitter = new Emitter<Readonly<ModelServerMessage>>();
+    get onDirtyStateListener(): Event<ModelServerMessage> {
+        return this.onDirtyStateEmitter.event;
+    }
+
+    protected onIncrementalUpdateEmitter = new Emitter<Readonly<ModelServerMessage>>();
+    get onIncrementalUpdateListener(): Event<ModelServerMessage> {
+        return this.onIncrementalUpdateEmitter.event;
+    }
+    protected onFullUpdateEmitter = new Emitter<Readonly<ModelServerMessage>>();
+    get onFullUpdateListener(): Event<ModelServerMessage> {
+        return this.onFullUpdateEmitter.event;
+    }
+
+    protected onSuccessEmitter = new Emitter<Readonly<ModelServerMessage>>();
+    get onSuccessListener(): Event<ModelServerMessage> {
+        return this.onSuccessEmitter.event;
+    }
+
+    protected onUnknownMessageEmitter = new Emitter<Readonly<ModelServerMessage>>();
+    get onUnknownMessageListener(): Event<ModelServerMessage> {
+        return this.onUnknownMessageEmitter.event;
     }
 }

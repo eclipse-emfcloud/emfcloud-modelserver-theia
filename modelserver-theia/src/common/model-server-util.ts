@@ -8,7 +8,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { DataValueType, ModelServerCommand, ModelServerObject, ModelServerReferenceDescription } from './model-server-api';
+import {
+    DataValueType,
+    ModelServerCommand,
+    ModelServerCompoundCommand,
+    ModelServerObject,
+    ModelServerReferenceDescription
+} from './model-server-api';
 
 const isNumberArray =
     (array: number[] | ModelServerReferenceDescription[]): array is number[] => array.every((e: number | ModelServerReferenceDescription) => typeof e === 'number');
@@ -80,5 +86,14 @@ export namespace ModelServerCommandUtil {
             command.dataValues = changedValues;
         }
         return command;
+    }
+
+    export function createCompoundCommand(commands: (ModelServerCommand | ModelServerCompoundCommand)[]): ModelServerCompoundCommand {
+        const compoundCommand: ModelServerCompoundCommand = {
+            eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//CompoundCommand',
+            type: 'compound',
+            commands
+        };
+        return compoundCommand;
     }
 }

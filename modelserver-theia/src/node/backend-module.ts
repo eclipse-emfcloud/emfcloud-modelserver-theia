@@ -8,11 +8,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { ConnectionHandler, JsonRpcConnectionHandler, JsonRpcProxy } from '@theia/core';
+import { ConnectionHandler, JsonRpcConnectionHandler } from '@theia/core';
 import { BackendApplicationContribution } from '@theia/core/lib/node';
 import { ContainerModule } from 'inversify';
 
-import { MODEL_SERVER_CLIENT_SERVICE_PATH, ModelServerClient, ModelServerSubscriptionClient } from '../common';
+import { MODEL_SERVER_CLIENT_SERVICE_PATH, ModelServerClient, ModelServerFrontendClient } from '../common';
 import { DefaultModelServerLauncher, ModelServerLauncher } from './model-server-backend-contribution';
 import { DefaultModelServerClient } from './model-server-client';
 
@@ -25,12 +25,14 @@ export default new ContainerModule(bind => {
 
     bind(ConnectionHandler)
         .toDynamicValue(ctx =>
-            new JsonRpcConnectionHandler<ModelServerSubscriptionClient>(
+            new JsonRpcConnectionHandler<ModelServerFrontendClient>(
                 MODEL_SERVER_CLIENT_SERVICE_PATH,
-                (subscriptionClientProxy: JsonRpcProxy<ModelServerSubscriptionClient>) => {
-                    const server = ctx.container.get<ModelServerClient>(ModelServerClient);
-                    server.setClient(subscriptionClientProxy);
-                    subscriptionClientProxy.onDidCloseConnection(() => server.dispose());
+                client => {
+                    const server = ctx.container.get<ModelServerClient>(
+                        ModelServerClient
+                    );
+                    server.setClient(client);
+                    client.onDidCloseConnection(() => server.dispose());
                     return server;
                 }
             )
