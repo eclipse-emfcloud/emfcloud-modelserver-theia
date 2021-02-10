@@ -117,6 +117,9 @@ export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClie
     getTypeSchema(modelUri: string): Promise<Response<string>>;
     getUiSchema(schemaName: string): Promise<Response<string>>;
 
+    validation(modelUri: string): Promise<Response<string>>;
+    validationConstraints(modelUri: string): Promise<Response<string>>;
+
     // WebSocket connection
     subscribe(modelUri: string): void;
     subscribeWithFormat(modelUri: string, format: string): void;

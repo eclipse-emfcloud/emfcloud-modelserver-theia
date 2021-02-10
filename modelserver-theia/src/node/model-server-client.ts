@@ -133,6 +133,16 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.asString);
     }
 
+    async validation(modelUri: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.VALIDATION}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.asString);
+    }
+
+    async validationConstraints(modelUri: string): Promise<Response<string>> {
+        const response = await this.restClient.get(`${ModelServerPaths.VALIDATION_CONSTRAINTS}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.asString);
+    }
+
     subscribe(modelUri: string): void {
         const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}`;
         this.doSubscribe(modelUri, path);

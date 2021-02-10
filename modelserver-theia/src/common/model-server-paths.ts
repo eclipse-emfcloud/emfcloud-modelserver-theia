@@ -32,4 +32,7 @@ export namespace ModelServerPaths {
     export const UNDO = 'undo';
     export const REDO = 'redo';
 
+    export const VALIDATION = 'validation';
+    export const VALIDATION_CONSTRAINTS = 'validation/constraints';
+
 }
