@@ -122,6 +122,7 @@ export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClie
 
     // WebSocket connection
     subscribe(modelUri: string): void;
+    subscribeWithValidation(modelUri: string): void;
     subscribeWithFormat(modelUri: string, format: string): void;
     subscribeWithTimeout(modelUri: string, timeout: number): void;
     subscribeWithTimeoutAndFormat(modelUri: string, timeout: number, format: string): void;

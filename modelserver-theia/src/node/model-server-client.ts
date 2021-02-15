@@ -148,6 +148,11 @@ export class DefaultModelServerClient implements ModelServerClient {
         this.doSubscribe(modelUri, path);
     }
 
+    subscribeWithValidation(modelUri: string): void {
+        const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}&livevalidation=true`;
+        this.doSubscribe(modelUri, path);
+    }
+
     subscribeWithFormat(modelUri: string, format: string): void {
         const path = `${this.baseUrl}${ModelServerPaths.SUBSCRIPTION}?modeluri=${modelUri}&format=${format}`;
         this.doSubscribe(modelUri, path);
