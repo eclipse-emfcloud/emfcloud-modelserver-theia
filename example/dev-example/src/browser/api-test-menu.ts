@@ -992,6 +992,9 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         this.modelServerSubscriptionService.onErrorListener((response: ModelServerMessage) => {
             this.showSocketError(`Error! ${JSON.stringify(response.data)}`, response.modelUri);
         });
+        this.modelServerSubscriptionService.onValidationResultListener((response: ModelServerMessage) => {
+            this.showSocketInfo(`Validation result ${JSON.stringify(response.data)}`, response.modelUri);
+        });
     }
 
     private showSocketInfo(message: string, modelUri = ''): void {

@@ -53,6 +53,10 @@ export class ModelServerSubscriptionClient implements ModelServerFrontendClient,
                 this.onErrorEmitter.fire(message);
                 break;
             }
+            case 'validationResult': {
+                this.onValidationResultEmitter.fire(message);
+                break;
+            }
             default: {
                 this.onUnknownMessageEmitter.fire(message);
             }
@@ -112,5 +116,10 @@ export class ModelServerSubscriptionClient implements ModelServerFrontendClient,
     protected onUnknownMessageEmitter = new Emitter<Readonly<ModelServerMessage>>();
     get onUnknownMessageListener(): Event<ModelServerMessage> {
         return this.onUnknownMessageEmitter.event;
+    }
+
+    protected onValidationResultEmitter = new Emitter<Readonly<ModelServerMessage>>();
+    get onValidationResultListener(): Event<ModelServerMessage> {
+        return this.onValidationResultEmitter.event;
     }
 }

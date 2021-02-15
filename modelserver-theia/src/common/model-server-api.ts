@@ -85,6 +85,7 @@ export interface ModelServerSubscriptionService {
     readonly onFullUpdateListener: Event<ModelServerMessage>;
     readonly onSuccessListener: Event<ModelServerMessage>;
     readonly onUnknownMessageListener: Event<ModelServerMessage>;
+    readonly onValidationResultListener: Event<ModelServerMessage>;
 }
 
 export const ModelServerClient = Symbol('ModelServerClient');
@@ -156,7 +157,7 @@ export interface ModelServerResponse {
 }
 
 export interface ModelServerMessage extends ModelServerResponse {
-    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error' | 'keepAlive';
+    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error' | 'keepAlive' | 'validationResult';
 }
 
 export type ResponseBody = ModelServerMessage;
