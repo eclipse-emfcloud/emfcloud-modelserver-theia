@@ -85,6 +85,7 @@ export interface ModelServerSubscriptionService {
     readonly onFullUpdateListener: Event<ModelServerMessage>;
     readonly onSuccessListener: Event<ModelServerMessage>;
     readonly onUnknownMessageListener: Event<ModelServerMessage>;
+    readonly onValidationResultListener: Event<ModelServerMessage>;
 }
 
 export const ModelServerClient = Symbol('ModelServerClient');
@@ -117,8 +118,12 @@ export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClie
     getTypeSchema(modelUri: string): Promise<Response<string>>;
     getUiSchema(schemaName: string): Promise<Response<string>>;
 
+    validation(modelUri: string): Promise<Response<string>>;
+    validationConstraints(modelUri: string): Promise<Response<string>>;
+
     // WebSocket connection
     subscribe(modelUri: string): void;
+    subscribeWithValidation(modelUri: string): void;
     subscribeWithFormat(modelUri: string, format: string): void;
     subscribeWithTimeout(modelUri: string, timeout: number): void;
     subscribeWithTimeoutAndFormat(modelUri: string, timeout: number, format: string): void;
@@ -152,7 +157,7 @@ export interface ModelServerResponse {
 }
 
 export interface ModelServerMessage extends ModelServerResponse {
-    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error' | 'keepAlive';
+    type: 'dirtyState' | 'incrementalUpdate' | 'fullUpdate' | 'success' | 'error' | 'keepAlive' | 'validationResult';
 }
 
 export type ResponseBody = ModelServerMessage;
