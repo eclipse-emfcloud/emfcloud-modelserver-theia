@@ -9,7 +9,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
 import {
-    ModelServerClient,
     ModelServerCommand,
     ModelServerCommandUtil,
     ModelServerCompoundCommand,
@@ -29,6 +28,8 @@ import {
 } from '@theia/core';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { inject, injectable, postConstruct } from 'inversify';
+
+import { DevModelServerClient } from '../common/dev-model-server-client';
 
 /* ModelServer commands */
 export const PingCommand: Command = {
@@ -309,6 +310,32 @@ export const UnsubscribeTimeoutCommand: Command = {
     label: 'unsubscribe(SuperBrewer3000.json)'
 };
 
+/* Custom commands */
+export const CustomCounterAdd3: Command = {
+    id: 'Coffee.Counter.Add3',
+    label: 'counter(add, 3)'
+};
+
+export const CustomCounterAdd: Command = {
+    id: 'Coffee.Counter.Add',
+    label: 'counter(add)'
+};
+
+export const CustomCounterSubtract2: Command = {
+    id: 'Coffee.Counter.Subtract',
+    label: 'counter(subtract, 2)'
+};
+
+export const CustomCounterSubtract: Command = {
+    id: 'Coffee.Count.Subtract',
+    label: 'counter(subtract)'
+};
+
+export const CustomCounter: Command = {
+    id: 'Coffee.Count',
+    label: 'counter()'
+};
+
 /* ModelServer menu */
 export const API_TEST_MENU = [...MAIN_MENU_BAR, '9_0_API_TEST_MENU'];
 export const SERVER_SECTION = [...API_TEST_MENU, '1_API_TEST_MENU_SERVER_SECTION'];
@@ -339,6 +366,10 @@ export const SUPERBREWER_JSON_EDIT_SECTION = [...SUPERBREWER_JSON_TEST_MENU, '2_
 export const SUPERBREWER_JSON_SAVE_SECTION = [...SUPERBREWER_JSON_TEST_MENU, '3_API_MENU_SUPERBREWER_JSON_SAVE_SECTION'];
 export const SUPERBREWER_JSON_VALIDATION_SECTION = [...SUPERBREWER_JSON_TEST_MENU, '4_API_MENU_SUPERBREWER_JSON_VALIDATION_SECTION'];
 export const SUPERBREWER_JSON_WEBSOCKET_SECTION = [...SUPERBREWER_JSON_TEST_MENU, '5_API_MENU_SUPERBREWER_JSON_WEBSOCKET_SECTION'];
+
+/* Custom menu */
+export const CUSTOM_TEST_MENU = [...MAIN_MENU_BAR, '9_4_API_TEST_MENU_CUSTOM'];
+export const CUSTOM_TEST_COUNTER_SECTION = [...CUSTOM_TEST_MENU, '1_COUNTER'];
 
 const superBrewer3000JsonPatch = {
     'eClass':
@@ -386,7 +417,7 @@ const superBrewer3000JsonPatch = {
 export class ApiTestMenuContribution implements MenuContribution, CommandContribution {
 
     @inject(MessageService) protected readonly messageService: MessageService;
-    @inject(ModelServerClient) protected readonly modelServerClient: ModelServerClient;
+    @inject(DevModelServerClient) protected readonly modelServerClient: DevModelServerClient;
     @inject(ModelServerSubscriptionService) protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
 
     private workspaceUri: string;
@@ -876,6 +907,22 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 this.modelServerClient.unsubscribe('SuperBrewer3000.json');
             }
         });
+
+        commands.registerCommand(CustomCounterAdd3, {
+            execute: () => this.modelServerClient.counter('add', 3).then((response: any) => this.messageService.info(printResponse(response)))
+        });
+        commands.registerCommand(CustomCounterAdd, {
+            execute: () => this.modelServerClient.counter('add').then((response: any) => this.messageService.info(printResponse(response)))
+        });
+        commands.registerCommand(CustomCounterSubtract2, {
+            execute: () => this.modelServerClient.counter('subtract', 2).then((response: any) => this.messageService.info(printResponse(response)))
+        });
+        commands.registerCommand(CustomCounterSubtract, {
+            execute: () => this.modelServerClient.counter('subtract').then((response: any) => this.messageService.info(printResponse(response)))
+        });
+        commands.registerCommand(CustomCounter, {
+            execute: () => this.modelServerClient.counter().then((response: any) => this.messageService.info(printResponse(response)))
+        });
     }
 
     registerMenus(menus: MenuModelRegistry): void {
@@ -965,6 +1012,12 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'b' });
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: UnsubscribeTimeoutCommand.id, order: 'c' });
 
+        menus.registerSubmenu(CUSTOM_TEST_MENU, 'Custom');
+        menus.registerMenuAction(CUSTOM_TEST_COUNTER_SECTION, { commandId: CustomCounterAdd3.id, order: 'a' });
+        menus.registerMenuAction(CUSTOM_TEST_COUNTER_SECTION, { commandId: CustomCounterAdd.id, order: 'b' });
+        menus.registerMenuAction(CUSTOM_TEST_COUNTER_SECTION, { commandId: CustomCounterSubtract2.id, order: 'c' });
+        menus.registerMenuAction(CUSTOM_TEST_COUNTER_SECTION, { commandId: CustomCounterSubtract.id, order: 'd' });
+        menus.registerMenuAction(CUSTOM_TEST_COUNTER_SECTION, { commandId: CustomCounter.id, order: 'e' });
     }
 
     private initializeWebSocketListener(clearIntervalId = false): void {

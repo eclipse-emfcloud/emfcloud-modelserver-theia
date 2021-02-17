@@ -8,13 +8,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { ModelServerPaths } from '@eclipse-emfcloud/modelserver-theia';
+import { ModelServerPaths, Response, ResponseBody } from '@eclipse-emfcloud/modelserver-theia';
 import { DefaultModelServerClient } from '@eclipse-emfcloud/modelserver-theia/lib/node';
 import { injectable } from 'inversify';
 
-@injectable()
-export class DevModelServerClient extends DefaultModelServerClient {
+import { DevModelServerClient } from '../common/dev-model-server-client';
 
+@injectable()
+export class CustomDevModelServerClient extends DefaultModelServerClient implements DevModelServerClient {
     private intervalId: NodeJS.Timeout;
 
     subscribeWithTimeout(modelUri: string, timeout: number): void {
@@ -56,4 +57,8 @@ export class DevModelServerClient extends DefaultModelServerClient {
         }
     }
 
+    async counter(operation?: 'add' | 'subtract', delta?: number): Promise<Response<string>> {
+        const response = await this.restClient.get(`counter?delta=${delta}&operation=${operation}`);
+        return response.mapBody(ResponseBody.asString);
+    }
 }
