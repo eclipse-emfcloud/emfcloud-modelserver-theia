@@ -12,5 +12,5 @@ import { ModelServerClient, Response } from '@eclipse-emfcloud/modelserver-theia
 
 export const DevModelServerClient = Symbol('DevModelServerClient');
 export interface DevModelServerClient extends ModelServerClient {
-    counter(operation?: 'add' | 'subtract', delta?: number): Promise<Response<string>>;
+    counter(operation: 'add' | 'subtract' | undefined, delta: number | undefined): Promise<Response<string>>;
 }

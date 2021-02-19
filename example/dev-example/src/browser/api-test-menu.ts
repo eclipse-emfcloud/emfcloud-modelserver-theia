@@ -912,16 +912,16 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             execute: () => this.modelServerClient.counter('add', 3).then((response: any) => this.messageService.info(printResponse(response)))
         });
         commands.registerCommand(CustomCounterAdd, {
-            execute: () => this.modelServerClient.counter('add').then((response: any) => this.messageService.info(printResponse(response)))
+            execute: () => this.modelServerClient.counter('add', undefined).then((response: any) => this.messageService.info(printResponse(response)))
         });
         commands.registerCommand(CustomCounterSubtract2, {
             execute: () => this.modelServerClient.counter('subtract', 2).then((response: any) => this.messageService.info(printResponse(response)))
         });
         commands.registerCommand(CustomCounterSubtract, {
-            execute: () => this.modelServerClient.counter('subtract').then((response: any) => this.messageService.info(printResponse(response)))
+            execute: () => this.modelServerClient.counter('subtract', undefined).then((response: any) => this.messageService.info(printResponse(response)))
         });
         commands.registerCommand(CustomCounter, {
-            execute: () => this.modelServerClient.counter().then((response: any) => this.messageService.info(printResponse(response)))
+            execute: () => this.modelServerClient.counter(undefined, undefined).then((response: any) => this.messageService.info(printResponse(response)))
         });
     }
 

@@ -57,8 +57,15 @@ export class CustomDevModelServerClient extends DefaultModelServerClient impleme
         }
     }
 
-    async counter(operation?: 'add' | 'subtract', delta?: number): Promise<Response<string>> {
-        const response = await this.restClient.get(`counter?delta=${delta}&operation=${operation}`);
+    async counter(operation: 'add' | 'subtract' | undefined, delta: number | undefined): Promise<Response<string>> {
+        let url = 'counter?';
+        if (operation) {
+            url += 'operation=' + operation;
+        }
+        if (delta) {
+            url += operation ? '&delta=' + delta : 'delta=' + delta;
+        }
+        const response = await this.restClient.get(url);
         return response.mapBody(ResponseBody.asString);
     }
 }
