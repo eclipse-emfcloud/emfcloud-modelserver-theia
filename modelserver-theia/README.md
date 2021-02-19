@@ -1,63 +1,100 @@
-# Model Server Theia
-[Model server](https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia) integration for Theia
+# Model Server Typescript API
 
-## Getting started
+## Typescript Client API
 
-Install [nvm](https://github.com/creationix/nvm#install-script).
+The model server project features a Typescript-based client API that eases integration with the Model Server.
+The interface declaration is as defined below. Please note that the `Model` class is a POJO with a model uri and content.
 
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.5/install.sh | bash
+```typescript
+export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClient> {
+    initialize(): Promise<boolean>;
 
-Install npm and node.
+    get(modelUri: string, format?: string): Promise<Response<string>>;
+    getAll(format?: string): Promise<Response<Model[]>>;
+    getModelUris(): Promise<Response<string[]>>;
 
-    nvm install 8
-    nvm use 8
+    getElementById(modelUri: string, elementid: string, format?: string): Promise<Response<string>>;
+    getElementByName(modelUri: string, elementname: string, format?: string): Promise<Response<string>>;
 
-Install yarn.
+    delete(modelUri: string): Promise<Response<boolean>>;
+    update(modelUri: string, newModel: any): Promise<Response<string>>;
 
-    npm install -g yarn
+    configure(configuration?: ServerConfiguration): Promise<Response<boolean>>;
+    ping(): Promise<Response<boolean>>;
 
-## Running the browser example
+    undo(modelUri: string): Promise<Response<string>>;
+    redo(modelUri: string): Promise<Response<string>>;
+    save(modelUri: string): Promise<Response<boolean>>;
+    saveAll(): Promise<Response<boolean>>;
 
-    yarn rebuild:browser
-    cd browser-app
-    yarn start
+    getLaunchOptions(): Promise<LaunchOptions>;
 
-Open http://localhost:3000 in the browser.
+    edit(modelUri: string, command: ModelServerCommand | ModelServerCompoundCommand): Promise<Response<boolean>>;
 
-## Running the Electron example
+    getTypeSchema(modelUri: string): Promise<Response<string>>;
+    getUiSchema(schemaName: string): Promise<Response<string>>;
 
-    yarn rebuild:electron
-    cd electron-app
-    yarn start
+    validation(modelUri: string): Promise<Response<string>>;
+    validationConstraints(modelUri: string): Promise<Response<string>>;
 
-## Developing with the browser example
+    // WebSocket connection
+    subscribe(modelUri: string): void;
+    subscribeWithValidation(modelUri: string): void;
+    subscribeWithFormat(modelUri: string, format: string): void;
+    subscribeWithTimeout(modelUri: string, timeout: number): void;
+    subscribeWithTimeoutAndFormat(modelUri: string, timeout: number, format: string): void;
+    sendKeepAlive(modelUri: string): void;
+    unsubscribe(modelUri: string): void;
+}
+```
 
-Start watching of modelserver-theia.
+## Typescript API Examples
 
-    cd modelserver-theia
-    yarn watch
+```typescript
 
-Start watching of the browser example.
+@inject(ModelServerClient) protected readonly modelServerClient: ModelServerClient;
 
-    yarn rebuild:browser
-    cd browser-app
-    yarn watch
+// perform simple GET
+this.modelServerClient.get('SuperBrewer3000.json')
+    .then((response: Response<any>) => this.messageService.info("GET: " + response.body()));
 
-Launch `Start Browser Backend` configuration from VS code.
+// perform same GET, but expect an EObject
+this.modelServerClient.get('SuperBrewer3000.coffee', 'xmi')
+    .then((response: Response<any>) => this.messageService.info("GET XMI: " + response.body()));
 
-Open http://localhost:3000 in the browser.
+// perform GET ALL
+this.modelServerClient.getAll()
+    .then((response: Response<any>) => this.messageService.info("GET ALL: " + response.body()));
 
-## Developing with the Electron example
+// perform GET ELEMENT
+this.modelServerClient.getElementByName('SuperBrewer3000.json', 'Super Brewer 3000')
+    .then((response: Response<any>) => this.messageService.info("GET ELEMENT: " + response.body()));
+            
+// perform ADD COMMAND (adds an AutomaticTask to the first Workflow and expects incremental update)
+const owner = {
+    'eClass':
+        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
+    '$ref':
+        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
+};
+const feature = 'nodes';
+const toAdd = [
+    {
+        eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask'
+    }
+];
+const addCommand: ModelServerCommand = ModelServerCommandUtil.createAddCommand(owner, feature, toAdd);
+this.modelServerClient.edit('SuperBrewer3000.json', addCommand)
+    .then((response: any) => this.messageService.info("INCREMENTAL UPDATE: " + response.body()));
 
-Start watching of modelserver-theia.
+// perform UNDO
+this.modelServerClient.undo('SuperBrewer3000.json')
+    .then((response: any) => this.messageService.info("INCREMENTAL UPDATE AFTER UNDO: " + response.body()));
 
-    cd modelserver-theia
-    yarn watch
+// subscribe
+this.modelServerClient.subscribe('SuperBrewer3000.json');
 
-Start watching of the electron example.
-
-    yarn rebuild:electron
-    cd electron-app
-    yarn watch
-
-Launch `Start Electron Backend` configuration from VS code.
+// unsubscribe
+this.modelServerClient.unsubscribe('SuperBrewer3000.json');
+            
+```

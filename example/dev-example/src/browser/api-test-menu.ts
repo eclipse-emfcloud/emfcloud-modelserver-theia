@@ -961,9 +961,9 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_JSON_VALIDATION_SECTION, { commandId: ValidationConstraintsSuperBrewer3000JsonCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: SubscribeWithTimeoutCommand.id, order: 'a' });
-        menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: SubscribeWithValidationSuperBrewer3000JsonCommand.id });
-        menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'b' });
-        menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: UnsubscribeTimeoutCommand.id, order: 'c' });
+        menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: SubscribeWithValidationSuperBrewer3000JsonCommand.id, order: 'b' });
+        menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'c' });
+        menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: UnsubscribeTimeoutCommand.id, order: 'd' });
 
     }
 
