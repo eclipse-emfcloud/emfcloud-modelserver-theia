@@ -21,7 +21,7 @@ export class SimpleLaunchOptions implements LaunchOptions {
     baseURL = 'api/v1/';
     serverPort = 8081;
     hostname = 'localhost';
-    jarPath = resolve(join(__dirname, '..', '..', 'build', 'com.eclipsesource.modelserver.example-0.0.1-SNAPSHOT-standalone.jar'));
+    jarPath = resolve(join(__dirname, '..', '..', 'build', 'org.eclipse.emfcloud.modelserver.example-0.7.0-SNAPSHOT-standalone.jar'));
     additionalArgs = ['--errorsOnly'];
 }
 
