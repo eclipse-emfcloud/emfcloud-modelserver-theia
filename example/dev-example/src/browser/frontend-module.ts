@@ -8,13 +8,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
+import { ModelServerClient } from '@eclipse-emfcloud/modelserver-theia';
 import { CommandContribution, MenuContribution } from '@theia/core';
 import { ContainerModule } from 'inversify';
 
+import { DevModelServerClient } from '../common/dev-model-server-client';
 import { ApiTestMenuContribution } from './api-test-menu';
 
 export default new ContainerModule(bind => {
     bind(ApiTestMenuContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(ApiTestMenuContribution);
     bind(MenuContribution).toService(ApiTestMenuContribution);
+    bind(DevModelServerClient).toService(ModelServerClient);
 });
