@@ -25,13 +25,14 @@ export interface ModelServerReferenceDescription extends ModelServerObject {
 
 export interface ModelServerCommand {
     eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//Command';
-    type: 'add' | 'remove' | 'set' | 'replace' | 'move';
-    owner: ModelServerReferenceDescription;
-    feature: string;
+    type: string;
+    owner?: ModelServerReferenceDescription;
+    feature?: string;
     indices?: number[];
     dataValues?: DataValueType[];
     objectValues?: ModelServerReferenceDescription[];
     objectsToAdd?: ModelServerObject[];
+    properties?: { [key: string]: string };
 }
 
 export interface ModelServerCompoundCommand {

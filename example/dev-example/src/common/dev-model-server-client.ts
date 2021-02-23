@@ -8,9 +8,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { ModelServerClient, Response } from '@eclipse-emfcloud/modelserver-theia';
+import { ModelServerClient, ModelServerCommand, Response } from '@eclipse-emfcloud/modelserver-theia';
 
 export const DevModelServerClient = Symbol('DevModelServerClient');
 export interface DevModelServerClient extends ModelServerClient {
     counter(operation: 'add' | 'subtract' | undefined, delta: number | undefined): Promise<Response<string>>;
 }
+
+export namespace DevModelServerCommandUtil {
+    export function createUpdateTaskNameCommand(text: string): ModelServerCommand {
+        return {
+            eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//Command',
+            type: 'updateTaskName',
+            properties: { text }
+        };
+    }    
+}
+
