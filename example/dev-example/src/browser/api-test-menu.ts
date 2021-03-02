@@ -29,7 +29,7 @@ import {
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { inject, injectable, postConstruct } from 'inversify';
 
-import { DevModelServerClient } from '../common/dev-model-server-client';
+import { DevModelServerClient, DevModelServerCommandUtil } from '../common/dev-model-server-client';
 
 /* ModelServer commands */
 export const PingCommand: Command = {
@@ -263,6 +263,11 @@ export const EditAddSuperBrewer3000JsonCommand: Command = {
 export const EditRemoveSuperBrewer3000JsonCommand: Command = {
     id: 'ApiTest.EditRemove.SuperBrewer3000Json',
     label: 'edit(SuperBrewer3000.json,{type:remove})'
+};
+
+export const UpdateTaskNameSuperBrewer3000JsonCustomCommand: Command = {
+    id: 'ApiTest.UpdateTaskName.SuperBrewer3000Json',
+    label: 'edit(SuperBrewer3000.json,{type:updateTaskName},\'Coffee\')'
 };
 
 export const UndoSuperBrewer3000JsonCommand: Command = {
@@ -852,6 +857,13 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
+        commands.registerCommand(UpdateTaskNameSuperBrewer3000JsonCustomCommand, {
+            execute: () => {
+                const updateTaskName = DevModelServerCommandUtil.createUpdateTaskNameCommand('Coffee');
+                this.modelServerClient.edit('SuperBrewer3000.json', updateTaskName)
+                    .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
         commands.registerCommand(UndoSuperBrewer3000JsonCommand, {
             execute: () => {
                 this.modelServerClient
@@ -999,6 +1011,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_JSON_EDIT_SECTION, { commandId: EditSetSuperBrewer3000JsonCommand.id });
         menus.registerMenuAction(SUPERBREWER_JSON_EDIT_SECTION, { commandId: EditRemoveSuperBrewer3000JsonCommand.id });
         menus.registerMenuAction(SUPERBREWER_JSON_EDIT_SECTION, { commandId: EditAddSuperBrewer3000JsonCommand.id });
+        menus.registerMenuAction(SUPERBREWER_JSON_EDIT_SECTION, { commandId: UpdateTaskNameSuperBrewer3000JsonCustomCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_JSON_SAVE_SECTION, { commandId: SaveSuperBrewer3000JsonCommand.id });
         menus.registerMenuAction(SUPERBREWER_JSON_SAVE_SECTION, { commandId: UndoSuperBrewer3000JsonCommand.id });
