@@ -25,7 +25,8 @@
   "dependencies": {
     "@theia/core": "latest",
     "@theia/workspace": "latest",
-    "@modelserver/coffee-theia": "0.7.0"
+    "@modelserver/coffee-theia": "0.7.0",
+    "@eclipse-emfcloud/modelserver-markers-theia": "0.7.0"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
