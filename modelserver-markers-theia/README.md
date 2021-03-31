@@ -44,4 +44,4 @@ this.modelServerClient.validation(modelURI.toString())
 The marker in the problems view can be used to navigate to the precise element in error.
 As this navigation depends on your model editor implementation, you must implement the `OpenHandler` interface if you want this functionality (see `@theia/core/lib/browser/opener-service.ts`).
 In the opener options, you will find a `selection` entry, which value can be cast as a `ModelElementRange`, containing fake start and end values, but the correct model element's URI fragment (identifier) at the `uriFragment` key.
-This is up to your widget implementation to select the correct element corresponding to this URI fragment.
+It is up to your widget implementation to select the correct element corresponding to this URI fragment.
