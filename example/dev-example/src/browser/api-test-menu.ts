@@ -17,6 +17,8 @@ import {
     ModelServerSubscriptionService,
     Response
 } from '@eclipse-emfcloud/modelserver-theia/lib/common';
+import { Diagnostic } from '@eclipse-emfcloud/modelserver-theia/lib/browser';
+import { DiagnosticManager } from '@eclipse-emfcloud/modelserver-markers-theia/lib/browser';
 import {
     Command,
     CommandContribution,
@@ -26,6 +28,7 @@ import {
     MenuModelRegistry,
     MessageService
 } from '@theia/core';
+import URI from '@theia/core/lib/common/uri';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { inject, injectable, postConstruct } from 'inversify';
 
@@ -133,6 +136,11 @@ export const ValidationCoffeeEcoreCommand: Command = {
     label: 'validate(Coffee.ecore)'
 };
 
+export const ValidationMarkersCoffeeEcoreCommand: Command = {
+    id: 'ApiTest.ValidationMarkers.CoffeeEcore',
+    label: 'validateAndCreateMarkers(Coffee.ecore)'
+};
+
 export const ValidationConstraintsCoffeeEcoreCommand: Command = {
     id: 'ApiTest.ValidationConstraints.CoffeeEcore',
     label: 'validationConstraints(Coffee.ecore)'
@@ -214,6 +222,11 @@ export const ValidationCommand: Command = {
     label: 'validate(SuperBrewer3000.coffee)'
 };
 
+export const ValidationMarkersCommand: Command = {
+    id: 'ApiTest.ValidationMarkers.SuperBrewer3000',
+    label: 'validateAndCreateMarkers(SuperBrewer3000.coffee)'
+};
+
 export const ValidationConstraintsCommand: Command = {
     id: 'ApiTest.ValidationConstraints.SuperBrewer3000',
     label: 'validationConstraints(SuperBrewer3000.coffee)'
@@ -288,6 +301,11 @@ export const SaveSuperBrewer3000JsonCommand: Command = {
 export const ValidationSuperBrewer3000JsonCommand: Command = {
     id: 'ApiTest.Validation.SuperBrewer3000Json',
     label: 'validate(SuperBrewer3000.json)'
+};
+
+export const ValidationMarkersSuperBrewer3000JsonCommand: Command = {
+    id: 'ApiTest.ValidationMarkers.SuperBrewer3000Json',
+    label: 'validateAndCreateMarkers(SuperBrewer3000.json)'
 };
 
 export const ValidationConstraintsSuperBrewer3000JsonCommand: Command = {
@@ -424,6 +442,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     @inject(MessageService) protected readonly messageService: MessageService;
     @inject(DevModelServerClient) protected readonly modelServerClient: DevModelServerClient;
     @inject(ModelServerSubscriptionService) protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
+    @inject(DiagnosticManager) protected readonly diagnosticManager: DiagnosticManager;
 
     private workspaceUri: string;
 
@@ -586,6 +605,16 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 this.modelServerClient
                     .validation('SuperBrewer3000.coffee')
                     .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
+        commands.registerCommand(ValidationMarkersCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .validation('SuperBrewer3000.coffee')
+                    .then((response: any) => {
+                        const message = createMarkersFromResponseBody(this.diagnosticManager, new URI('SuperBrewer3000.coffee'), response);
+                        this.messageService.info(message);
+                    });
             }
         });
         commands.registerCommand(ValidationConstraintsCommand, {
@@ -759,6 +788,16 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
+        commands.registerCommand(ValidationMarkersCoffeeEcoreCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .validation('Coffee.ecore')
+                    .then((response: any) => {
+                        const message = createMarkersFromResponseBody(this.diagnosticManager, new URI('Coffee.ecore'), response);
+                        this.messageService.info(message);
+                    });
+            }
+        });
         commands.registerCommand(ValidationConstraintsCoffeeEcoreCommand, {
             execute: () => {
                 this.modelServerClient
@@ -892,6 +931,16 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
+        commands.registerCommand(ValidationMarkersSuperBrewer3000JsonCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .validation('SuperBrewer3000.json')
+                    .then((response: any) => {
+                        const message = createMarkersFromResponseBody(this.diagnosticManager, new URI('SuperBrewer3000.json'), response);
+                        this.messageService.info(message);
+                    });
+            }
+        });
         commands.registerCommand(ValidationConstraintsSuperBrewer3000JsonCommand, {
             execute: () => {
                 this.modelServerClient
@@ -971,6 +1020,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(COFFEE_SAVE_SECTION, { commandId: RedoCoffeeEcoreCommand.id });
 
         menus.registerMenuAction(COFFEE_VALIDATION_SECTION, { commandId: ValidationCoffeeEcoreCommand.id });
+        menus.registerMenuAction(COFFEE_VALIDATION_SECTION, { commandId: ValidationMarkersCoffeeEcoreCommand.id });
         menus.registerMenuAction(COFFEE_VALIDATION_SECTION, { commandId: ValidationConstraintsCoffeeEcoreCommand.id });
 
         menus.registerMenuAction(COFFEE_WEBSOCKET_SECTION, { commandId: SubscribeAndKeepAliveCommand.id });
@@ -995,6 +1045,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_SAVE_SECTION, { commandId: RedoCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_VALIDATION_SECTION, { commandId: ValidationCommand.id });
+        menus.registerMenuAction(SUPERBREWER_VALIDATION_SECTION, { commandId: ValidationMarkersCommand.id });
         menus.registerMenuAction(SUPERBREWER_VALIDATION_SECTION, { commandId: ValidationConstraintsCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_WEBSOCKET_SECTION, { commandId: SubscribeCommand.id });
@@ -1018,6 +1069,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_JSON_SAVE_SECTION, { commandId: RedoSuperBrewer3000JsonCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_JSON_VALIDATION_SECTION, { commandId: ValidationSuperBrewer3000JsonCommand.id });
+        menus.registerMenuAction(SUPERBREWER_JSON_VALIDATION_SECTION, { commandId: ValidationMarkersSuperBrewer3000JsonCommand.id });
         menus.registerMenuAction(SUPERBREWER_JSON_VALIDATION_SECTION, { commandId: ValidationConstraintsSuperBrewer3000JsonCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: SubscribeWithTimeoutCommand.id, order: 'a' });
@@ -1084,4 +1136,23 @@ function printResponse(response: Response<any>): string {
     return `${now.toISOString()} | [REST Response]: StatusCode: ${response.statusCode}
             StatusMessage: ${response.statusMessage}
             Body: ${response.body ? JSON.stringify(response.body) : 'undefined'}`;
+}
+
+/**
+ * Create the markers in the problem view
+ * @param diagnosticManager the diagnostic manager
+ * @param modelURI the concerned model URI
+ * @param response the validation response
+ * @returns the message to log
+ */
+function createMarkersFromResponseBody(diagnosticManager: DiagnosticManager, modelURI: URI, response: Response<any>): string {
+    // print markers in Problems view
+    const diagnostic = response.body as Diagnostic;
+    diagnosticManager.setDiagnostic(modelURI, diagnostic);
+    const level = Diagnostic.getSeverityLabel(diagnostic);
+    if (level === 'OK') {
+        return `Validation is ${level}. There should be no new marker in Problems view.`;
+    } else {
+        return `Look for ${level} markers in Problems view.`;
+    }
 }

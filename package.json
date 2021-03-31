@@ -43,6 +43,7 @@
   },
   "workspaces": [
     "modelserver-theia",
+    "modelserver-markers-theia",
     "example/browser-app",
     "example/coffee-theia",
     "example/dev-example"

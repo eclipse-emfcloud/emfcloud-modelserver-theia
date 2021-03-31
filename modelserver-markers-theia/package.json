@@ -1,0 +1,47 @@
+{
+  "name": "@eclipse-emfcloud/modelserver-markers-theia",
+  "main": "lib/common/index.js",
+  "license": "(EPL-2.0 OR MIT)",
+  "keywords": [
+    "theia-extension",
+    "model-server",
+    "glsp",
+    "modeling"
+  ],
+  "homepage": "https://www.eclipse.org/emfcloud/",
+  "bugs": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia/issues",
+  "version": "0.7.0",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "author": {
+    "name": "Vincent HEMERY (CS GROUP - France)",
+    "email": "vincent.hemery@csgroup.eu"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
+  },
+  "dependencies": {
+    "@theia/markers": "latest",
+    "@eclipse-emfcloud/modelserver-theia": "0.7.0"
+  },
+  "devDependencies": {
+    "semver": "^6.3.0"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "tsc && yarn run lint",
+    "lint": "eslint -c ../.eslintrc.js --ext .ts ./src",
+    "watch": "tsc -w",
+    "publish:latest": "yarn publish --tag latest",
+    "publish:next": "yarn publish --new-version \"$(semver $npm_package_version -i minor)-next.$(git rev-parse --short HEAD)\" --tag next"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/frontend-module"
+    }
+  ]
+}

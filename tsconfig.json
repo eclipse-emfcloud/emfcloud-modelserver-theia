@@ -6,6 +6,9 @@
       "@eclipse-emfcloud/modelserver-theia": [
         "modelserver-theia/src/*"
       ],
+      "@eclipse-emfcloud/modelserver-markers-theia": [
+        "modelserver-markers-theia/src/*"
+      ],
       "@modelserver/coffee-theia": [
         "example/coffe-theia/src/*"
       ],
@@ -16,6 +19,7 @@
   },
   "include": [
     "modelserver-theia/src",
+    "modelserver-markers-theia/src",
     "example/coffee-theia/src",
     "example/dev-example/src"
   ]
