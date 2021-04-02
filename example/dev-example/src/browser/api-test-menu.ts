@@ -8,17 +8,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
+import { DiagnosticManager } from '@eclipse-emfcloud/modelserver-markers-theia/lib/browser';
+import { Diagnostic } from '@eclipse-emfcloud/modelserver-theia/lib/browser';
 import {
-    ModelServerCommand,
-    ModelServerCommandUtil,
-    ModelServerCompoundCommand,
+    AddCommand,
+    CommandExecutionResult,
+    CompoundCommand,
     ModelServerMessage,
     ModelServerResponse,
     ModelServerSubscriptionService,
-    Response
+    RemoveCommand,
+    Response,
+    SetCommand
 } from '@eclipse-emfcloud/modelserver-theia/lib/common';
-import { Diagnostic } from '@eclipse-emfcloud/modelserver-theia/lib/browser';
-import { DiagnosticManager } from '@eclipse-emfcloud/modelserver-markers-theia/lib/browser';
 import {
     Command,
     CommandContribution,
@@ -32,7 +34,7 @@ import URI from '@theia/core/lib/common/uri';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { inject, injectable, postConstruct } from 'inversify';
 
-import { DevModelServerClient, DevModelServerCommandUtil } from '../common/dev-model-server-client';
+import { DevModelServerClient, UpdateTaskNameCommand } from '../common/dev-model-server-client';
 
 /* ModelServer commands */
 export const PingCommand: Command = {
@@ -534,7 +536,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
-                const setCommand: ModelServerCommand = ModelServerCommandUtil.createSetCommand(owner, feature, changedValues);
+                const setCommand = new SetCommand(owner, feature, changedValues);
                 this.modelServerClient
                     .edit('SuperBrewer3000.coffee', setCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -550,7 +552,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'nodes';
                 const indices = [0];
-                const removeCommand: ModelServerCommand = ModelServerCommandUtil.createRemoveCommand(owner, feature, indices);
+                const removeCommand = new RemoveCommand(owner, feature, indices);
                 this.modelServerClient
                     .edit('SuperBrewer3000.coffee', removeCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -566,7 +568,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];
-                const addCommand: ModelServerCommand = ModelServerCommandUtil.createAddCommand(owner, feature, toAdd);
+                const addCommand = new AddCommand(owner, feature, toAdd);
                 this.modelServerClient
                     .edit('SuperBrewer3000.coffee', addCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -693,7 +695,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const featureA = 'name';
                 const changedValuesA = ['ControlUnitNew'];
-                const setCommandA: ModelServerCommand = ModelServerCommandUtil.createSetCommand(ownerA, featureA, changedValuesA);
+                const setCommandA = new SetCommand(ownerA, featureA, changedValuesA);
 
                 const ownerB = {
                     'eClass':
@@ -703,9 +705,9 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const featureB = 'name';
                 const changedValuesB = ['WaterTankNew'];
-                const setCommandB: ModelServerCommand = ModelServerCommandUtil.createSetCommand(ownerB, featureB, changedValuesB);
+                const setCommandB = new SetCommand(ownerB, featureB, changedValuesB);
 
-                const compoundCommand: ModelServerCompoundCommand = ModelServerCommandUtil.createCompoundCommand([setCommandA, setCommandB]);
+                const compoundCommand = new CompoundCommand([setCommandA, setCommandB]);
 
                 this.modelServerClient
                     .edit('Coffee.ecore', compoundCommand)
@@ -722,7 +724,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'name';
                 const changedValues = ['ControlUnitNew'];
-                const setCommand: ModelServerCommand = ModelServerCommandUtil.createSetCommand(owner, feature, changedValues);
+                const setCommand = new SetCommand(owner, feature, changedValues);
                 this.modelServerClient
                     .edit('Coffee.ecore', setCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -738,7 +740,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'eClassifiers';
                 const indices = [5];
-                const removeCommand: ModelServerCommand = ModelServerCommandUtil.createRemoveCommand(owner, feature, indices);
+                const removeCommand = new RemoveCommand(owner, feature, indices);
                 this.modelServerClient
                     .edit('Coffee.ecore', removeCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -754,7 +756,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'eClassifiers';
                 const toAdd = [{ eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EClass', name: 'NewEClassifier' }];
-                const addCommand: ModelServerCommand = ModelServerCommandUtil.createAddCommand(owner, feature, toAdd);
+                const addCommand = new AddCommand(owner, feature, toAdd);
                 this.modelServerClient
                     .edit('Coffee.ecore', addCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -858,7 +860,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
-                const setCommand: ModelServerCommand = ModelServerCommandUtil.createSetCommand(owner, feature, changedValues);
+                const setCommand = new SetCommand(owner, feature, changedValues);
                 this.modelServerClient
                     .edit('SuperBrewer3000.json', setCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -874,7 +876,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'nodes';
                 const indices = [0];
-                const removeCommand: ModelServerCommand = ModelServerCommandUtil.createRemoveCommand(owner, feature, indices);
+                const removeCommand = new RemoveCommand(owner, feature, indices);
                 this.modelServerClient
                     .edit('SuperBrewer3000.json', removeCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -890,7 +892,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 };
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];
-                const addCommand: ModelServerCommand = ModelServerCommandUtil.createAddCommand(owner, feature, toAdd);
+                const addCommand = new AddCommand(owner, feature, toAdd);
                 this.modelServerClient
                     .edit('SuperBrewer3000.json', addCommand)
                     .then((response: any) => this.messageService.info(printResponse(response)));
@@ -898,7 +900,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(UpdateTaskNameSuperBrewer3000JsonCustomCommand, {
             execute: () => {
-                const updateTaskName = DevModelServerCommandUtil.createUpdateTaskNameCommand('Coffee');
+                const updateTaskName = new UpdateTaskNameCommand('Coffee');
                 this.modelServerClient.edit('SuperBrewer3000.json', updateTaskName)
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
@@ -1093,6 +1095,11 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             this.showSocketInfo(`DirtyState ${response.data}`, response.modelUri);
         });
         this.modelServerSubscriptionService.onIncrementalUpdateListener((response: ModelServerMessage) => {
+            const data = response.data;
+            // show-case type casting from server data
+            if (CommandExecutionResult.is(data)) {
+                console.log(`Incremental update due to command execution: Reason '${data.type}' based on command '${data.source.type}'`);
+            }
             this.showSocketInfo(`IncrementalUpdate ${JSON.stringify(response.data)}`, response.modelUri);
         });
         this.modelServerSubscriptionService.onFullUpdateListener((response: ModelServerMessage) => {

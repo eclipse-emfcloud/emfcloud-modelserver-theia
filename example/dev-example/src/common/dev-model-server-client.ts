@@ -15,13 +15,8 @@ export interface DevModelServerClient extends ModelServerClient {
     counter(operation: 'add' | 'subtract' | undefined, delta: number | undefined): Promise<Response<string>>;
 }
 
-export namespace DevModelServerCommandUtil {
-    export function createUpdateTaskNameCommand(text: string): ModelServerCommand {
-        return {
-            eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//Command',
-            type: 'updateTaskName',
-            properties: { text }
-        };
-    }    
+export class UpdateTaskNameCommand extends ModelServerCommand {
+    constructor(text: string) {
+        super('updateTaskName', { text });
+    }
 }
-
