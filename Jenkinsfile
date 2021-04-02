@@ -4,7 +4,7 @@ kind: Pod
 spec:
   containers:
   - name: node
-    image: node:10.18
+    image: node:12.14.1
     tty: true
     resources:
       limits:
@@ -50,9 +50,7 @@ pipeline {
         stage('Build package') {
             steps {
                 container('node') {
-                    dir('modelserver-theia') {
-                        sh "yarn install"
-                    }
+                    sh "yarn install"
                 }
             }
         }

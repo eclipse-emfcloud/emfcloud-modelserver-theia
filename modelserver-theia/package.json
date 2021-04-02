@@ -1,11 +1,14 @@
 {
   "name": "@eclipse-emfcloud/modelserver-theia",
+  "license": "(EPL-2.0 OR MIT)",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "lib/common/index.js",
-  "license": "(EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0)",
   "keywords": [
     "theia-extension",
     "model-server",
-    "glsp",
+    "EMF",
     "modeling"
   ],
   "homepage": "https://www.eclipse.org/emfcloud/",
@@ -23,24 +26,19 @@
     "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
   },
   "dependencies": {
-    "@theia/core": "latest",
-    "@theia/process": "latest",
-    "@theia/workspace": "latest",
+    "@theia/core": "^1.0.0",
+    "@theia/process": "^1.0.0",
+    "@theia/workspace": "^1.0.0",
     "@types/node-fetch": "2.5.7",
     "node-fetch": "2.6.1",
     "ws": "7.1.1"
-  },
-  "devDependencies": {
-    "semver": "^6.3.0"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
     "build": "tsc && yarn run lint",
     "lint": "eslint -c ../.eslintrc.js --ext .ts ./src",
-    "watch": "tsc -w",
-    "publish:latest": "yarn publish --tag latest",
-    "publish:next": "yarn publish --new-version \"$(semver $npm_package_version -i minor)-next.$(git rev-parse --short HEAD)\" --tag next"
+    "watch": "tsc -w"
   },
   "theiaExtensions": [
     {
