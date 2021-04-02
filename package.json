@@ -1,8 +1,9 @@
 {
   "private": true,
+  "license": "(EPL-2.0 OR MIT)",
   "engines": {
     "yarn": "1.0.x || >=1.2.1",
-    "node": ">=10.11.0 <13"
+    "node": ">=12.14.1 <13"
   },
   "scripts": {
     "prepare": "lerna run prepare && yarn download:plugins",
@@ -26,20 +27,6 @@
     "lerna": "^2.11.0",
     "rimraf": "^2.6.2",
     "typescript": "3.9.2"
-  },
-  "resolutions": {
-    "**/@theia/core": "^1.8.1",
-    "**/@theia/editor": "^1.8.1",
-    "**/@theia/filesystem": "^1.8.1",
-    "**/@theia/markers": "^1.8.1",
-    "**/@theia/messages": "^1.8.1",
-    "**/@theia/monaco": "^1.8.1",
-    "**/@theia/navigator": "^1.8.1",
-    "**/@theia/plugin-ext-vscode": "^1.8.1",
-    "**/@theia/preferences": "^1.8.1",
-    "**/@theia/process": "^1.8.1",
-    "**/@theia/terminal": "^1.8.1",
-    "**/@theia/workspace": "^1.8.1"
   },
   "workspaces": [
     "modelserver-theia",
