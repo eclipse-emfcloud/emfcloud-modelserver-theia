@@ -29,7 +29,7 @@ export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClie
 
     getLaunchOptions(): Promise<LaunchOptions>;
 
-    edit(modelUri: string, command: ModelServerCommand | ModelServerCompoundCommand): Promise<Response<boolean>>;
+    edit(modelUri: string, command: ModelServerCommand): Promise<Response<boolean>>;
 
     getTypeSchema(modelUri: string): Promise<Response<string>>;
     getUiSchema(schemaName: string): Promise<Response<string>>;
@@ -83,7 +83,7 @@ const toAdd = [
         eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask'
     }
 ];
-const addCommand: ModelServerCommand = ModelServerCommandUtil.createAddCommand(owner, feature, toAdd);
+const addCommand = new AddCommand(owner, feature, toAdd);
 this.modelServerClient.edit('SuperBrewer3000.json', addCommand)
     .then((response: any) => this.messageService.info("INCREMENTAL UPDATE: " + response.body()));
 

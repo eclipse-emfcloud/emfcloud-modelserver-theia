@@ -11,35 +11,9 @@
 import { Event, JsonRpcServer } from '@theia/core';
 import * as WebSocket from 'ws';
 
+import { ModelServerCommand } from './command-model';
+
 export const MODEL_SERVER_CLIENT_SERVICE_PATH = '/services/modelserverclient';
-
-export type DataValueType = boolean | number | string;
-
-export interface ModelServerObject {
-    eClass: string;
-}
-
-export interface ModelServerReferenceDescription extends ModelServerObject {
-    $ref: string;
-}
-
-export interface ModelServerCommand {
-    eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//Command';
-    type: string;
-    owner?: ModelServerReferenceDescription;
-    feature?: string;
-    indices?: number[];
-    dataValues?: DataValueType[];
-    objectValues?: ModelServerReferenceDescription[];
-    objectsToAdd?: ModelServerObject[];
-    properties?: { [key: string]: string };
-}
-
-export interface ModelServerCompoundCommand {
-    eClass: 'http://www.eclipsesource.com/schema/2019/modelserver/command#//CompoundCommand';
-    type: 'compound';
-    commands: (ModelServerCommand | ModelServerCompoundCommand)[];
-}
 
 export interface WebSocketEvent {
     target?: WebSocket;
@@ -114,7 +88,7 @@ export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClie
 
     getLaunchOptions(): Promise<LaunchOptions>;
 
-    edit(modelUri: string, command: ModelServerCommand | ModelServerCompoundCommand): Promise<Response<boolean>>;
+    edit(modelUri: string, command: ModelServerCommand): Promise<Response<boolean>>;
 
     getTypeSchema(modelUri: string): Promise<Response<string>>;
     getUiSchema(schemaName: string): Promise<Response<string>>;

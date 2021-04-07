@@ -17,7 +17,6 @@ import {
     Model,
     ModelServerClient,
     ModelServerCommand,
-    ModelServerCompoundCommand,
     ModelServerFrontendClient,
     ModelServerMessage,
     ModelServerPaths,
@@ -118,7 +117,7 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.isSuccess);
     }
 
-    async edit(modelUri: string, command: ModelServerCommand | ModelServerCompoundCommand): Promise<Response<boolean>> {
+    async edit(modelUri: string, command: ModelServerCommand): Promise<Response<boolean>> {
         const response = await this.restClient.patch(`${ModelServerPaths.COMMANDS}?modeluri=${modelUri}`, RequestBody.fromData(command));
         return response.mapBody(ResponseBody.isSuccess);
     }
