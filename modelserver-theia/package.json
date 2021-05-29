@@ -31,7 +31,7 @@
     "@theia/workspace": "^1.0.0",
     "@types/node-fetch": "2.5.7",
     "node-fetch": "2.6.1",
-    "ws": "7.1.1"
+    "ws": "7.4.6"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
