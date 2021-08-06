@@ -88,7 +88,7 @@ export class ChangeDescription extends ModelServerObject {
     static readonly URI = ChangePackage.NS_URI + '#//ChangeDescription';
     eClass = ChangeDescription.URI;
 
-    objectsChanges?: EObjectToChangesMapEntry[];
+    objectChanges?: EObjectToChangesMapEntry[];
     objectsToDetach?: ModelServerObject[];
     objectsToAttach?: ModelServerObject[];
     resourceChanges?: ResourceChange[];
