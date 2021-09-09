@@ -21,6 +21,13 @@
     "name": "Vincent HEMERY (CS GROUP - France)",
     "email": "vincent.hemery@csgroup.eu"
   },
+  "contributors": [
+    {
+      "name": "Eclipse emf.cloud Project",
+      "email": "emfcloud-dev@eclipse.org",
+      "url": "https://projects.eclipse.org/projects/ecd.emfcloud"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
