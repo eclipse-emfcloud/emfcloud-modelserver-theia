@@ -60,7 +60,7 @@ export class ResourceChange extends ModelServerObject {
 
 export class FeatureChange {
     static readonly URI = ChangePackage.NS_URI + '#//FeatureChange';
-    eClass = ChangeDescription.URI;
+    eClass = FeatureChange.URI;
 
     featureName?: string;
     dataValue?: string;
@@ -73,7 +73,7 @@ export class FeatureChange {
 
 export class EObjectToChangesMapEntry extends ModelServerObject {
     static readonly URI = ChangePackage.NS_URI + '#//EObjectToChangesMapEntry';
-    eClass = ChangeDescription.URI;
+    eClass = EObjectToChangesMapEntry.URI;
 
     key: ModelServerReferenceDescription;
     value?: FeatureChange[];
