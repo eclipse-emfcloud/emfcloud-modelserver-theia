@@ -26,6 +26,7 @@ export namespace ModelServerPaths {
 
     export const COMMANDS = 'edit';
 
+    export const CLOSE = 'close';
     export const SAVE = 'save';
     export const SAVE_ALL = 'saveall';
 
