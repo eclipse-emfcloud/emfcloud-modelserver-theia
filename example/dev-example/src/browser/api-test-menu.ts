@@ -133,6 +133,11 @@ export const SaveCoffeeEcoreCommand: Command = {
     label: 'save(Coffee.ecore)'
 };
 
+export const CloseCoffeeEcoreCommand: Command = {
+    id: 'ApiTest.Close.CoffeeEcore',
+    label: 'close(Coffee.ecore)'
+};
+
 export const ValidationCoffeeEcoreCommand: Command = {
     id: 'ApiTest.Validation.CoffeeEcore',
     label: 'validate(Coffee.ecore)'
@@ -219,6 +224,11 @@ export const SaveCommand: Command = {
     label: 'save(SuperBrewer3000.coffee)'
 };
 
+export const CloseCommand: Command = {
+    id: 'ApiTest.Close.SuperBrewer3000',
+    label: 'close(SuperBrewer3000.coffee)'
+};
+
 export const ValidationCommand: Command = {
     id: 'ApiTest.Validation.SuperBrewer3000',
     label: 'validate(SuperBrewer3000.coffee)'
@@ -298,6 +308,11 @@ export const RedoSuperBrewer3000JsonCommand: Command = {
 export const SaveSuperBrewer3000JsonCommand: Command = {
     id: 'ApiTest.Save.SuperBrewer3000Json',
     label: 'save(SuperBrewer3000.json)'
+};
+
+export const CloseSuperBrewer3000JsonCommand: Command = {
+    id: 'ApiTest.Close.SuperBrewer3000Json',
+    label: 'close(SuperBrewer3000.json)'
 };
 
 export const ValidationSuperBrewer3000JsonCommand: Command = {
@@ -602,6 +617,13 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
+        commands.registerCommand(CloseCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .close('SuperBrewer3000.coffee')
+                    .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
         commands.registerCommand(ValidationCommand, {
             execute: () => {
                 this.modelServerClient
@@ -783,6 +805,13 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
+        commands.registerCommand(CloseCoffeeEcoreCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .close('Coffee.ecore')
+                    .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
         commands.registerCommand(ValidationCoffeeEcoreCommand, {
             execute: () => {
                 this.modelServerClient
@@ -926,6 +955,13 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     .then((response: any) => this.messageService.info(printResponse(response)));
             }
         });
+        commands.registerCommand(CloseSuperBrewer3000JsonCommand, {
+            execute: () => {
+                this.modelServerClient
+                    .close('SuperBrewer3000.json')
+                    .then((response: any) => this.messageService.info(printResponse(response)));
+            }
+        });
         commands.registerCommand(ValidationSuperBrewer3000JsonCommand, {
             execute: () => {
                 this.modelServerClient
@@ -1020,6 +1056,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(COFFEE_SAVE_SECTION, { commandId: SaveCoffeeEcoreCommand.id });
         menus.registerMenuAction(COFFEE_SAVE_SECTION, { commandId: UndoCoffeeEcoreCommand.id });
         menus.registerMenuAction(COFFEE_SAVE_SECTION, { commandId: RedoCoffeeEcoreCommand.id });
+        menus.registerMenuAction(COFFEE_SAVE_SECTION, { commandId: CloseCoffeeEcoreCommand.id });
 
         menus.registerMenuAction(COFFEE_VALIDATION_SECTION, { commandId: ValidationCoffeeEcoreCommand.id });
         menus.registerMenuAction(COFFEE_VALIDATION_SECTION, { commandId: ValidationMarkersCoffeeEcoreCommand.id });
@@ -1045,6 +1082,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_SAVE_SECTION, { commandId: SaveCommand.id });
         menus.registerMenuAction(SUPERBREWER_SAVE_SECTION, { commandId: UndoCommand.id });
         menus.registerMenuAction(SUPERBREWER_SAVE_SECTION, { commandId: RedoCommand.id });
+        menus.registerMenuAction(SUPERBREWER_SAVE_SECTION, { commandId: CloseCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_VALIDATION_SECTION, { commandId: ValidationCommand.id });
         menus.registerMenuAction(SUPERBREWER_VALIDATION_SECTION, { commandId: ValidationMarkersCommand.id });
@@ -1069,6 +1107,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_JSON_SAVE_SECTION, { commandId: SaveSuperBrewer3000JsonCommand.id });
         menus.registerMenuAction(SUPERBREWER_JSON_SAVE_SECTION, { commandId: UndoSuperBrewer3000JsonCommand.id });
         menus.registerMenuAction(SUPERBREWER_JSON_SAVE_SECTION, { commandId: RedoSuperBrewer3000JsonCommand.id });
+        menus.registerMenuAction(SUPERBREWER_JSON_SAVE_SECTION, { commandId: CloseSuperBrewer3000JsonCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_JSON_VALIDATION_SECTION, { commandId: ValidationSuperBrewer3000JsonCommand.id });
         menus.registerMenuAction(SUPERBREWER_JSON_VALIDATION_SECTION, { commandId: ValidationMarkersSuperBrewer3000JsonCommand.id });
