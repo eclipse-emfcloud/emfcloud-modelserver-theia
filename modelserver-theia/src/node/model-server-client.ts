@@ -80,6 +80,11 @@ export class DefaultModelServerClient implements ModelServerClient {
         return response.mapBody(ResponseBody.isSuccess);
     }
 
+    async close(modelUri: string): Promise<Response<boolean>> {
+        const response = await this.restClient.post(`${ModelServerPaths.CLOSE}?modeluri=${modelUri}`);
+        return response.mapBody(ResponseBody.isSuccess);
+    }
+
     async undo(modelUri: string): Promise<Response<string>> {
         const response = await this.restClient.get(`${ModelServerPaths.UNDO}?modeluri=${modelUri}`);
         return response.mapBody(ResponseBody.asString);

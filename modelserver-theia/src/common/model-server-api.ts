@@ -75,6 +75,7 @@ export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClie
     getElementByName(modelUri: string, elementname: string, format?: string): Promise<Response<string>>;
 
     delete(modelUri: string): Promise<Response<boolean>>;
+    close(modelUri: string): Promise<Response<boolean>>;
     // snapshot update
     update(modelUri: string, newModel: any): Promise<Response<string>>;
 
