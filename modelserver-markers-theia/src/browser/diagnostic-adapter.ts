@@ -12,12 +12,7 @@
  *    Vincent HEMERY (CS GROUP - France) - initial API and implementation
  ********************************************************************************/
 import { Diagnostic as EMFDiagnostic } from '@eclipse-emfcloud/modelserver-theia/lib/browser';
-import {
-    Diagnostic as LangServerDiagnostic,
-    DiagnosticSeverity,
-
-    Position, Range
-} from 'vscode-languageserver-types';
+import { Diagnostic as LangServerDiagnostic, DiagnosticSeverity, Range } from 'vscode-languageserver-types';
 
 /**
  * Range pointing to a model element
@@ -28,15 +23,11 @@ export interface ModelElementRange extends Range {
 }
 
 export namespace ModelElementRange {
-    /** fake position */
-    const NO_POSITION = Position.create(-1, -1);
     export function create(uriFragment: string): ModelElementRange {
-        const range: ModelElementRange = {
+        return {
             uriFragment: uriFragment,
-            start: NO_POSITION,
-            end: NO_POSITION
+            ...Range.create(0, 0, 0, 0)
         };
-        return range;
     }
     /**
      * Checks whether the given literal conforms to the ModelElementRange interface.
