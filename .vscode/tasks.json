@@ -20,7 +20,7 @@
     {
       "label": "Start Theia Browser Backend",
       "type": "shell",
-      "command": "cd example/browser-app && yarn start",
+      "command": "yarn start",
       "presentation": {
         "reveal": "always",
         "panel": "new"

@@ -11,6 +11,7 @@
     "@typescript-eslint",
     "header",
     "import",
+    "chai-friendly",
     "no-null"
   ],
   "extends": [

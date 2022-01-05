@@ -8,13 +8,13 @@
       "type": "node",
       "request": "launch",
       "name": "Start Browser Backend",
-      "program": "${workspaceRoot}/example/browser-app/src-gen/backend/main.js",
+      "program": "${workspaceRoot}/examples/browser-app/src-gen/backend/main.js",
       "args": [
         "--loglevel=debug",
         "--port=3000",
         "--no-cluster",
-        "--root-dir=${workspaceRoot}/example/workspace",
-        "--app-project-path=${workspaceRoot}/example/browser-app",
+        "--root-dir=${workspaceRoot}/examples/workspace",
+        "--app-project-path=${workspaceRoot}/examples/browser-app",
         "--plugins=local-dir:${workspaceRoot}/plugins"
       ],
       "env": {
@@ -23,10 +23,10 @@
       "sourceMaps": true,
       "outFiles": [
         "${workspaceRoot}/node_modules/@theia/*/lib/**/*.js",
-        "${workspaceRoot}/example/browser-app/lib/**/*.js",
-        "${workspaceRoot}/example/browser-app/src-gen/**/*.js",
-        "${workspaceRoot}/example/dev-example/lib/**/*.js",
-        "${workspaceRoot}/modelserver-theia/lib/**/*.js"
+        "${workspaceRoot}/examples/browser-app/lib/**/*.js",
+        "${workspaceRoot}/examples/browser-app/src-gen/**/*.js",
+        "${workspaceRoot}/examples/dev-example/lib/**/*.js",
+        "${workspaceRoot}/packages/**/lib/**/*.js"
       ],
       "smartStep": true,
       "internalConsoleOptions": "openOnSessionStart",
@@ -39,6 +39,32 @@
       "url": "http://localhost:3000/",
       "sourceMaps": true,
       "webRoot": "${workspaceRoot}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run current test",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": ["--config", "${workspaceFolder}/configs/.mocharc.json", "${file}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run all tests",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": [
+        "--config",
+        "${workspaceFolder}/configs/.mocharc.json",
+        "--no-timeouts",
+        "${workspaceFolder}/packages/*/src/**/*.spec.ts"
+      ],
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }

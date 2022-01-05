@@ -1,0 +1,45 @@
+{
+  "private": true,
+  "name": "browser-app",
+  "license": "(EPL-2.0 OR MIT)",
+  "version": "0.7.0",
+  "dependencies": {
+    "@theia/core": "^1.0.0",
+    "@theia/editor": "^1.0.0",
+    "@theia/filesystem": "^1.0.0",
+    "@theia/markers": "^1.0.0",
+    "@theia/messages": "^1.0.0",
+    "@theia/monaco": "^1.0.0",
+    "@theia/navigator": "^1.0.0",
+    "@theia/plugin-ext-vscode": "^1.0.0",
+    "@theia/preferences": "^1.0.0",
+    "@theia/process": "^1.0.0",
+    "@theia/terminal": "^1.0.0",
+    "@theia/workspace": "^1.0.0",
+    "@modelserver/dev-example": "0.7.0"
+  },
+  "devDependencies": {
+    "@theia/cli": "^1.0.0"
+  },
+  "scripts": {
+    "prepare": "yarn  clean && yarn build && yarn download:plugins",
+    "clean": "theia clean",
+    "build": "theia build --mode development",
+    "start": "theia start --plugins=local-dir:./plugins --root-dir=../workspace",
+    "watch": "theia build --watch --mode development",
+    "download:plugins": "theia download:plugins"
+  },
+  "theia": {
+    "frontend": {
+      "config": {
+        "applicationName": "modelserver-theia Browser Example"
+      }
+    }
+  },
+  "theiaPluginsDir": "plugins",
+  "theiaPlugins": {
+    "vscode-builtin-json": "https://open-vsx.org/api/vscode/json/1.46.1/file/vscode.json-1.46.1.vsix",
+    "vscode-builtin-json-language-features": "https://open-vsx.org/api/vscode/json-language-features/1.46.1/file/vscode.json-language-features-1.46.1.vsix",
+    "vscode-builtin-xml": "https://open-vsx.org/api/vscode/xml/1.44.2/file/vscode.xml-1.44.2.vsix"
+  }
+}
