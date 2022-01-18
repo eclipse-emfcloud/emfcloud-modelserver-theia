@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
+import { Operation } from 'fast-json-patch';
 import { ModelServerMessage } from './model-server-message';
 import { CommandExecutionResult } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
@@ -56,6 +57,15 @@ export interface DirtyStateNotification extends ModelServerNotification {
 export interface IncrementalUpdateNotification extends ModelServerNotification {
     /** The description of the incremental change */
     result: CommandExecutionResult;
+}
+
+/**
+ * An `IncrementalUpdateNotification` is sent to notify subscribers about an incremental model change.
+ * The incremental change is described using JsonPatch {@link Operation}[]
+ */
+export interface IncrementalUpdateNotificationV2 extends ModelServerNotification {
+    /** The description of the incremental change */
+    patch: Operation[];
 }
 
 /**
