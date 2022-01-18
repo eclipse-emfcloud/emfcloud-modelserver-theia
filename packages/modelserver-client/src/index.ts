@@ -9,7 +9,9 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
 export * from './model-server-client';
+export * from './model-server-client-v2';
 export * from './model-server-client-api-v1';
+export * from './model-server-client-api-v2';
 export * from './model-server-notification';
 export * from './model-server-paths';
 export * from './model-server-message';
@@ -20,4 +22,4 @@ export * from './model/diagnostic';
 export * from './subscription-listener';
 export * from './utils/model-server-utils';
 export * from './utils/type-util';
-
+export * from './utils/patch-utils';
