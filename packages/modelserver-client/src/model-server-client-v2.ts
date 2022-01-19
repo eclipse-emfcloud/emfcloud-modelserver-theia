@@ -148,14 +148,14 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
             if (typeof formatOrGuard === 'function') {
                 const typeGuard = formatOrGuard;
                 return this.process(
-                    this.restClient.patch(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
+                    this.restClient.put(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
                     msg => MessageDataMapper.as(msg, typeGuard)
                 );
             }
             format = formatOrGuard;
         }
         return this.process(
-            this.restClient.patch(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
+            this.restClient.put(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
             MessageDataMapper.asObject
         );
     }
