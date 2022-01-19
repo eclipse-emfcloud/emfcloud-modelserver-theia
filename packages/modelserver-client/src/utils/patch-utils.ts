@@ -8,9 +8,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
+import { AddOperation, Operation, RemoveOperation, ReplaceOperation } from 'fast-json-patch';
 
 import { ModelServerObjectV2 } from '../model/base-model';
-import { ReplaceOperation, AddOperation, RemoveOperation, Operation } from 'fast-json-patch';
 import { TypeGuard } from './type-util';
 
 // Utility methods to create Json Patches
@@ -44,15 +44,17 @@ export function replace<T>(modeluri: string, object: ModelServerObjectV2, featur
  * @param modeluri the uri of the model to edit
  * @param parent the parent in which the new element should be created
  * @param feature the property of the parent in which the new element should be added
- * @param value the type of element to create
+ * @param $type the type of element to create
+ * @param attributes the attributes to initialize for the new element
  * @returns The Json Patch AddOperation to create the element.
  */
-export function create(modeluri: string, parent: ModelServerObjectV2, feature: string, $type: string): AddOperation<TypeDefinition> {
+export function create(modeluri: string, parent: ModelServerObjectV2, feature: string, $type: string, attributes?: any): AddOperation<TypeDefinition> {
     return {
         op: 'add',
         path: getPropertyPath(modeluri, parent, feature),
         value: {
-            $type: $type
+            $type: $type,
+            ...attributes
         }
     };
 }
@@ -97,6 +99,18 @@ export function removeValue(modeluri: string, object: ModelServerObjectV2, featu
         return removeValue(modeluri, object, feature, index);
     }
     return undefined;
+}
+
+/**
+ * Create a RemoveOperation, to delete an object from the model.
+ * @param modeluri the uri of the model to edit
+ * @param objectToRemove the object to delete from the model
+ */
+export function removeObject(modeluri: string, objectToRemove: ModelServerObjectV2): RemoveOperation {
+    return {
+        op: 'remove',
+        path: getObjectPath(modeluri, objectToRemove)
+    };
 }
 
 export function getObjectPath(modeluri: string, object: ModelServerObjectV2): string {
