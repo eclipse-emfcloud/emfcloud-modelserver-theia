@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 EclipseSource and others.
+ * Copyright (c) 2019-2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,100 +10,133 @@
  ********************************************************************************/
 import {
     CloseNotification,
+    CommandExecutionResult,
+    Diagnostic,
     DirtyStateNotification,
     ErrorNotification,
     FullUpdateNotification,
     IncrementalUpdateNotification,
+    MessageDataMapper,
+    MessageType,
+    ModelServerMessage,
     ModelServerNotification,
-    ModelServerNotificationListener,
-    NotificationSubscriptionListener,
-    SubscriptionListener,
     UnknownNotification,
     ValidationNotification
 } from '@eclipse-emfcloud/modelserver-client';
 import { Emitter, Event } from '@theia/core';
 import { injectable } from '@theia/core/shared/inversify';
+import WebSocket from 'isomorphic-ws';
+
+import { ModelServerFrontendClient } from '../common';
 
 export const ModelServerSubscriptionService = Symbol('ModelServerSubscriptionService');
 export interface ModelServerSubscriptionService {
-    readonly subscriptionListener: SubscriptionListener;
+    readonly onOpenListener: Event<ModelServerNotification>;
+    readonly onClosedListener: Event<CloseNotification>;
+    readonly onErrorListener: Event<ErrorNotification>;
 
-    readonly onOpen: Event<ModelServerNotification>;
-    readonly onClose: Event<CloseNotification>;
-    readonly onError: Event<ErrorNotification>;
-
-    readonly onDirtyStateChange: Event<DirtyStateNotification>;
-    readonly onIncrementalUpdate: Event<IncrementalUpdateNotification>;
-    readonly onFullUpdate: Event<FullUpdateNotification>;
-    readonly onSuccess: Event<ModelServerNotification>;
-    readonly onUnknownMessage: Event<UnknownNotification>;
-    readonly onValidationResult: Event<ValidationNotification>;
+    readonly onDirtyStateListener: Event<DirtyStateNotification>;
+    readonly onIncrementalUpdateListener: Event<IncrementalUpdateNotification>;
+    readonly onFullUpdateListener: Event<FullUpdateNotification>;
+    readonly onSuccessListener: Event<ModelServerNotification>;
+    readonly onUnknownMessageListener: Event<UnknownNotification>;
+    readonly onValidationResultListener: Event<ValidationNotification>;
 }
 @injectable()
-export class DefaultSubscriptionService implements ModelServerSubscriptionService {
-
-    protected _subscriptionListener = this.createSubscriptionListener();
-
-    protected createSubscriptionListener(): SubscriptionListener {
-        const messageListener: ModelServerNotificationListener = {
-            onOpen: msg => this.onOpenEmitter.fire(msg),
-            onClose: msg => this.onClosedEmitter.fire(msg),
-            onError: msg => this.onErrorEmitter.fire(msg),
-            onSuccess: msg => this.onSuccessEmitter.fire(msg),
-            onDirtyStateChanged: msg => this.onDirtyStateChangeEmitter.fire(msg),
-            onIncrementalUpdate: msg => this.onIncrementalUpdateEmitter.fire(msg),
-            onFullUpdate: msg => this.onFullUpdateEmitter.fire(msg),
-            onValidation: msg => this.onValidationResultEmitter.fire(msg),
-            onUnknown: msg => this.onUnknownMessageEmitter.fire(msg)
-        };
-
-        return new NotificationSubscriptionListener(messageListener);
-    }
-    get subscriptionListener(): SubscriptionListener {
-        return this._subscriptionListener;
+export class ModelServerSubscriptionClient implements ModelServerFrontendClient, ModelServerSubscriptionService {
+    onOpen(modelUri: string, _event: WebSocket.Event): void {
+        this.onOpenEmitter.fire({ modelUri });
     }
 
-    protected onOpenEmitter = new Emitter<ModelServerNotification>();
-    get onOpen(): Event<Readonly<ModelServerNotification>> {
+    onClose(modelUri: string, event: WebSocket.CloseEvent): void {
+        this.onClosedEmitter.fire({ modelUri, code: event.code, reason: event.reason });
+    }
+
+    onError(modelUri: string, event: WebSocket.ErrorEvent): void {
+        this.onErrorEmitter.fire({ modelUri, error: event.error });
+    }
+
+    onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
+        const message = JSON.parse(event.data.toString());
+        if (ModelServerMessage.is(message)) {
+            const type = MessageType.asMessageType(message.type);
+            switch (type) {
+                case MessageType.dirtyState: {
+                    this.onDirtyStateEmitter.fire({ modelUri, isDirty: MessageDataMapper.asBoolean(message) });
+                    break;
+                }
+                case MessageType.keepAlive:
+                case MessageType.success: {
+                    this.onSuccessEmitter.fire({ modelUri });
+                    break;
+                }
+                case MessageType.error: {
+                    this.onErrorEmitter.fire({ modelUri, error: MessageDataMapper.asString(message) });
+                    break;
+                }
+                case MessageType.incrementalUpdate: {
+                    this.onIncrementalUpdateEmitter.fire({
+                        modelUri,
+                        result: MessageDataMapper.as(message, CommandExecutionResult.is)
+                    });
+                    break;
+                }
+                case MessageType.fullUpdate: {
+                    this.onFullUpdateEmitter.fire({ modelUri, model: MessageDataMapper.asObject(message) });
+                    break;
+                }
+                case MessageType.validationResult: {
+                    this.onValidationResultEmitter.fire({ modelUri, diagnostic: MessageDataMapper.as(message, Diagnostic.is) });
+                    break;
+                }
+                default: {
+                    this.onUnknownMessageEmitter.fire({ ...message, modelUri });
+                }
+            }
+        }
+    }
+
+    protected onOpenEmitter = new Emitter<Readonly<ModelServerNotification>>();
+    get onOpenListener(): Event<ModelServerNotification> {
         return this.onOpenEmitter.event;
     }
 
-    protected onClosedEmitter = new Emitter<CloseNotification>();
-    get onClose(): Event<Readonly<CloseNotification>> {
+    protected onClosedEmitter = new Emitter<Readonly<CloseNotification>>();
+    get onClosedListener(): Event<CloseNotification> {
         return this.onClosedEmitter.event;
     }
 
-    protected onErrorEmitter = new Emitter<ErrorNotification>();
-    get onError(): Event<Readonly<ErrorNotification>> {
+    protected onErrorEmitter = new Emitter<Readonly<ErrorNotification>>();
+    get onErrorListener(): Event<ErrorNotification> {
         return this.onErrorEmitter.event;
     }
 
-    protected onDirtyStateChangeEmitter = new Emitter<DirtyStateNotification>();
-    get onDirtyStateChange(): Event<Readonly<DirtyStateNotification>> {
-        return this.onDirtyStateChangeEmitter.event;
+    protected onDirtyStateEmitter = new Emitter<Readonly<DirtyStateNotification>>();
+    get onDirtyStateListener(): Event<DirtyStateNotification> {
+        return this.onDirtyStateEmitter.event;
     }
 
-    protected onIncrementalUpdateEmitter = new Emitter<IncrementalUpdateNotification>();
-    get onIncrementalUpdate(): Event<Readonly<IncrementalUpdateNotification>> {
+    protected onIncrementalUpdateEmitter = new Emitter<Readonly<IncrementalUpdateNotification>>();
+    get onIncrementalUpdateListener(): Event<IncrementalUpdateNotification> {
         return this.onIncrementalUpdateEmitter.event;
     }
-    protected onFullUpdateEmitter = new Emitter<FullUpdateNotification>();
-    get onFullUpdate(): Event<Readonly<FullUpdateNotification>> {
+    protected onFullUpdateEmitter = new Emitter<Readonly<FullUpdateNotification>>();
+    get onFullUpdateListener(): Event<FullUpdateNotification> {
         return this.onFullUpdateEmitter.event;
     }
 
-    protected onSuccessEmitter = new Emitter<ModelServerNotification>();
-    get onSuccess(): Event<Readonly<ModelServerNotification>> {
+    protected onSuccessEmitter = new Emitter<Readonly<ModelServerNotification>>();
+    get onSuccessListener(): Event<ModelServerNotification> {
         return this.onSuccessEmitter.event;
     }
 
     protected onUnknownMessageEmitter = new Emitter<Readonly<UnknownNotification>>();
-    get onUnknownMessage(): Event<Readonly<UnknownNotification>> {
+    get onUnknownMessageListener(): Event<UnknownNotification> {
         return this.onUnknownMessageEmitter.event;
     }
 
     protected onValidationResultEmitter = new Emitter<Readonly<ValidationNotification>>();
-    get onValidationResult(): Event<Readonly<ValidationNotification>> {
+    get onValidationResultListener(): Event<ValidationNotification> {
         return this.onValidationResultEmitter.event;
     }
 }

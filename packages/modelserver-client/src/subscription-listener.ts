@@ -30,10 +30,10 @@ import { Diagnostic } from './model/diagnostic';
  * notifications for the subscribed model.
  */
 export interface SubscriptionListener {
-    onOpen?(modelUri: string, event: WebSocket.Event): void;
-    onClose?(modelUri: string, event: WebSocket.CloseEvent): void;
-    onError?(modelUri: string, event: WebSocket.ErrorEvent): void;
-    onMessage?(modelUri: string, event: WebSocket.MessageEvent): void;
+    onOpen(modelUri: string, event: WebSocket.Event): void;
+    onClose(modelUri: string, event: WebSocket.CloseEvent): void;
+    onError(modelUri: string, event: WebSocket.ErrorEvent): void;
+    onMessage(modelUri: string, event: WebSocket.MessageEvent): void;
 }
 
 /**

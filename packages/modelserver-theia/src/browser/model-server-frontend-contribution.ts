@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 EclipseSource and others.
+ * Copyright (c) 2019-2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,16 +8,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { ModelServerClient } from '@eclipse-emfcloud/modelserver-client';
 import { MaybePromise } from '@theia/core';
 import { FrontendApplication, FrontendApplicationContribution } from '@theia/core/lib/browser';
+import { inject, injectable } from '@theia/core/shared/inversify';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { inject, injectable } from 'inversify';
+
+import { TheiaModelServerClient } from '../common';
 
 @injectable()
 export class ModelServerFrontendContribution implements FrontendApplicationContribution {
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
-    @inject(ModelServerClient) protected readonly modelServerClient: ModelServerClient;
+    @inject(TheiaModelServerClient) protected readonly modelServerClient: TheiaModelServerClient;
 
     configure(app: FrontendApplication): MaybePromise<void> {
         return this.setup();

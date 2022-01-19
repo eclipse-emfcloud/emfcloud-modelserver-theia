@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021 CS GROUP - France and others.
+ * Copyright (c) 2021-2022 CS GROUP - France and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,7 +11,7 @@
  * Contributors:
  *    Vincent HEMERY (CS GROUP - France) - initial API and implementation
  ********************************************************************************/
-import { Diagnostic as EMFDiagnostic } from '@eclipse-emfcloud/modelserver-theia/lib/browser';
+import { Diagnostic as EMFDiagnostic } from '@eclipse-emfcloud/modelserver-client';
 import { Diagnostic as LangServerDiagnostic, DiagnosticSeverity, Range } from 'vscode-languageserver-types';
 
 /**

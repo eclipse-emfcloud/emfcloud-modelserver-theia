@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@theia/markers": "^1.0.0",
-    "@eclipse-emfcloud/modelserver-theia": "0.7.0"
+    "@eclipse-emfcloud/modelserver-client": "0.7.0"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",

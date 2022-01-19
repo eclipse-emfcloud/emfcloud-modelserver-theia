@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 EclipseSource and others.
+ * Copyright (c) 2019-2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
 import { LaunchOptions } from '@eclipse-emfcloud/modelserver-theia/lib/node';
-import { ContainerModule, injectable } from 'inversify';
+import { ContainerModule, injectable } from '@theia/core/shared/inversify';
 import { join, resolve } from 'path';
 
 export default new ContainerModule(bind => {

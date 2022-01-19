@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021 CS GROUP - France and others.
+ * Copyright (c) 2021-2022 CS GROUP - France and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,11 +11,12 @@
  * Contributors:
  *    Vincent HEMERY (CS GROUP - France) - initial API and implementation
  ********************************************************************************/
-import { Diagnostic as EMFDiagnostic } from '@eclipse-emfcloud/modelserver-theia/lib/browser';
+import { Diagnostic as EMFDiagnostic } from '@eclipse-emfcloud/modelserver-client';
 import URI from '@theia/core/lib/common/uri';
+import { inject, injectable } from '@theia/core/shared/inversify';
 import { ProblemManager } from '@theia/markers/lib/browser';
-import { inject, injectable } from 'inversify';
 import { Diagnostic as LangServerDiagnostic } from 'vscode-languageserver-types';
+
 import { DiagnosticAdapter } from './diagnostic-adapter';
 
 @injectable()

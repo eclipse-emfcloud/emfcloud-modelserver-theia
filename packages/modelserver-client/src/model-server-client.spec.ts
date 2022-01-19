@@ -184,7 +184,7 @@ describe('tests for ModelServerClient', () => {
             });
         });
 
-        it('save', done => {
+        it('saveAll', done => {
             client.saveAll();
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent();
@@ -350,7 +350,7 @@ describe('tests for ModelServerClient', () => {
             });
         });
 
-        it('ping ', done => {
+        it('getAll ', done => {
             const model1: Model = {
                 modelUri: 'path/to/model1',
                 content: {

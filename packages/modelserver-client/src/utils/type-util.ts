@@ -95,7 +95,7 @@ export function asString(object: unknown): string {
     if (typeof object === 'string') {
         return object;
     }
-    return JSON.stringify(object);
+    return JSON.stringify(object, undefined, 2);
 }
 
 /**

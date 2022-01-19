@@ -22,7 +22,7 @@
     "@theia/cli": "^1.0.0"
   },
   "scripts": {
-    "prepare": "yarn  clean && yarn build && yarn download:plugins",
+    "prepare": "yarn clean && yarn build && yarn download:plugins",
     "clean": "theia clean",
     "build": "theia build --mode development",
     "start": "theia start --plugins=local-dir:./plugins --root-dir=../workspace",

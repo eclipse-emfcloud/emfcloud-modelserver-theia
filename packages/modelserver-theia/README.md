@@ -52,7 +52,7 @@ export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClie
 
 ```typescript
 
-@inject(ModelServerClient) protected readonly modelServerClient: ModelServerClient;
+@inject(TheiaModelServerClient) protected readonly modelServerClient: TheiaModelServerClient;
 
 // perform simple GET
 this.modelServerClient.get('SuperBrewer3000.json')

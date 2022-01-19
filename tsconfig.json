@@ -10,11 +10,14 @@
         "packages/modelserver-markers-theia/src/*"
       ],
       "@modelserver/coffee-theia": [
-        "examples/coffe-theia/src/*"
+        "examples/coffee-theia/src/*"
       ],
       "@modelserver/dev-example": [
         "examples/dev-example/src/*"
-      ]
+      ],
+      "@eclipse-emfcloud/modelserver-client": [
+        "packages/modelserver-client/src/*"
+      ],
     }
   },
   "include": [

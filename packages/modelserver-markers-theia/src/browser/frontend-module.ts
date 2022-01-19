@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021 CS GROUP - France and others.
+ * Copyright (c) 2021-2022 CS GROUP - France and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,7 +11,8 @@
  * Contributors:
  *    Vincent HEMERY (CS GROUP - France) - initial API and implementation
  ********************************************************************************/
-import { ContainerModule } from 'inversify';
+import { ContainerModule } from '@theia/core/shared/inversify';
+
 import { DiagnosticManager } from './diagnostic-manager';
 
 export default new ContainerModule(bind => {

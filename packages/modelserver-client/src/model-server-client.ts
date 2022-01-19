@@ -42,17 +42,13 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         return { baseURL };
     }
 
-    get(modeluri: string, format?: string): Promise<AnyObject>;
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
-    get<M>(modeluri: string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
-        if (typeof formatOrGuard === 'function') {
-            const typeGuard = formatOrGuard;
-            return this.process(this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri, format } }), msg =>
-                MessageDataMapper.as(msg, typeGuard)
-            );
-        }
-        format = formatOrGuard;
-        return this.process(this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri, format } }), MessageDataMapper.asObject);
+    get(modeluri: string,): Promise<AnyObject>;
+    get<M>(modeluri: string, typeGuard: TypeGuard<M>,): Promise<M>;
+    get(modeluri: string, format: string): Promise<string>;
+    get<M>(modeluri: string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
+        const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
+        const mapper = createMapper<M>(formatOrGuard);
+        return this.process(this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri, format } }), mapper);
     }
 
     getAll(): Promise<Model[]>;
@@ -61,14 +57,15 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     getAll<M>(formatOrGuard?: FormatOrGuard<M>): Promise<Array<Model | Model<string> | Model<M>>> {
         let modelMapper: (model: Model) => Model<string | AnyObject | M>;
         let format = 'json';
-        if (!formatOrGuard) {
-            modelMapper = (model: Model) => mapModel(model);
-        } else if (typeof formatOrGuard === 'string') {
+        if (typeof formatOrGuard === 'string') {
             format = formatOrGuard;
             modelMapper = (model: Model) => mapModel(model, undefined, true);
-        } else {
+        } else if (typeof formatOrGuard === 'function') {
             modelMapper = (model: Model) => mapModel(model, formatOrGuard);
+        } else {
+            modelMapper = (model: Model) => mapModel(model);
         }
+
         const messageMapper = (message: ModelServerMessage): Array<Model | Model<string> | Model<M>> =>
             MessageDataMapper.asModelArray(message).map(modelMapper);
 
@@ -79,87 +76,51 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         return this.process(this.restClient.get(ModelServerPaths.MODEL_URIS), MessageDataMapper.asStringArray);
     }
 
-    getElementById(modeluri: string, elementid: string, format?: string): Promise<AnyObject>;
+    getElementById(modeluri: string, elementid: string): Promise<AnyObject>;
     getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>): Promise<M>;
-    getElementById<M>(modeluri: string, elementid: string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
-        format = format ?? 'json';
-        if (formatOrGuard) {
-            if (typeof formatOrGuard === 'function') {
-                const typeGuard = formatOrGuard;
-                return this.process(this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementid, format } }), msg =>
-                    MessageDataMapper.as(msg, typeGuard)
-                );
-            }
-            format = formatOrGuard;
-        }
+    getElementById(modeluri: string, elementid: string, format: string): Promise<string>;
+    getElementById<M>(modeluri: string, elementid: string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
+        const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
+        const mapper = createMapper<M>(formatOrGuard);
         return this.process(
             this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementid, format } }),
-            MessageDataMapper.asObject
+            mapper
         );
     }
 
-    getElementByName(modeluri: string, elementname: string, format?: string): Promise<AnyObject>;
+    getElementByName(modeluri: string, elementname: string): Promise<AnyObject>;
     getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
-    getElementByName<M>(modeluri: string, elementname: string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
-        format = format ?? 'json';
-        if (formatOrGuard) {
-            if (typeof formatOrGuard === 'function') {
-                const typeGuard = formatOrGuard;
-                return this.process(
-                    this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementname, format } }),
-                    msg => MessageDataMapper.as(msg, typeGuard)
-                );
-            }
-            format = formatOrGuard;
-        }
+    getElementByName(modeluri: string, elementname: string, format: string): Promise<string>;
+    getElementByName<M>(modeluri: string, elementname: string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
+        const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
+        const mapper = createMapper<M>(formatOrGuard);
         return this.process(
             this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementname, format } }),
-            MessageDataMapper.asObject
+            mapper
         );
     }
 
-    create(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
-    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
-    create<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
-        format = format ?? 'json';
-        if (formatOrGuard) {
-            if (typeof formatOrGuard === 'function') {
-                const typeGuard = formatOrGuard;
-                return this.process(
-                    this.restClient.post(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
-                    msg => MessageDataMapper.as(msg, typeGuard)
-                );
-            }
-            format = formatOrGuard;
-        }
+    create(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
+    create(modeluri: string, model: AnyObject | string, format: string): Promise<string>;
+    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>): Promise<M>;
+    create<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
+        const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
+        const mapper = createMapper<M>(formatOrGuard);
         return this.process(
             this.restClient.post(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
-            MessageDataMapper.asObject
+            mapper
         );
     }
 
+    update(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
+    update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>): Promise<M>;
     update(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
-    update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
-    update<M>(
-        modeluri: string,
-        model: AnyObject | string,
-        formatOrGuard?: FormatOrGuard<M>,
-        format?: string
-    ): Promise<AnyObject> | Promise<M> {
-        format = format ?? 'json';
-        if (formatOrGuard) {
-            if (typeof formatOrGuard === 'function') {
-                const typeGuard = formatOrGuard;
-                return this.process(
-                    this.restClient.patch(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
-                    msg => MessageDataMapper.as(msg, typeGuard)
-                );
-            }
-            format = formatOrGuard;
-        }
+    update<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
+        const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
+        const mapper = createMapper<M>(formatOrGuard);
         return this.process(
             this.restClient.patch(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
-            MessageDataMapper.asObject
+            mapper
         );
     }
 
@@ -236,9 +197,9 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         }
     }
 
-    subscribe(modeluri: string, options: SubscriptionOptions = {}): SubscriptionListener {
+    subscribe(modeluri: string, options: SubscriptionOptions = {}): void {
         if (!options.listener) {
-            const errorMsg = `${modeluri} : Cannot subscribe. No lister is present!'`;
+            const errorMsg = `${modeluri} : Cannot subscribe. No listener is present!'`;
             throw new Error(errorMsg);
         }
         if (this.isSocketOpen(modeluri)) {
@@ -250,7 +211,6 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         }
         const path = this.createSubscriptionPath(modeluri, options);
         this.doSubscribe(options.listener, modeluri, path);
-        return options.listener;
     }
 
     unsubscribe(modeluri: string): void {
@@ -262,22 +222,24 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     }
 
     protected createSubscriptionPath(modeluri: string, options: SubscriptionOptions): string {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { listener, ...paramOptions } = options;
         const queryParams = new URLSearchParams();
         queryParams.append('modeluri', modeluri);
         if (!options.format) {
             options.format = this.defaultFormat;
         }
-        Object.entries(options).forEach(entry => queryParams.append(entry[0], entry[1]));
+        Object.entries(paramOptions).forEach(entry => queryParams.append(entry[0], entry[1]));
         queryParams.delete('errorWhenUnsuccessful');
         return `${this._baseUrl}${ModelServerPaths.SUBSCRIPTION}?${queryParams.toString()}`.replace(/^(http|https):\/\//i, 'ws://');
     }
 
     protected doSubscribe(listener: SubscriptionListener, modelUri: string, path: string): void {
         const socket = new WebSocket(path.trim());
-        socket.onopen = event => listener.onOpen?.(modelUri, event);
-        socket.onclose = event => listener.onClose?.(modelUri, event);
-        socket.onerror = event => listener.onError?.(modelUri, event);
-        socket.onmessage = event => listener.onMessage?.(modelUri, event);
+        socket.onopen = event => listener.onOpen(modelUri, event);
+        socket.onclose = event => listener.onClose(modelUri, event);
+        socket.onerror = event => listener.onError(modelUri, event);
+        socket.onmessage = event => listener.onMessage(modelUri, event);
         this.openSockets.set(modelUri, socket);
     }
 
@@ -312,6 +274,23 @@ function isAxiosError(error: any): error is AxiosError {
  * a 'format' string or a typeguard to cast the response to a concrete type.
  */
 type FormatOrGuard<M> = string | TypeGuard<M>;
+
+/**
+ * Creates a modelserver message data mapper that maps the response either to a generic JSON object, a specific typed object or string.
+ * The actual mapper is derived from the input parameters.
+ * @param guard
+ * @param toString
+ */
+function createMapper<M>(formatOrGuard?: FormatOrGuard<M>): MessageDataMapper<AnyObject | M | string> {
+    if (typeof formatOrGuard === 'string') {
+        return msg => MessageDataMapper.asString(msg);
+    } else if (typeof formatOrGuard === 'function') {
+        const typeGuard = formatOrGuard;
+        return msg => MessageDataMapper.as(msg, typeGuard);
+    }
+    return msg => MessageDataMapper.asObject(msg);
+
+}
 
 function mapModel<M>(model: Model, guard?: TypeGuard<M>, toString = false): Model<AnyObject | M | string> {
     const { modelUri, content } = model;

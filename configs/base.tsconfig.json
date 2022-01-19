@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "skipLibCheck": true,
     "declaration": true,
@@ -14,6 +15,7 @@
     "downlevelIteration": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "esModuleInterop": true,
     "target": "ES2017",
     "jsx": "react",
     "lib": [

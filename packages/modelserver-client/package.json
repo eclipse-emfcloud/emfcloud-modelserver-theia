@@ -37,11 +37,11 @@
   "dependencies": {
     "axios": "^0.24.0",
     "events": "^3.3.0",
-    "ws": "^8.2.3",
+    "ws": "^7.4.6",
     "isomorphic-ws": "^4.0.1"
   },
   "devDependencies": {
-    "@types/ws": "^8.2.0",
+    "@types/ws": "",
     "typescript": "^3.9.2",
     "@types/moxios": "^0.4.14",
     "moxios": "^0.4.0"

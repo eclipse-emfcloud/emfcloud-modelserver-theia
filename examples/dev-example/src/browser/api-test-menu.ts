@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019-2021 EclipseSource and others.
+ * Copyright (c) 2019-2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,6 +10,8 @@
  ********************************************************************************/
 import {
     AddCommand,
+    AnyObject,
+    asString,
     CompoundCommand,
     Diagnostic,
     MessageType,
@@ -25,7 +27,8 @@ import {
     MAIN_MENU_BAR,
     MenuContribution,
     MenuModelRegistry,
-    MessageService
+    MessageService,
+    MessageType as MessageLevel
 } from '@theia/core';
 import { ConfirmDialog } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
@@ -475,14 +478,22 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         this.initializeWebSocketListener();
     }
 
-    protected async printResponse(request: string, response: object | string | boolean | number): Promise<void> {
+    protected async printResponse(request: string, response: object | string | boolean | number, level: MessageLevel = MessageLevel.Info): Promise<void> {
         const now = new Date(Date.now());
         const message = `${now.toISOString()} | [ModelServer] Received response for '${request}' request`;
         const showResponse = 'Show response';
         const responseMsg = response instanceof Error
             ? `${response.message}\n\n${response.stack ?? ''}`
-            : JSON.stringify(response, undefined, 2);
-        const action = await this.messageService.info(message, showResponse);
+            : asString(response);
+        let action: string | undefined = undefined;
+        if (level === MessageLevel.Info) {
+            action = await this.messageService.info(message, showResponse);
+        } else if (level === MessageLevel.Error) {
+            action = await this.messageService.error(message, showResponse);
+        } else if (level === MessageLevel.Warning) {
+            action = await this.messageService.warn(message, showResponse);
+        }
+
         if (action === showResponse) {
             this.showResponse(request, responseMsg);
         }
@@ -572,7 +583,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const setCommand = new SetCommand(owner, feature, changedValues);
                 this.modelServerClient
                     .edit('SuperBrewer3000.coffee', setCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit SetCommand', result));
             }
         });
         commands.registerCommand(EditRemoveCommand, {
@@ -588,7 +599,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const removeCommand = new RemoveCommand(owner, feature, indices);
                 this.modelServerClient
                     .edit('SuperBrewer3000.coffee', removeCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit RemoveCommand', result));
             }
         });
         commands.registerCommand(EditAddCommand, {
@@ -604,7 +615,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const addCommand = new AddCommand(owner, feature, toAdd);
                 this.modelServerClient
                     .edit('SuperBrewer3000.coffee', addCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit AddCommand', result));
             }
         });
         commands.registerCommand(PatchCommand, {
@@ -686,7 +697,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(GetModelCoffeeEcoreCommand, {
             execute: () => {
                 this.modelServerClient
-                    .get('Coffee.ecore')
+                    .get<AnyObject>('Coffee.ecore', AnyObject.is)
                     .then(result => this.printResponse('get', result));
             }
         });
@@ -694,7 +705,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             execute: () => {
                 this.modelServerClient
                     .get('Coffee.ecore', 'xmi')
-                    .then(result => this.printResponse('get', result));
+                    .then(result => this.printResponse('get in xmi format', result));
             }
         });
         commands.registerCommand(GetModelElementByIdCoffeeEcoreCommand, {
@@ -708,7 +719,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             execute: () => {
                 this.modelServerClient
                     .getElementById('Coffee.ecore', '//@eClassifiers.2', 'xmi')
-                    .then(result => this.printResponse('getElementById', result));
+                    .then(result => this.printResponse('getElementById in xmi format', result));
             }
         });
         commands.registerCommand(GetModelElementByNameCoffeeEcoreCommand, {
@@ -722,7 +733,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             execute: () => {
                 this.modelServerClient
                     .getElementByName('Coffee.ecore', 'Machine', 'xmi')
-                    .then(result => this.printResponse('getElementByName', result));
+                    .then(result => this.printResponse('getElementByName in xmi format', result));
             }
         });
         commands.registerCommand(EditCompoundCoffeeEcoreCommand, {
@@ -751,7 +762,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
 
                 this.modelServerClient
                     .edit('Coffee.ecore', compoundCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit CompoundCommand', result));
             }
         });
         commands.registerCommand(EditSetCoffeeEcoreCommand, {
@@ -767,7 +778,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const setCommand = new SetCommand(owner, feature, changedValues);
                 this.modelServerClient
                     .edit('Coffee.ecore', setCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit SetCommand', result));
             }
         });
         commands.registerCommand(EditRemoveCoffeeEcoreCommand, {
@@ -783,7 +794,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const removeCommand = new RemoveCommand(owner, feature, indices);
                 this.modelServerClient
                     .edit('Coffee.ecore', removeCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit RemoveCommand', result));
             }
         });
         commands.registerCommand(EditAddCoffeeEcoreCommand, {
@@ -910,7 +921,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const setCommand = new SetCommand(owner, feature, changedValues);
                 this.modelServerClient
                     .edit('SuperBrewer3000.json', setCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit SetCommand', result));
             }
         });
         commands.registerCommand(EditRemoveSuperBrewer3000JsonCommand, {
@@ -926,7 +937,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const removeCommand = new RemoveCommand(owner, feature, indices);
                 this.modelServerClient
                     .edit('SuperBrewer3000.json', removeCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit RemoveCommand', result));
             }
         });
         commands.registerCommand(EditAddSuperBrewer3000JsonCommand, {
@@ -942,14 +953,14 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                 const addCommand = new AddCommand(owner, feature, toAdd);
                 this.modelServerClient
                     .edit('SuperBrewer3000.json', addCommand)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit AddCommand', result));
             }
         });
         commands.registerCommand(UpdateTaskNameSuperBrewer3000JsonCustomCommand, {
             execute: () => {
                 const updateTaskName = new UpdateTaskNameCommand('Coffee');
                 this.modelServerClient.edit('SuperBrewer3000.json', updateTaskName)
-                    .then(result => this.printResponse('edit', result));
+                    .then(result => this.printResponse('edit CustomCommand', result));
             }
         });
         commands.registerCommand(UndoSuperBrewer3000JsonCommand, {
@@ -1049,7 +1060,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             execute: () => this.modelServerClient
                 .counter(undefined, undefined)
                 .then(result => this.printResponse('counter', result))
-                .catch(error => this.printResponse('counter', error))
+                .catch(error => this.printResponse('counter', error, MessageLevel.Error))
 
         });
     }
@@ -1157,34 +1168,34 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     }
 
     private initializeWebSocketListener(clearIntervalId = false): void {
-        this.modelServerSubscriptionService.onOpen(msg => {
+        this.modelServerSubscriptionService.onOpenListener(msg => {
             this.showSocketInfo('Subscription opened!', msg.modelUri);
         });
-        this.modelServerSubscriptionService.onDirtyStateChange(msg => {
+        this.modelServerSubscriptionService.onDirtyStateListener(msg => {
             this.showSocketInfo(`DirtyState ${msg.modelUri}`, `${msg.isDirty}`);
         });
-        this.modelServerSubscriptionService.onIncrementalUpdate(msg => {
+        this.modelServerSubscriptionService.onIncrementalUpdateListener(msg => {
 
             console.log(`Incremental update due to command execution: Reason '${msg.result.type}' based on command '${msg.result.source.type}'`);
 
             this.showSocketInfo(`IncrementalUpdate ${JSON.stringify(msg.result)}`, msg.modelUri);
         });
-        this.modelServerSubscriptionService.onFullUpdate(msg => {
+        this.modelServerSubscriptionService.onFullUpdateListener(msg => {
             this.showSocketInfo(`FullUpdate ${JSON.stringify(msg.model)}`, msg.modelUri);
         });
-        this.modelServerSubscriptionService.onSuccess(msg => {
+        this.modelServerSubscriptionService.onSuccessListener(msg => {
             this.showSocketInfo('Success', msg.modelUri);
         });
-        this.modelServerSubscriptionService.onUnknownMessage(msg => {
+        this.modelServerSubscriptionService.onUnknownMessageListener(msg => {
             this.showSocketWarning(`Unknown Message ${JSON.stringify(msg.data)}`, msg.modelUri);
         });
-        this.modelServerSubscriptionService.onClose(msg => {
+        this.modelServerSubscriptionService.onClosedListener(msg => {
             this.showSocketInfo(`Subscription closed! Reason: ${JSON.stringify(msg)}`, msg.modelUri);
         });
-        this.modelServerSubscriptionService.onError(msg => {
+        this.modelServerSubscriptionService.onErrorListener(msg => {
             this.showSocketError(`Error! ${JSON.stringify(msg.error)}`, msg.modelUri);
         });
-        this.modelServerSubscriptionService.onValidationResult(result => {
+        this.modelServerSubscriptionService.onValidationResultListener(result => {
             this.showSocketInfo(`Validation result ${JSON.stringify(result.diagnostic)}`, result.modelUri);
         });
     }
@@ -1230,9 +1241,6 @@ function createMarkersFromDiagnostic(diagnosticManager: DiagnosticManager, model
   */
 function wrapMessage(msg: string): HTMLDivElement {
     // Convert line breaks to proper html line breaks
-    const regex = /\\n|\\r\\n|\\n\\r|\\r/g;
-    msg.replace(regex, '<br>');
-
     const scrollDiv = document.createElement('div');
     scrollDiv.style.maxHeight = '260px';
     scrollDiv.style.overflow = 'auto';

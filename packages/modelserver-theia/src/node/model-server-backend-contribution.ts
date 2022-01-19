@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 EclipseSource and others.
+ * Copyright (c) 2019-2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,14 +8,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { ModelServerClient } from '@eclipse-emfcloud/modelserver-client';
 import { BackendApplicationContribution } from '@theia/core/lib/node';
+import { inject, injectable, optional } from '@theia/core/shared/inversify';
 import { ProcessErrorEvent } from '@theia/process/lib/node/process';
 import { ProcessManager } from '@theia/process/lib/node/process-manager';
 import { RawProcess, RawProcessFactory } from '@theia/process/lib/node/raw-process';
 import * as cp from 'child_process';
-import { inject, injectable, optional } from 'inversify';
 
+import { TheiaModelServerClient } from '../common';
 import { DEFAULT_LAUNCH_OPTIONS, LaunchOptions } from './launch-options';
 
 export const ModelServerLauncher = Symbol('ModelServerLauncher');
@@ -30,11 +30,9 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
     @inject(LaunchOptions) @optional() protected readonly launchOptions: LaunchOptions = DEFAULT_LAUNCH_OPTIONS;
     @inject(RawProcessFactory) protected readonly processFactory: RawProcessFactory;
     @inject(ProcessManager) protected readonly processManager: ProcessManager;
-    @inject(ModelServerClient) protected readonly modelserverClient: ModelServerClient;
+    @inject(TheiaModelServerClient) protected readonly modelserverClient: TheiaModelServerClient;
 
     async initialize(): Promise<void> {
-        const baseUrl = this.getBaseUrl();
-        await this.modelserverClient.initialize(baseUrl);
         try {
             const alive = await this.modelserverClient.ping();
             if (alive) {
@@ -46,12 +44,6 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
             this.logInfo('Starting Model Server from jar');
             this.startServer();
         }
-    }
-
-    protected getBaseUrl(): string {
-        const baseUrl = `http://${this.launchOptions.hostname}:${this.launchOptions.serverPort}/${this.launchOptions.baseURL}`;
-        return baseUrl;
-
     }
 
     startServer(): boolean {

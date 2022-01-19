@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2020 EclipseSource and others.
+ * Copyright (c) 2020-2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,10 +8,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { AnyObject, ModelServerClient, ModelServerCommand } from '@eclipse-emfcloud/modelserver-client';
+import { AnyObject, ModelServerCommand } from '@eclipse-emfcloud/modelserver-client';
+import { TheiaModelServerClient } from '@eclipse-emfcloud/modelserver-theia';
 
 export const DevModelServerClient = Symbol('DevModelServerClient');
-export interface DevModelServerClient extends ModelServerClient {
+export interface DevModelServerClient extends TheiaModelServerClient {
     counter(operation: 'add' | 'subtract' | undefined, delta: number | undefined): Promise<AnyObject>;
 }
 

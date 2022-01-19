@@ -48,26 +48,31 @@ export interface ModelServerClientApiV1 {
      */
     getAll(format: string): Promise<Model<string>[]>;
 
-    get(modeluri: string, format?: string): Promise<AnyObject>;
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    get(modeluri: string,): Promise<AnyObject>;
+    get<M>(modeluri: string, typeGuard: TypeGuard<M>,): Promise<M>;
+    get(modeluri: string, format: string): Promise<string>;
 
     getModelUris(): Promise<string[]>;
 
-    getElementById(modeluri: string, elementid: string, format?: string): Promise<AnyObject>;
-    getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    getElementById(modeluri: string, elementid: string): Promise<AnyObject>;
+    getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>): Promise<M>;
+    getElementById(modeluri: string, elementid: string, format: string): Promise<string>;
 
-    getElementByName(modeluri: string, elementname: string, format?: string): Promise<AnyObject>;
+    getElementByName(modeluri: string, elementname: string): Promise<AnyObject>;
     getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    getElementByName(modeluri: string, elementname: string, format: string): Promise<string>;
 
     delete(modeluri: string): Promise<boolean>;
 
     close(modeluri: string): Promise<boolean>;
 
-    create(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
-    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    create(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
+    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>): Promise<M>;
+    create(modeluri: string, model: AnyObject | string, format: string): Promise<string>;
 
+    update(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
+    update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>): Promise<M>;
     update(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
-    update<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
 
     save(modeluri: string): Promise<boolean>;
 
@@ -92,7 +97,7 @@ export interface ModelServerClientApiV1 {
     redo(modeluri: string): Promise<string>;
 
     // WebSocket connection
-    subscribe(modeluri: string, options?: SubscriptionOptions): SubscriptionListener;
+    subscribe(modeluri: string, options?: SubscriptionOptions): void;
 
     send(modelUri: string, message: ModelServerMessage): void;
     unsubscribe(modelUri: string): void;

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 EclipseSource and others.
+ * Copyright (c) 2019-2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,21 +10,22 @@
  ********************************************************************************/
 import { ModelServerClient } from '@eclipse-emfcloud/modelserver-client';
 import { FrontendApplicationContribution, WebSocketConnectionProvider } from '@theia/core/lib/browser';
-import { ContainerModule } from 'inversify';
+import { ContainerModule } from '@theia/core/shared/inversify';
 
-import { MODEL_SERVER_CLIENT_SERVICE_PATH } from '../common';
+import { MODEL_SERVER_CLIENT_SERVICE_PATH, ModelServerFrontendClient, TheiaModelServerClient } from '../common';
 import { ModelServerFrontendContribution } from './model-server-frontend-contribution';
-import { DefaultSubscriptionService, ModelServerSubscriptionService } from './model-server-subscription-client';
+import { ModelServerSubscriptionClient, ModelServerSubscriptionService } from './model-server-subscription-client';
 
 export default new ContainerModule(bind => {
     bind(ModelServerFrontendContribution).toSelf().inSingletonScope();
     bind(FrontendApplicationContribution).toService(ModelServerFrontendContribution);
-    bind(DefaultSubscriptionService).toSelf().inSingletonScope();
-    bind(ModelServerSubscriptionService).toService(DefaultSubscriptionService);
-    bind(ModelServerClient)
+    bind(ModelServerSubscriptionClient).toSelf().inSingletonScope();
+    bind(ModelServerFrontendClient).toService(ModelServerSubscriptionClient);
+    bind(ModelServerSubscriptionService).toService(ModelServerSubscriptionClient);
+    bind(TheiaModelServerClient)
         .toDynamicValue(ctx => {
             const connection = ctx.container.get(WebSocketConnectionProvider);
-            const subService: ModelServerSubscriptionService = ctx.container.get(ModelServerSubscriptionService);
-            return connection.createProxy<ModelServerClient>(MODEL_SERVER_CLIENT_SERVICE_PATH, subService.subscriptionListener);
+            const client: ModelServerFrontendClient = ctx.container.get(ModelServerFrontendClient);
+            return connection.createProxy<ModelServerClient>(MODEL_SERVER_CLIENT_SERVICE_PATH, client);
         }).inSingletonScope();
 });

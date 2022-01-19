@@ -8,26 +8,40 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import { ModelServerClient, SubscriptionListener, SubscriptionOptions } from '@eclipse-emfcloud/modelserver-client';
-import { decorate, injectable } from '@theia/core/shared/inversify';
+import { ModelServerClient, SubscriptionOptions } from '@eclipse-emfcloud/modelserver-client';
+import { decorate, inject, injectable, optional } from '@theia/core/shared/inversify';
 
-import { ModelServerFrontendSubscriptionListener } from '../common';
+import { ModelServerFrontendClient, TheiaModelServerClient } from '../common';
+import { DEFAULT_LAUNCH_OPTIONS, LaunchOptions } from './launch-options';
 
 decorate(injectable(), ModelServerClient);
 
 @injectable()
-export class TheiaModelServerClient extends ModelServerClient {
-    protected subscriptionListener: ModelServerFrontendSubscriptionListener;
+export class TheiaBackendModelServerClient extends ModelServerClient implements TheiaModelServerClient {
 
-    subscribe(modeluri: string, options: SubscriptionOptions = {}): SubscriptionListener {
-        if (!options.listener) {
-            options.listener = this.subscriptionListener;
-        }
-        return super.subscribe(modeluri, options);
+    constructor(@inject(LaunchOptions) @optional() protected readonly launchOptions: LaunchOptions = DEFAULT_LAUNCH_OPTIONS) {
+        super();
+        const baseUrl = this.getBaseUrl();
+        this.initialize(baseUrl);
     }
 
-    setListener(listener: ModelServerFrontendSubscriptionListener): void {
-        this.subscriptionListener = listener;
+    protected getBaseUrl(): string {
+        const baseUrl = `http://${this.launchOptions.hostname}:${this.launchOptions.serverPort}/${this.launchOptions.baseURL}`;
+        return baseUrl;
+
+    }
+
+    protected subscriptionClient?: ModelServerFrontendClient;
+
+    setClient(client: ModelServerFrontendClient | undefined): void {
+        this.subscriptionClient = client;
+    }
+
+    subscribe(modeluri: string, options: SubscriptionOptions = {}): void {
+        if (!options.listener) {
+            options.listener = this.subscriptionClient;
+        }
+        super.subscribe(modeluri, options);
     }
 
     dispose(): void {

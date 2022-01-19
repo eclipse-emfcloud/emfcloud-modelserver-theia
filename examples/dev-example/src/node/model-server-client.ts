@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2020 EclipseSource and others.
+ * Copyright (c) 2020-2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,23 +8,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
-import {
-    AnyObject,
-    MessageDataMapper,
-    MessageType,
-    SubscriptionListener,
-    SubscriptionOptions
-} from '@eclipse-emfcloud/modelserver-client';
-import { TheiaModelServerClient } from '@eclipse-emfcloud/modelserver-theia/lib/node';
-import { injectable } from 'inversify';
+import { AnyObject, MessageDataMapper, MessageType, SubscriptionOptions } from '@eclipse-emfcloud/modelserver-client';
+import { TheiaBackendModelServerClient } from '@eclipse-emfcloud/modelserver-theia/lib/node';
+import { injectable } from '@theia/core/shared/inversify';
 
 import { DevModelServerClient } from '../common/dev-model-server-client';
 
 @injectable()
-export class CustomDevModelServerClient extends TheiaModelServerClient implements DevModelServerClient {
+export class CustomDevModelServerClient extends TheiaBackendModelServerClient implements DevModelServerClient {
     private intervalId: NodeJS.Timeout;
 
-    subscribe(modeluri: string, options: SubscriptionOptions = {}): SubscriptionListener {
+    subscribe(modeluri: string, options: SubscriptionOptions = {}): void {
         if (options.timeout) {
             this.setKeepAliveInterval(modeluri, options.timeout);
         }
