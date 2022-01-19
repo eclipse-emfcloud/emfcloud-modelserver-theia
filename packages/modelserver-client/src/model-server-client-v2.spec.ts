@@ -161,7 +161,7 @@ describe('tests for ModelServerClientV2', () => {
 
             moxios.wait(() => {
                 let request = moxios.requests.at(0);
-                expect(request.config.method).to.be.equal('patch');
+                expect(request.config.method).to.be.equal('put');
                 expect(request.config.data).to.be.equal(JSON.stringify({ data }));
                 expect(request.config.params).to.include({ format: 'json', modeluri });
                 expect(request.config.baseURL).to.be.equal(baseUrl);
