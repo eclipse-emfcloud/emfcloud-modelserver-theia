@@ -11,6 +11,7 @@
 import { expect } from 'chai';
 
 import {
+    create,
     IncrementalUpdateNotificationV2,
     ModelServerClientV2,
     ModelServerNotification,
@@ -18,6 +19,8 @@ import {
     ModelServerObjectV2,
     NotificationSubscriptionListenerV2,
     Operations,
+    removeObject,
+    removeValueAt,
     replace,
     SetCommand
 } from '.';
@@ -26,6 +29,19 @@ import { ModelServerClientApiV2 } from './model-server-client-api-v2';
 describe('Integration tests for ModelServerClientV2', () => {
     let client: ModelServerClientV2;
     const baseUrl = `http://localhost:8081${ModelServerClientApiV2.API_ENDPOINT}`;
+
+    const testUndoRedo: (modeluri: string, originalModel: any, patchedModel: any) => void = async (modeluri, originalModel, patchedModel) => {
+        await client.undo(modeluri);
+        const undoModel = await client.get(modeluri);
+        expect(undoModel).to.deep.equal(originalModel);
+
+        await client.redo(modeluri);
+        const redoModel = await client.get(modeluri);
+        expect(redoModel).to.deep.equal(patchedModel);
+
+        // Restore initial state
+        await client.undo(modeluri);
+    };
 
     beforeEach(() => {
         client = new ModelServerClientV2();
@@ -37,48 +53,84 @@ describe('Integration tests for ModelServerClientV2', () => {
             const modeluri = 'SuperBrewer3000.coffee';
             const newName = 'Super Brewer 6000';
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
-            const originalName = (machine as any).name;
             const patch = replace(modeluri, machine, 'name', newName);
             await client.edit(modeluri, patch);
             const model = await client.get(modeluri);
             expect(model.name).to.be.equal(newName);
 
-            await client.undo(modeluri);
-            const resetModel = await client.get(modeluri);
-            expect(resetModel.name).to.be.equal(originalName);
+            await testUndoRedo(modeluri, machine, model);
+        });
 
-            await client.redo(modeluri);
-            const redoModel = await client.get(modeluri);
-            expect(redoModel.name).to.be.equal(newName);
+        it('create with patch', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
+            const newWorkflowName = 'New Test Workflow';
+            const initialWorkflowsCount: number = (originalModel as any).workflows.length;
 
-            // Restore initial state
-            await client.undo(modeluri);
+            const patch = create(modeluri, originalModel, 'workflows', 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow', {name: newWorkflowName});
+            await client.edit(modeluri, patch);
+            const patchedModel = await client.get(modeluri);
+
+            const workflows = patchedModel.workflows as any[];
+            expect(workflows.length).to.be.equal(initialWorkflowsCount + 1);
+            const newWorkflow = (patchedModel as any).workflows[initialWorkflowsCount];
+
+            expect(newWorkflow.name).to.be.equal(newWorkflowName);
+            expect(newWorkflow).to.have.property('$id');
+            expect(newWorkflow.$id).to.be.a('string');
+
+            await testUndoRedo(modeluri, originalModel, patchedModel);
+        });
+
+        it('delete with patch - index based', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
+
+            const parentWorkflow = (originalModel as any).workflows[0];
+            expect(parentWorkflow.nodes).to.be.an('array').that.is.not.empty;
+            const patch = removeValueAt(modeluri, parentWorkflow, 'nodes', 0);
+
+            await client.edit(modeluri, patch);
+            const patchedModel = await client.get(modeluri);
+            const patchedParentWorkflow = (patchedModel as any).workflows[0];
+            expect(patchedParentWorkflow.nodes).to.be.undefined;
+
+            await testUndoRedo(modeluri, originalModel, patchedModel);
+        });
+
+        it('delete with patch - object', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
+
+            const parentWorkflow = (originalModel as any).workflows[0];
+            expect(parentWorkflow.nodes).to.be.an('array').that.is.not.empty;
+            const valueToRemove = parentWorkflow.nodes[0];
+            const patch = removeObject(modeluri, valueToRemove);
+
+            await client.edit(modeluri, patch);
+            const patchedModel = await client.get(modeluri);
+
+            const patchedParentWorkflow = (patchedModel as any).workflows[0];
+            console.log('Nodes: ', patchedParentWorkflow.nodes);
+            expect(patchedParentWorkflow.nodes).to.be.undefined;
+
+            await testUndoRedo(modeluri, originalModel, patchedModel);
         });
 
         it('edit with command', async () => {
             const modeluri = 'SuperBrewer3000.coffee';
             const newName = 'Super Brewer 6000';
-            const machine = await client.get(modeluri, ModelServerObjectV2.is);
-            const originalName = (machine as any).name;
+            const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
             const owner = {
-                eClass: machine.$type,
-                $ref: `SuperBrewer3000.coffee#${machine.$id}`
+                eClass: originalModel.$type,
+                $ref: `SuperBrewer3000.coffee#${originalModel.$id}`
             };
             const command = new SetCommand(owner, 'name', [newName]);
             await client.edit(modeluri, command);
             const model = await client.get(modeluri);
             expect(model.name).to.be.equal(newName);
 
-            await client.undo(modeluri);
-            const resetModel = await client.get(modeluri);
-            expect(resetModel.name).to.be.equal(originalName);
-
-            await client.redo(modeluri);
-            const redoModel = await client.get(modeluri);
-            expect(redoModel.name).to.be.equal(newName);
-
-            // Restore initial state
-            await client.undo(modeluri);
+            await testUndoRedo(modeluri, originalModel, model);
         });
 
         it('subscribe to changes', async () => {
@@ -124,3 +176,4 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
     });
 });
+
