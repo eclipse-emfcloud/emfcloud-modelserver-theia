@@ -10,7 +10,7 @@
  *********************************************************************************/
 import { AddOperation, Operation, RemoveOperation, ReplaceOperation } from 'fast-json-patch';
 
-import { ModelServerObjectV2 } from '../model/base-model';
+import { ModelServerObjectV2, ModelServerReferenceDescriptionV2 } from '../model/base-model';
 import { TypeGuard } from './type-util';
 
 // Utility methods to create Json Patches
@@ -55,6 +55,25 @@ export function create(modeluri: string, parent: ModelServerObjectV2, feature: s
         value: {
             $type: $type,
             ...attributes
+        }
+    };
+}
+
+/**
+ * Create an AddOperation, to add an existing object of the specified type, in the specified parent.
+ * @param modeluri the uri of the model to edit
+ * @param parent the parent in which the element should be added
+ * @param feature the property of the parent in which the element should be added
+ * @param value the element to add
+ * @returns The Json Patch AddOperation to add the element in the parent.
+ */
+ export function add(modeluri: string, parent: ModelServerObjectV2, feature: string, value: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): AddOperation<ModelServerObjectV2> {
+    return {
+        op: 'add',
+        path: getPropertyPath(modeluri, parent, feature),
+        value: {
+            $type: value.$type,
+            $id: getObjectPath(modeluri, value)
         }
     };
 }
@@ -113,8 +132,9 @@ export function removeObject(modeluri: string, objectToRemove: ModelServerObject
     };
 }
 
-export function getObjectPath(modeluri: string, object: ModelServerObjectV2): string {
-    return `${modeluri}#${object.$id}`;
+export function getObjectPath(modeluri: string, object: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): string {
+    const id = ModelServerReferenceDescriptionV2.is(object) ? object.$ref : object.$id;
+    return `${modeluri}#${id}`;
 }
 
 export function getPropertyPath(modeluri: string, object: ModelServerObjectV2, feature: string, index?: number): string {

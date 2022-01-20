@@ -11,6 +11,7 @@
 import { expect } from 'chai';
 
 import {
+    add,
     create,
     IncrementalUpdateNotificationV2,
     ModelServerClientV2,
@@ -82,6 +83,31 @@ describe('Integration tests for ModelServerClientV2', () => {
             await testUndoRedo(modeluri, originalModel, patchedModel);
         });
 
+        it('add with patch', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const initialModel = await client.get(modeluri, ModelServerObjectV2.is);
+
+            // Add a second workflow to the model; we'll use it to move a Task from a workflow to the other
+            const createWorkflow = create(modeluri, initialModel, 'workflows', 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow', {name: "New Workflow"});
+            await client.edit(modeluri, createWorkflow);
+            const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
+            const sourceWF = (originalModel as any).workflows[0];
+            const targetWF = (originalModel as any).workflows[1];
+
+            const patch = add(modeluri, targetWF, "nodes", sourceWF.nodes[0]);
+            await client.edit(modeluri, patch);
+            const patchedModel = await client.get(modeluri);
+            
+            const patchedSourceWF = (patchedModel as any).workflows[0];
+            const patchedTargetWF = (patchedModel as any).workflows[1];
+            
+            expect(patchedSourceWF.nodes).to.be.undefined;
+            expect(patchedTargetWF.nodes).to.be.an('array').of.length(1);
+            expect(patchedTargetWF.nodes[0].name).to.be.equal(sourceWF.nodes[0].name); // Node was moved
+
+            await testUndoRedo(modeluri, originalModel, patchedModel);
+        });
+
         it('delete with patch - index based', async () => {
             const modeluri = 'SuperBrewer3000.coffee';
             const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
@@ -111,7 +137,6 @@ describe('Integration tests for ModelServerClientV2', () => {
             const patchedModel = await client.get(modeluri);
 
             const patchedParentWorkflow = (patchedModel as any).workflows[0];
-            console.log('Nodes: ', patchedParentWorkflow.nodes);
             expect(patchedParentWorkflow.nodes).to.be.undefined;
 
             await testUndoRedo(modeluri, originalModel, patchedModel);
