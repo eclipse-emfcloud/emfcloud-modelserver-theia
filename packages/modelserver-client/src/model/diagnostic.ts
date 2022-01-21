@@ -76,6 +76,7 @@ export namespace Diagnostic {
             isString(object, 'id')
         );
     }
+
     /**
      * Recompute the severity of a composed diagnostic by looking at its children.
      * Contrary to the org.eclipse.emf.common.util.BasicDiagnostic.recomputeSeverity() implementation,
@@ -134,5 +135,91 @@ export namespace Diagnostic {
         } else {
             return [];
         }
+    }
+
+    /**
+     * Get an OK diagnostic.
+     *
+     * @returns an OK diagnostic
+     */
+    export function ok(): Diagnostic {
+        return {
+            severity: OK,
+            code: 0,
+            message: 'OK',
+            source: '',
+            data: [],
+            children: [],
+            id: ''
+        };
+    }
+
+    /**
+     * Merge any number of `diagnostics` (even zero) into a single result.
+     * Any OK diagnostics are elided and the result may itself just be OK.
+     *
+     * @param diagnostics diagnostics to merge
+     * @returns the merged diagnostic
+     */
+    export function merge(...diagnostics: Diagnostic[]): Diagnostic {
+        const nonOK = diagnostics.filter(d => d && d.severity > OK);
+        if (nonOK.length === 0) {
+            return ok();
+        }
+        if (nonOK.length === 1) {
+            return nonOK[0];
+        }
+
+        const max = worstOf(diagnostics);
+
+        // Recompute IDs of the diagnostics because they are now in
+        // a new tree structure and their paths have changed.
+        return recomputeIDs({
+            severity: max.severity,
+            message: `Diagnosis of ${nonOK.length} problems.`,
+            source: max.source,
+            code: max.code,
+            data: [],
+            children: nonOK,
+            id: '/'
+        });
+    }
+
+    /**
+     * Find the worst severity in a list of `diagnostics`.
+     *
+     * @param diagnostics an array of diagnostics, possibly empty
+     * @returns the first diagnostic of the great severity amongst the `diagnostics`
+     *        or else an OK diagnostic if none
+     */
+    export function worstOf(diagnostics: Diagnostic[]): Diagnostic {
+        if (!diagnostics || diagnostics.length === 0) {
+            return ok();
+        }
+
+        let result = diagnostics[0];
+
+        for (const d of diagnostics) {
+            if (d.severity > result.severity) {
+                result = d;
+            }
+            if (d.severity === CANCEL) {
+                break; // Cannot get worse than this
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Assign IDs of the diagnostics in a tree according to the EMF
+     * path-structured URI fragment algorithm.
+     */
+    function recomputeIDs(diagnostic: Diagnostic, base = '/'): Diagnostic {
+        diagnostic.id = base;
+
+        diagnostic.children?.forEach((child, i) => recomputeIDs(child, `${base}/@children.${i}`));
+
+        return diagnostic;
     }
 }
