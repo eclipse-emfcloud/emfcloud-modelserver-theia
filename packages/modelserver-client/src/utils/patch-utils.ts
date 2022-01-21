@@ -67,7 +67,8 @@ export function create(modeluri: string, parent: ModelServerObjectV2, feature: s
  * @param value the element to add
  * @returns The Json Patch AddOperation to add the element in the parent.
  */
- export function add(modeluri: string, parent: ModelServerObjectV2, feature: string, value: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): AddOperation<ModelServerObjectV2> {
+export function add(modeluri: string, parent: ModelServerObjectV2, feature: string,
+    value: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): AddOperation<ModelServerObjectV2> {
     return {
         op: 'add',
         path: getPropertyPath(modeluri, parent, feature),
