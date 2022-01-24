@@ -14,7 +14,10 @@ import {
     asString,
     CompoundCommand,
     Diagnostic,
+    FullUpdateNotification,
+    IncrementalUpdateNotification,
     MessageType,
+    ModelServerNotification,
     RemoveCommand,
     SetCommand
 } from '@eclipse-emfcloud/modelserver-client';
@@ -36,6 +39,19 @@ import { inject, injectable, postConstruct } from '@theia/core/shared/inversify'
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 
 import { DevModelServerClient, UpdateTaskNameCommand } from '../common/dev-model-server-client';
+
+/**
+ * The configuration parameters for used
+ * for prompting messages received from the modelserver.
+*/
+interface MessageParams {
+    message: string,
+    details: object | string | boolean | number,
+    sender?: string,
+    level?: MessageLevel,
+    detailsLabel?: string
+    detailsTitle?: string
+}
 
 /* ModelServer commands */
 export const PingCommand: Command = {
@@ -478,29 +494,75 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         this.initializeWebSocketListener();
     }
 
-    protected async printResponse(request: string, response: object | string | boolean | number, level: MessageLevel = MessageLevel.Info): Promise<void> {
+    protected async printMessage(params: MessageParams): Promise<void> {
         const now = new Date(Date.now());
-        const message = `${now.toISOString()} | [ModelServer] Received response for '${request}' request`;
-        const showResponse = 'Show response';
-        const responseMsg = response instanceof Error
-            ? `${response.message}\n\n${response.stack ?? ''}`
-            : asString(response);
+        const sender = params.sender ? `[${params.sender}]` : '';
+        const message = `${now.toISOString()} | ${sender} ${params.message}`;
+
+        const showDetail = params.detailsLabel ?? 'Show details';
+        const detailsMsg = params.details instanceof Error
+            ? `${params.details.message} \n\n${params.details.stack ?? ''} `
+            : asString(params.details);
+        const level = params.level ?? MessageLevel.Info;
         let action: string | undefined = undefined;
+
         if (level === MessageLevel.Info) {
-            action = await this.messageService.info(message, showResponse);
+            action = await this.messageService.info(message, showDetail);
         } else if (level === MessageLevel.Error) {
-            action = await this.messageService.error(message, showResponse);
+            action = await this.messageService.error(message, showDetail);
         } else if (level === MessageLevel.Warning) {
-            action = await this.messageService.warn(message, showResponse);
+            action = await this.messageService.warn(message, showDetail);
         }
 
-        if (action === showResponse) {
-            this.showResponse(request, responseMsg);
+        if (action === showDetail) {
+            const title = params.detailsTitle ?? 'Detail:';
+            this.showResponse(title, detailsMsg);
         }
     }
 
-    protected showResponse(request: string, msg: string): void {
-        new ConfirmDialog({ title: `Response for '${request}'`, msg: wrapMessage(msg) }).open();
+    protected printResponse(request: string, response: object | string | boolean | number, level: MessageLevel = MessageLevel.Info): Promise<void> {
+        const messageParams: MessageParams = {
+            message: `Received response for '${request}' request`,
+            details: response,
+            sender: 'Modelserver',
+            detailsLabel: 'Show response',
+            detailsTitle: `Response for ${request}`,
+            level
+        };
+        return this.printMessage(messageParams);
+    }
+
+    protected printNotification(message: ModelServerNotification, level: MessageLevel = MessageLevel.Info): Promise<void> {
+        let details: string | object = message;
+        // Prettyprinting for update notifications in non-json format
+        if (message.type === MessageType.incrementalUpdate) {
+            const result = (message as IncrementalUpdateNotification).result;
+            if (typeof result === 'string') {
+                details = JSON.stringify({ modelUri: message.modelUri, type: message.type, result: 'XMI (see output below)' });
+                details += '\n' + result;
+            }
+        } else if (message.type === MessageType.fullUpdate) {
+            const model = (message as FullUpdateNotification).model;
+            if (typeof model === 'string') {
+                details = JSON.stringify({ modelUri: message.modelUri, type: message.type, model: 'XMI (see output below)' });
+                details += '\n' + model;
+            }
+        }
+
+        const messageParams: MessageParams = {
+            message: `'${message.type}' notification received`,
+            sender: message.modelUri,
+            details,
+            detailsLabel: 'Show notification',
+            detailsTitle: `Notification details [${message.type}]`,
+            level
+        };
+        return this.printMessage(messageParams);
+
+    }
+
+    protected showResponse(title: string, msg: string): void {
+        new ConfirmDialog({ title, msg: wrapMessage(msg) }).open();
     }
 
     registerCommands(commands: CommandRegistry): void {
@@ -576,7 +638,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
                     '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0/@nodes.0`
+                        `${this.workspaceUri} /SuperBrewer3000.coffee#/ /@workflows.0 /@nodes.0`
                 };
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
@@ -592,7 +654,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
                     '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0`
+                        `${this.workspaceUri} /SuperBrewer3000.coffee#/ /@workflows.0`
                 };
                 const feature = 'nodes';
                 const indices = [0];
@@ -608,7 +670,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
                     '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0`
+                        `${this.workspaceUri} /SuperBrewer3000.coffee#/ /@workflows.0`
                 };
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];
@@ -742,7 +804,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EClass',
                     '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
+                        `${this.workspaceUri} /Coffee.ecore#/ /@eClassifiers.2`
                 };
                 const featureA = 'name';
                 const changedValuesA = ['ControlUnitNew'];
@@ -752,7 +814,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EClass',
                     '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.5`
+                        `${this.workspaceUri} /Coffee.ecore#/ /@eClassifiers.5`
                 };
                 const featureB = 'name';
                 const changedValuesB = ['WaterTankNew'];
@@ -771,7 +833,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EClass',
                     '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
+                        `${this.workspaceUri} /Coffee.ecore#/ /@eClassifiers.2`
                 };
                 const feature = 'name';
                 const changedValues = ['ControlUnitNew'];
@@ -787,7 +849,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EPackage',
                     '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#/`
+                        `${this.workspaceUri} /Coffee.ecore#/`
                 };
                 const feature = 'eClassifiers';
                 const indices = [5];
@@ -803,7 +865,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EPackage',
                     '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#/`
+                        `${this.workspaceUri} /Coffee.ecore#/`
                 };
                 const feature = 'eClassifiers';
                 const toAdd = [{ eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EClass', name: 'NewEClassifier' }];
@@ -914,7 +976,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
                     '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0/@nodes.0`
+                        `${this.workspaceUri} /SuperBrewer3000.json#/ /@workflows.0 /@nodes.0`
                 };
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
@@ -930,7 +992,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
                     '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
+                        `${this.workspaceUri} /SuperBrewer3000.json#/ /@workflows.0`
                 };
                 const feature = 'nodes';
                 const indices = [0];
@@ -946,7 +1008,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
                     '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
+                        `${this.workspaceUri} /SuperBrewer3000.json#/ /@workflows.0`
                 };
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];
@@ -1167,53 +1229,18 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(CUSTOM_TEST_COUNTER_SECTION, { commandId: CustomCounter.id, order: 'e' });
     }
 
-    private initializeWebSocketListener(clearIntervalId = false): void {
-        this.modelServerSubscriptionService.onOpenListener(msg => {
-            this.showSocketInfo('Subscription opened!', msg.modelUri);
-        });
-        this.modelServerSubscriptionService.onDirtyStateListener(msg => {
-            this.showSocketInfo(`DirtyState ${msg.modelUri}`, `${msg.isDirty}`);
-        });
-        this.modelServerSubscriptionService.onIncrementalUpdateListener(msg => {
-
-            console.log(`Incremental update due to command execution: Reason '${msg.result.type}' based on command '${msg.result.source.type}'`);
-
-            this.showSocketInfo(`IncrementalUpdate ${JSON.stringify(msg.result)}`, msg.modelUri);
-        });
-        this.modelServerSubscriptionService.onFullUpdateListener(msg => {
-            this.showSocketInfo(`FullUpdate ${JSON.stringify(msg.model)}`, msg.modelUri);
-        });
-        this.modelServerSubscriptionService.onSuccessListener(msg => {
-            this.showSocketInfo('Success', msg.modelUri);
-        });
-        this.modelServerSubscriptionService.onUnknownMessageListener(msg => {
-            this.showSocketWarning(`Unknown Message ${JSON.stringify(msg.data)}`, msg.modelUri);
-        });
-        this.modelServerSubscriptionService.onClosedListener(msg => {
-            this.showSocketInfo(`Subscription closed! Reason: ${JSON.stringify(msg)}`, msg.modelUri);
-        });
-        this.modelServerSubscriptionService.onErrorListener(msg => {
-            this.showSocketError(`Error! ${JSON.stringify(msg.error)}`, msg.modelUri);
-        });
-        this.modelServerSubscriptionService.onValidationResultListener(result => {
-            this.showSocketInfo(`Validation result ${JSON.stringify(result.diagnostic)}`, result.modelUri);
-        });
+    private initializeWebSocketListener(): void {
+        this.modelServerSubscriptionService.onOpenListener(msg => this.printNotification(msg));
+        this.modelServerSubscriptionService.onDirtyStateListener(msg => this.printNotification(msg));
+        this.modelServerSubscriptionService.onIncrementalUpdateListener(msg => this.printNotification(msg));
+        this.modelServerSubscriptionService.onFullUpdateListener(msg => this.printNotification(msg));
+        this.modelServerSubscriptionService.onSuccessListener(msg => this.printNotification(msg));
+        this.modelServerSubscriptionService.onUnknownMessageListener(msg => this.printNotification(msg));
+        this.modelServerSubscriptionService.onClosedListener(msg => this.printNotification(msg));
+        this.modelServerSubscriptionService.onErrorListener(msg => this.printNotification(msg));
+        this.modelServerSubscriptionService.onValidationResultListener(msg => this.printNotification(msg));
     }
 
-    private showSocketInfo(message: string, modelUri = ''): void {
-        const now = new Date(Date.now());
-        this.messageService.info(`${now.toISOString()} | [${modelUri}]: ${message}`);
-    }
-
-    private showSocketWarning(message: string, modelUri = ''): void {
-        const now = new Date(Date.now());
-        this.messageService.warn(`${now.toISOString()} | [${modelUri}]: ${message}`);
-    }
-
-    private showSocketError(message: string, modelUri = ''): void {
-        const now = new Date(Date.now());
-        this.messageService.error(`${now.toISOString()} | [${modelUri}]: ${message}`);
-    }
 }
 
 /**

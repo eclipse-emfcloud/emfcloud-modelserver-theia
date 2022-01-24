@@ -37,6 +37,7 @@ export namespace ModelServerMessage {
 /**
  * Enumeration of the default types of a {@link ModelServerMessage}.
  */
+// eslint-disable-next-line no-shadow
 export enum MessageType {
     success = 'success',
     warning = 'warning',
@@ -89,9 +90,20 @@ export namespace Model {
 }
 
 /**
- * Type to describe a function that maps the {@link ModelServerMessage.data} property to a specific type.
+ * Type to describe a function that maps a message to a specific type.
  */
+export type Mapper<M, D = unknown> = (message: M) => D;
+
+/**
+  * A Mapper which directly returns the message.
+  */
+export const IdentityMapper: Mapper<any, any> = m => m;
+
+/**
+  * Type to describe a function that maps the {@link ModelServerMessage.data} property to a specific type.
+  */
 export type MessageDataMapper<D = unknown> = (message: ModelServerMessage) => D;
+
 /**
  * A collection of utility functions to map the `data` property of a {@link ModelServerMessage} to a specific type.
  * If the `data` object of the given message cannot be mapped to the desired type an error is thrown.

@@ -13,6 +13,7 @@ import { ModelServerObject, ModelServerReferenceDescription } from './base-model
 export namespace ChangePackage {
     export const NS_URI = 'http://www.eclipse.org/emf/2003/Change';
 
+    // eslint-disable-next-line no-shadow
     export enum ChangeKind {
         ADD,
         REMOVE,

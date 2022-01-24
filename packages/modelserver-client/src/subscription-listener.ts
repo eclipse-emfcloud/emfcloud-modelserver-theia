@@ -105,15 +105,15 @@ export class NotificationSubscriptionListener implements SubscriptionListener {
     constructor(protected notificationListener: ModelServerNotificationListener = {}) { }
 
     onOpen(modelUri: string, _event: WebSocket.Event): void {
-        this.notificationListener.onOpen?.({ modelUri });
+        this.notificationListener.onOpen?.({ modelUri, type: MessageType.open });
     }
 
     onClose(modelUri: string, event: WebSocket.CloseEvent): void {
-        this.notificationListener.onClose?.({ modelUri, code: event.code, reason: event.reason });
+        this.notificationListener.onClose?.({ modelUri, code: event.code, reason: event.reason, type: MessageType.close });
     }
 
     onError(modelUri: string, event: WebSocket.ErrorEvent): void {
-        this.notificationListener.onError?.({ modelUri, error: event.error });
+        this.notificationListener.onError?.({ modelUri, error: event.error, type: MessageType.error });
     }
 
     onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
@@ -122,31 +122,32 @@ export class NotificationSubscriptionListener implements SubscriptionListener {
             const type = MessageType.asMessageType(message.type);
             switch (type) {
                 case MessageType.dirtyState: {
-                    this.notificationListener.onDirtyStateChanged?.({ modelUri, isDirty: MessageDataMapper.asBoolean(message) });
+                    this.notificationListener.onDirtyStateChanged?.({ modelUri, isDirty: MessageDataMapper.asBoolean(message), type });
                     break;
                 }
                 case MessageType.keepAlive:
                 case MessageType.success: {
-                    this.notificationListener.onSuccess?.({ modelUri });
+                    this.notificationListener.onSuccess?.({ modelUri, type });
                     break;
                 }
                 case MessageType.error: {
-                    this.notificationListener.onError?.({ modelUri, error: MessageDataMapper.asString(message) });
+                    this.notificationListener.onError?.({ modelUri, error: MessageDataMapper.asString(message), type });
                     break;
                 }
                 case MessageType.incrementalUpdate: {
                     this.notificationListener.onIncrementalUpdate?.({
                         modelUri,
-                        result: MessageDataMapper.as(message, CommandExecutionResult.is)
+                        result: MessageDataMapper.as(message, CommandExecutionResult.is),
+                        type
                     });
                     break;
                 }
                 case MessageType.fullUpdate: {
-                    this.notificationListener.onFullUpdate?.({ modelUri, model: MessageDataMapper.asObject(message) });
+                    this.notificationListener.onFullUpdate?.({ modelUri, model: MessageDataMapper.asObject(message), type });
                     break;
                 }
                 case MessageType.validationResult: {
-                    this.notificationListener.onValidation?.({ modelUri, diagnostic: MessageDataMapper.as(message, Diagnostic.is) });
+                    this.notificationListener.onValidation?.({ modelUri, diagnostic: MessageDataMapper.as(message, Diagnostic.is), type });
                     break;
                 }
                 default: {

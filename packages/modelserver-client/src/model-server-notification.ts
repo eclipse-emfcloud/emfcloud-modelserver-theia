@@ -19,6 +19,7 @@ import { AnyObject } from './utils/type-util';
  */
 export interface ModelServerNotification {
     modelUri: string;
+    type: string;
 }
 
 /**
@@ -55,7 +56,7 @@ export interface DirtyStateNotification extends ModelServerNotification {
  */
 export interface IncrementalUpdateNotification extends ModelServerNotification {
     /** The description of the incremental change */
-    result: CommandExecutionResult;
+    result: CommandExecutionResult | string;
 }
 
 /**
@@ -65,7 +66,7 @@ export interface IncrementalUpdateNotification extends ModelServerNotification {
  */
 export interface FullUpdateNotification<M = AnyObject> extends ModelServerNotification {
     /** The model that has been updated */
-    model: M;
+    model: M | string;
 }
 
 /**

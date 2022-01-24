@@ -31,17 +31,20 @@ export class CustomDevModelServerClient extends TheiaBackendModelServerClient im
         }
     }
 
-    unsubscribe(modelUri: string): void {
+    unsubscribe(modelUri: string): boolean {
         const openSocket = this.openSockets.get(modelUri);
+        let success = false;
         if (openSocket) {
             openSocket.close();
             this.openSockets.delete(modelUri);
+            success = true;
         } else {
             console.warn(modelUri + ': Cannot unsubscribe, no socket opened!');
         }
         if (this.intervalId && modelUri === 'Coffee.ecore') {
             clearInterval(this.intervalId);
         }
+        return success;
     }
 
     async counter(operation?: 'add' | 'subtract', delta?: number): Promise<AnyObject> {

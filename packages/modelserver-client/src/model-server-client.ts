@@ -17,7 +17,7 @@ import {
     ServerConfiguration,
     SubscriptionOptions
 } from './model-server-client-api-v1';
-import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
+import { IdentityMapper, Mapper, MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
@@ -114,7 +114,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
 
     update(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
     update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>): Promise<M>;
-    update(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
+    update(modeluri: string, model: AnyObject | string, format: string): Promise<AnyObject>;
     update<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
         const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
         const mapper = createMapper<M>(formatOrGuard);
@@ -175,9 +175,9 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         return this.process(this.restClient.get(ModelServerPaths.SERVER_PING), MessageDataMapper.isSuccess);
     }
 
-    edit(modeluri: string, command: ModelServerCommand, format = this.defaultFormat): Promise<boolean> {
+    edit(modeluri: string, command: ModelServerCommand): Promise<boolean> {
         return this.process(
-            this.restClient.patch(ModelServerPaths.EDIT, { data: command }, { params: { modeluri, format } }),
+            this.restClient.patch(ModelServerPaths.EDIT, { data: command }, { params: { modeluri, format: this.defaultFormat } }),
             MessageDataMapper.isSuccess
         );
     }
@@ -190,11 +190,13 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         return this.process(this.restClient.get(ModelServerPaths.REDO, { params: { modeluri } }), MessageDataMapper.asString);
     }
 
-    send(modelUri: string, message: ModelServerMessage): void {
+    send(modelUri: string, message: ModelServerMessage): boolean {
         const openSocket = this.openSockets.get(modelUri);
         if (openSocket) {
-            openSocket.send(message);
+            openSocket.send(JSON.stringify(message));
+            return true;
         }
+        return false;
     }
 
     subscribe(modeluri: string, options: SubscriptionOptions = {}): void {
@@ -213,12 +215,14 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         this.doSubscribe(options.listener, modeluri, path);
     }
 
-    unsubscribe(modeluri: string): void {
+    unsubscribe(modeluri: string): boolean {
         const openSocket = this.openSockets.get(modeluri);
         if (openSocket) {
             openSocket.close();
             this.openSockets.delete(modeluri);
+            return true;
         }
+        return false;
     }
 
     protected createSubscriptionPath(modeluri: string, options: SubscriptionOptions): string {
@@ -237,7 +241,11 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     protected doSubscribe(listener: SubscriptionListener, modelUri: string, path: string): void {
         const socket = new WebSocket(path.trim());
         socket.onopen = event => listener.onOpen(modelUri, event);
-        socket.onclose = event => listener.onClose(modelUri, event);
+        socket.onclose = event => {
+            listener.onClose(modelUri, event);
+            this.openSockets.delete(modelUri);
+        };
+
         socket.onerror = event => listener.onError(modelUri, event);
         socket.onmessage = event => listener.onMessage(modelUri, event);
         this.openSockets.set(modelUri, socket);
@@ -248,10 +256,29 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     }
 
     protected async process<T>(request: Promise<AxiosResponse<ModelServerMessage>>, mapper: MessageDataMapper<T>): Promise<T> {
+        const errorResponse = (data: ModelServerMessage): ModelServerError | undefined => {
+            if (data.type === 'error') {
+                return new ModelServerError(data);
+            }
+            return undefined;
+        };
+        return this.processGeneric<ModelServerMessage, T>(request, mapper, errorResponse);
+    }
+
+    protected async processMessageAsData<M>(request: Promise<AxiosResponse<M>>): Promise<M> {
+        return this.processGeneric<M, M>(request, IdentityMapper, () => undefined);
+    }
+
+    protected async processGeneric<M, T>(
+        request: Promise<AxiosResponse<M>>,
+        mapper: Mapper<M, T>,
+        erroResponse: (message: M) => ModelServerError | undefined
+    ): Promise<T> {
         try {
             const response = await request;
-            if (response.data.type === 'error') {
-                throw new ModelServerError(response.data);
+            const modelServerError = erroResponse(response.data);
+            if (modelServerError) {
+                throw modelServerError;
             }
             return mapper(response.data);
         } catch (error) {

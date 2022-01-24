@@ -41,7 +41,7 @@
     "isomorphic-ws": "^4.0.1"
   },
   "devDependencies": {
-    "@types/ws": "",
+    "@types/ws": "8.2.2",
     "typescript": "^3.9.2",
     "@types/moxios": "^0.4.14",
     "moxios": "^0.4.0"

@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
 import {
+    AnyObject,
     CloseNotification,
     CommandExecutionResult,
     Diagnostic,
@@ -45,15 +46,15 @@ export interface ModelServerSubscriptionService {
 @injectable()
 export class ModelServerSubscriptionClient implements ModelServerFrontendClient, ModelServerSubscriptionService {
     onOpen(modelUri: string, _event: WebSocket.Event): void {
-        this.onOpenEmitter.fire({ modelUri });
+        this.onOpenEmitter.fire({ modelUri, type: MessageType.open });
     }
 
     onClose(modelUri: string, event: WebSocket.CloseEvent): void {
-        this.onClosedEmitter.fire({ modelUri, code: event.code, reason: event.reason });
+        this.onClosedEmitter.fire({ modelUri, code: event.code, reason: event.reason, type: MessageType.close });
     }
 
     onError(modelUri: string, event: WebSocket.ErrorEvent): void {
-        this.onErrorEmitter.fire({ modelUri, error: event.error });
+        this.onErrorEmitter.fire({ modelUri, error: event.error, type: MessageType.error });
     }
 
     onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
@@ -62,31 +63,44 @@ export class ModelServerSubscriptionClient implements ModelServerFrontendClient,
             const type = MessageType.asMessageType(message.type);
             switch (type) {
                 case MessageType.dirtyState: {
-                    this.onDirtyStateEmitter.fire({ modelUri, isDirty: MessageDataMapper.asBoolean(message) });
+                    this.onDirtyStateEmitter.fire({ modelUri, isDirty: MessageDataMapper.asBoolean(message), type });
                     break;
                 }
                 case MessageType.keepAlive:
                 case MessageType.success: {
-                    this.onSuccessEmitter.fire({ modelUri });
+                    this.onSuccessEmitter.fire({ modelUri, type });
                     break;
                 }
                 case MessageType.error: {
-                    this.onErrorEmitter.fire({ modelUri, error: MessageDataMapper.asString(message) });
+                    this.onErrorEmitter.fire({ modelUri, error: MessageDataMapper.asString(message), type });
                     break;
                 }
                 case MessageType.incrementalUpdate: {
+                    let result: CommandExecutionResult | string;
+                    try {
+                        result = MessageDataMapper.as(message, CommandExecutionResult.is);
+                    } catch (error) {
+                        result = MessageDataMapper.asString(message);
+                    }
                     this.onIncrementalUpdateEmitter.fire({
                         modelUri,
-                        result: MessageDataMapper.as(message, CommandExecutionResult.is)
+                        result,
+                        type
                     });
                     break;
                 }
                 case MessageType.fullUpdate: {
-                    this.onFullUpdateEmitter.fire({ modelUri, model: MessageDataMapper.asObject(message) });
+                    let model: AnyObject | string;
+                    try {
+                        model = MessageDataMapper.asObject(message);
+                    } catch (error) {
+                        model = MessageDataMapper.asString(message);
+                    }
+                    this.onFullUpdateEmitter.fire({ modelUri, model, type });
                     break;
                 }
                 case MessageType.validationResult: {
-                    this.onValidationResultEmitter.fire({ modelUri, diagnostic: MessageDataMapper.as(message, Diagnostic.is) });
+                    this.onValidationResultEmitter.fire({ modelUri, diagnostic: MessageDataMapper.as(message, Diagnostic.is), type });
                     break;
                 }
                 default: {
