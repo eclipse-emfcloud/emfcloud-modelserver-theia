@@ -8,8 +8,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
+import { Format, JsonFormat } from '../model-server-client-api-v2';
 import { Model } from '../model-server-message';
-
 /**
  * The built-in 'object' & 'Object' types are currently hard to use
  * an should be avoided. It's recommended to use Record instead to describe the
@@ -144,4 +144,173 @@ export function asModelArray(object: unknown): Model[] {
     }
 
     throw new Error('Cannot map to Model[]. The given object is no defined or of type "object"!');
+}
+
+/** Protocol of a message encoder. */
+export type Encoder<T = unknown> = (object: string | AnyObject) => T | string;
+
+/**
+ * Obtain a message encoder for the request body.
+ *
+ * @param format the encoding format
+ * @returns the request body encoder format
+ */
+export function encodeRequestBody(format: Format): Encoder<{ data: any }> {
+    const encoder = encode(format);
+
+    return object => ({ data: encoder(object) });
+}
+
+/**
+ * Obtain a message encoder.
+ *
+ * @param format the encoding format
+ * @returns the encoder
+ */
+export function encode(format: Format): Encoder {
+    switch (format) {
+        case 'xml':
+            return asXML;
+        case 'json':
+            return handleString(asJsonV1);
+        case 'json-v2':
+            return handleString(asJsonV2);
+        default:
+            throw new Error(`Unsupported message format: ${format}`);
+    }
+}
+
+/**
+ * Wrap an encoder to handle string inputs. When the input is a string,
+ * it is parsed to convert the internal JSON structure to the appropriate
+ * JSON format and then unparsed back to a string for serialization.
+ *
+ * @param fn an encoder
+ * @returns the wrapped encoder
+ */
+function handleString<T>(fn: Encoder<T>): Encoder<T> {
+    return (target: string | AnyObject) => {
+        if (typeof target === 'string') {
+            const parsed = JSON.parse(target);
+            const result = fn(parsed);
+            return JSON.stringify(result);
+        }
+        return fn(target);
+    };
+}
+
+function asXML(object: string | AnyObject): string {
+    if (typeof object !== 'string') {
+        throw new Error('Attempt to encode non-string as XML');
+    }
+    return object;
+}
+
+function asJsonV1(object: AnyObject): any {
+    return isJsonV1(object) ? object : copy(object, 'json');
+}
+
+function asJsonV2(object: AnyObject): any {
+    return isJsonV2(object) ? object : copy(object, 'json-v2');
+}
+
+function isJsonV1(object: AnyObject): boolean {
+    return findProperty(object, 'eClass');
+}
+
+function isJsonV2(object: AnyObject): boolean {
+    return findProperty(object, '$type');
+}
+
+function findProperty(object: any, name: string, visited = new Set()): boolean {
+    return traverse(object, (target, props) => props.includes(name) ? true : undefined);
+}
+
+/**
+ * Copy an object graph for the sole purpose of writing over the wire in a JSON format.
+ *
+ * @param object the object graph to copy
+ * @param format the JSON format in which to copy it
+ * @returns the copied object graph
+ */
+function copy(object: any, format: JsonFormat): any {
+    // A map of original to copy
+    const copies: Map<any, any> = new Map();
+
+    const copier = (target: any): void => {
+        const theCopy = { ...target };
+
+        if (format === 'json' && '$type' in theCopy) {
+            theCopy.eClass = theCopy.$type;
+            delete theCopy.$type;
+        } else if (format === 'json-v2' && 'eClass' in theCopy) {
+            theCopy.$type = theCopy.eClass;
+            delete theCopy.eClass;
+        }
+
+        copies.set(target, theCopy);
+    };
+
+    const referencer = (target: any, props: string[]): void => {
+        const copyGetter = (o: any): any => copies.get(o) ?? o;
+
+        // We want to traverse all properties of object type; already guarded via `getOwnPropertyNames`.
+        // eslint-disable-next-line guard-for-in
+        for (const prop of props) {
+            const value = target[prop];
+
+            if (isNonEmptyObjectArray(value)) {
+                target[prop] = value.map(copyGetter);
+            } else if (Array.isArray(value)) {
+                // It's an array of non-object data types
+                target[prop] = [...value];
+            } else if (typeof value === 'object') {
+                target[prop] = copyGetter(value);
+            }
+        }
+    };
+
+    // Step one: copy everything
+    traverse(object, copier);
+    const result = copies.get(object);
+
+    // Step two: then rewrite cross-references
+    traverse(result, referencer);
+
+    return result;
+}
+
+function traverse<T>(object: any, fn: (target: any, props: string[]) => T | undefined, visited = new Set()): boolean {
+    if (visited.has(object)) {
+        return false;
+    }
+    visited.add(object);
+
+    const ownProps = Object.getOwnPropertyNames(object);
+
+    const result = fn(object, ownProps);
+    if (result !== undefined) {
+        return true;
+    }
+
+    // We want to traverse all properties of object type; already guarded via `getOwnPropertyNames`.
+    // eslint-disable-next-line guard-for-in
+    for (const prop of ownProps) {
+        const value = object[prop];
+
+        if (isNonEmptyObjectArray(value) && value.some(element => traverse(element, fn, visited))) {
+            return true;
+        }
+
+        if (typeof value === 'object' && traverse(value, fn, visited)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function isNonEmptyObjectArray(value: any): value is object[] {
+    // TODO: More correct would be value.every(e => typeof e === 'object' && !Array.isArray(value[0]))
+    return Array.isArray(value) && value.length > 0 && typeof value[0] === 'object' && !Array.isArray(value[0]);
 }

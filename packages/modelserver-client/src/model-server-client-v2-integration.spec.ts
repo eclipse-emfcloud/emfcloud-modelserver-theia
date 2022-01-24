@@ -46,7 +46,7 @@ describe('Integration tests for ModelServerClientV2', () => {
 
     beforeEach(() => {
         client = new ModelServerClientV2();
-        client.initialize(baseUrl);
+        client.initialize(baseUrl, 'json-v2');
     });
 
     describe('test requests', () => {
