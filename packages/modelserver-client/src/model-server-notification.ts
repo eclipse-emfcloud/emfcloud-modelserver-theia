@@ -8,10 +8,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
+import { MessageType } from '.';
 import { ModelServerMessage } from './model-server-message';
 import { CommandExecutionResult } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
-import { AnyObject } from './utils/type-util';
+import { AnyObject, isString } from './utils/type-util';
 
 /**
  * A `ModelServerNotification` represents the payload object that is sent by the modelserver over websocket to
@@ -20,6 +21,12 @@ import { AnyObject } from './utils/type-util';
 export interface ModelServerNotification {
     modelUri: string;
     type: string;
+}
+
+export namespace ModelServerNotification {
+    export function is(object?: unknown): object is ModelServerNotification {
+        return AnyObject.is(object) && isString(object, 'modelUri') && isString(object, 'type');
+    }
 }
 
 /**
@@ -34,12 +41,24 @@ export interface CloseNotification extends ModelServerNotification {
     reason: string;
 }
 
+export namespace CloseNotification {
+    export function is(object?: unknown): object is CloseNotification {
+        return ModelServerNotification.is(object) && object.type === MessageType.close;
+    }
+}
+
 /**
  * An `ErrorNotification` is sent to notify subscribers about an error occurred in connection with the subscribed the subscripted for.
  */
 export interface ErrorNotification extends ModelServerNotification {
     /** The error that occurred. */
     error: unknown;
+}
+
+export namespace ErrorNotification {
+    export function is(object?: unknown): object is ErrorNotification {
+        return ModelServerNotification.is(object) && object.type === MessageType.error;
+    }
 }
 
 /**
@@ -50,6 +69,12 @@ export interface DirtyStateNotification extends ModelServerNotification {
     isDirty: boolean;
 }
 
+export namespace DirtyStateNotification {
+    export function is(object?: unknown): object is DirtyStateNotification {
+        return ModelServerNotification.is(object) && object.type === MessageType.dirtyState;
+    }
+}
+
 /**
  * An `IncrementalUpdateNotification` is sent to notify subscribers about an incremental model change.
  * The incremental change is described using {@link CommandExecutionResult}.
@@ -57,6 +82,12 @@ export interface DirtyStateNotification extends ModelServerNotification {
 export interface IncrementalUpdateNotification extends ModelServerNotification {
     /** The description of the incremental change */
     result: CommandExecutionResult | string;
+}
+
+export namespace IncrementalUpdateNotification {
+    export function is(object?: unknown): object is IncrementalUpdateNotification {
+        return ModelServerNotification.is(object) && object.type === MessageType.incrementalUpdate;
+    }
 }
 
 /**
@@ -69,6 +100,11 @@ export interface FullUpdateNotification<M = AnyObject> extends ModelServerNotifi
     model: M | string;
 }
 
+export namespace FullUpdateNotification {
+    export function is(object?: unknown): object is FullUpdateNotification {
+        return ModelServerNotification.is(object) && object.type === MessageType.fullUpdate;
+    }
+}
 /**
  * A `ValidationNotification` is sent to notify subscribers about the result of a validation request.
  * The validation result is described using {@link Diagnostic}.
@@ -78,8 +114,20 @@ export interface ValidationNotification extends ModelServerNotification {
     diagnostic: Diagnostic;
 }
 
+export namespace ValidationNotification {
+    export function is(object?: unknown): object is ValidationNotification {
+        return ModelServerNotification.is(object) && object.type === MessageType.validationResult;
+    }
+}
+
 /**
  * If the type of a incoming notification cannot be mapped to concrete subtype of {@link ModelServerNotification}
  * it defaults to the unknown type. Exposes the data property of the original {@link ModelServerMessage} to enable custom processing
  */
 export type UnknownNotification = ModelServerNotification & ModelServerMessage;
+
+export namespace UnknownNotification {
+    export function is(object?: unknown): object is UnknownNotification {
+        return ModelServerNotification.is(object) && MessageType.asMessageType(object.type) === MessageType.unknown;
+    }
+}
