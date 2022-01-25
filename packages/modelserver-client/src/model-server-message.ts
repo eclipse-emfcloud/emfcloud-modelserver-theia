@@ -95,13 +95,13 @@ export namespace Model {
 export type Mapper<M, D = unknown> = (message: M) => D;
 
 /**
-  * A Mapper which directly returns the message.
-  */
+ * A Mapper which directly returns the message.
+ */
 export const IdentityMapper: Mapper<any, any> = m => m;
 
 /**
-  * Type to describe a function that maps the {@link ModelServerMessage.data} property to a specific type.
-  */
+ * Type to describe a function that maps the {@link ModelServerMessage.data} property to a specific type.
+ */
 export type MessageDataMapper<D = unknown> = (message: ModelServerMessage) => D;
 
 /**

@@ -638,7 +638,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
                     '$ref':
-                        `${this.workspaceUri} /SuperBrewer3000.coffee#/ /@workflows.0 /@nodes.0`
+                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0/@nodes.0`
                 };
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
@@ -654,7 +654,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
                     '$ref':
-                        `${this.workspaceUri} /SuperBrewer3000.coffee#/ /@workflows.0`
+                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0`
                 };
                 const feature = 'nodes';
                 const indices = [0];
@@ -670,7 +670,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
                     '$ref':
-                        `${this.workspaceUri} /SuperBrewer3000.coffee#/ /@workflows.0`
+                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0`
                 };
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];
@@ -804,7 +804,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EClass',
                     '$ref':
-                        `${this.workspaceUri} /Coffee.ecore#/ /@eClassifiers.2`
+                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
                 };
                 const featureA = 'name';
                 const changedValuesA = ['ControlUnitNew'];
@@ -814,7 +814,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EClass',
                     '$ref':
-                        `${this.workspaceUri} /Coffee.ecore#/ /@eClassifiers.5`
+                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.5`
                 };
                 const featureB = 'name';
                 const changedValuesB = ['WaterTankNew'];
@@ -833,7 +833,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EClass',
                     '$ref':
-                        `${this.workspaceUri} /Coffee.ecore#/ /@eClassifiers.2`
+                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
                 };
                 const feature = 'name';
                 const changedValues = ['ControlUnitNew'];
@@ -849,7 +849,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EPackage',
                     '$ref':
-                        `${this.workspaceUri} /Coffee.ecore#/`
+                        `${this.workspaceUri}/Coffee.ecore#/`
                 };
                 const feature = 'eClassifiers';
                 const indices = [5];
@@ -865,7 +865,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipse.org/emf/2002/Ecore#//EPackage',
                     '$ref':
-                        `${this.workspaceUri} /Coffee.ecore#/`
+                        `${this.workspaceUri}/Coffee.ecore#/`
                 };
                 const feature = 'eClassifiers';
                 const toAdd = [{ eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EClass', name: 'NewEClassifier' }];
@@ -976,7 +976,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
                     '$ref':
-                        `${this.workspaceUri} /SuperBrewer3000.json#/ /@workflows.0 /@nodes.0`
+                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0/@nodes.0`
                 };
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
@@ -992,7 +992,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
                     '$ref':
-                        `${this.workspaceUri} /SuperBrewer3000.json#/ /@workflows.0`
+                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
                 };
                 const feature = 'nodes';
                 const indices = [0];
@@ -1008,7 +1008,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
                     'eClass':
                         'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
                     '$ref':
-                        `${this.workspaceUri} /SuperBrewer3000.json#/ /@workflows.0`
+                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
                 };
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];

@@ -140,14 +140,14 @@ export interface ModelServerClientApiV1 {
     /**
      * Deletes the {@link Model} with the given URI from the current workspace.
      * @param modeluri The URI of the model that should be deleted.
-     * @returns A boolean value indicating wether the deletion was successful.
+     * @returns A boolean value indicating whether the deletion was successful.
      */
     delete(modeluri: string): Promise<boolean>;
 
     /**
      * Closes (i.e. unloads) the model with the given URI from the current workspace. This discards all dirty changes.
      * @param modeluri The URI of the model that should be closed.
-     * @returns A boolean value indicating wether the close operation was successful.
+     * @returns A boolean value indicating whether the close operation was successful.
      */
     close(modeluri: string): Promise<boolean>;
 
@@ -155,7 +155,7 @@ export interface ModelServerClientApiV1 {
      * Creates a new model object with the given URI and content object in the current workspace.
      * @param modeluri The URI of the model that should be created.
      * @param model The content of the new model object either as plain JSON object or string.
-     * @returns Thew newly created model as plain JSON object.
+     * @returns The newly created model as plain JSON object.
      */
     create(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
     /**
@@ -165,7 +165,7 @@ export interface ModelServerClientApiV1 {
      * @param modeluri The URI of the model that should be created.
      * @param model The content of the new model object either as plain JSON object or string.
      * @param typeGuard A guard function to check if the received model element is of the expected type.
-     * @returns Thew newly created model as typed JSON object `M`.
+     * @returns The newly created model as typed JSON object `M`.
      */
     create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>): Promise<M>;
     /**
@@ -174,7 +174,7 @@ export interface ModelServerClientApiV1 {
      * @param modeluri The URI of the model that should be created.
      * @param model The content of the new model object either as string.
      * @param format The desired format.
-     * @returns Thew newly created model as string.
+     * @returns The newly created model as string.
      */
     create(modeluri: string, model: string, format: string): Promise<string>;
 
@@ -194,8 +194,7 @@ export interface ModelServerClientApiV1 {
      * @param modeluri The URI of the model that should be updated.
      * @param model The content of the updated model object either as string.
      * @param typeGuard A guard function to check if the received model element is of the expected type.
-
-     * @returns Thew updated model as typed JSON object `M`.
+     * @returns The updated model as typed JSON object `M`.
      */
     update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>): Promise<M>;
     /**
@@ -204,20 +203,20 @@ export interface ModelServerClientApiV1 {
      * @param modeluri The URI of the model that should be updated.
      * @param model The content of the updated model object either as string.
      * @param format The desired format.
-     * @returns Thew updated model as string.
+     * @returns The updated model as string.
      */
     update(modeluri: string, model: string, format: string): Promise<AnyObject>;
 
     /**
      * Persists all `dirty` changes for the model with the given URI.
      * @param modeluri The URI of the model whose dirty changes should be saved.
-     * @returns A boolean indicating wether the saving was successful.
+     * @returns A boolean indicating whether the saving was successful.
      */
     save(modeluri: string): Promise<boolean>;
 
     /**
      * Saves (i.e. persists the dirty changes of) all models that are loaded in the current workspace.
-     * @returns A boolean indicating wether the saving was successful.
+     * @returns A boolean indicating whether the saving was successful.
      */
     saveAll(): Promise<boolean>;
 
@@ -260,7 +259,7 @@ export interface ModelServerClientApiV1 {
     configureServer(configuration: ServerConfiguration): Promise<boolean>;
 
     /**
-     * Can be used to check wether the model server is alive and reachable.
+     * Can be used to check whether the model server is alive and reachable.
      * @returns A boolean indicating whether the ping was successfully.
      */
     ping(): Promise<boolean>;
@@ -269,21 +268,21 @@ export interface ModelServerClientApiV1 {
      * Modifies the model with the given URI by executing the give {@link ModelServerCommand}.
      * @param modeluri The URI of the model that should be edited.
      * @param command The command that should be executed.
-     * @returns A promise indicating wether the command execution was successful.
+     * @returns A promise indicating whether the command execution was successful.
      */
     edit(modeluri: string, command: ModelServerCommand): Promise<boolean>;
 
     /**
      * Can be used to undo the latest edit change i.e command execution for the model with the given URI.
      * @param modeluri The URI the model whose change should be undone.
-     * @returns A string message indicating wether the change was successfully undone.
+     * @returns A string message indicating whether the change was successfully undone.
      */
     undo(modeluri: string): Promise<string>;
 
     /**
-     * Can be used to redo the latest edit change i.e command execution for the model with the given URI.
+     * Can be used to redo the latest edit change (i.e command execution) for the model with the given URI.
      * @param modeluri The URI the model whose change should be redone.
-     * @returns A string message indicating wether the change was successfully redone.
+     * @returns A string message indicating whether the change was successfully redone.
      */
     redo(modeluri: string): Promise<string>;
 
@@ -299,14 +298,14 @@ export interface ModelServerClientApiV1 {
      * Can be used to send arbitrary {@link ModelServerMessage}s to the model server via a subscription channel.
      * @param modelUri The URI of the subscribed model.
      * @param message The model server message that should be sent.
-     * @returns A boolean indicating wether the message submission was successful.
+     * @returns A boolean indicating whether the message submission was successful.
      */
     send(modelUri: string, message: ModelServerMessage): boolean;
 
     /**
      * Can be used to unsubscribe from model server notifications for the model with the given URI.
      * @param modeluri URI of the model to whose subscription should be canceled.
-     * @returns A boolean indicating wether the unsubscribe process was successful.
+     * @returns A boolean indicating whether the unsubscribe process was successful.
      */
     unsubscribe(modelUri: string): boolean;
 }
@@ -329,8 +328,8 @@ export interface SubscriptionOptions {
 }
 
 /**
- * Configuration object that can be send by the client to configure
- * the workspaceRoot & the ui schema folder.
+ * Configuration object that can be sent by the client to configure
+ * the workspaceRoot and the ui schema folder.
  */
 export interface ServerConfiguration {
     workspaceRoot: string;
@@ -338,8 +337,8 @@ export interface ServerConfiguration {
 }
 
 /**
- * A `ModelServerError` that is thrown clients implementing {@link ModelServerClientApiV1} if a request to the
- * model server has failed. If the server responden with an error code and a valid {@link ModelServerMessage} the
+ * A `ModelServerError` is thrown by clients implementing {@link ModelServerClientApiV1} if a request to the
+ * model server has failed. If the server responds with an error code and a valid {@link ModelServerMessage} the
  * error message is derived from the {@link ModelServerMessage.data} property. If no valid message was received i.e. the
  * request failed due to another internal error, the error message of the internal error is reused.
  */
