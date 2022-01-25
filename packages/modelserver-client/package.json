@@ -1,0 +1,57 @@
+{
+  "name": "@eclipse-emfcloud/modelserver-client",
+  "description": "Typescript rest client to interact with an EMF.cloud modelserver",
+  "license": "(EPL-2.0 OR MIT)",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/index",
+  "types": "lib/index",
+  "keywords": [
+    "model-server",
+    "EMF",
+    "modeling"
+  ],
+  "homepage": "https://www.eclipse.org/emfcloud/",
+  "bugs": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia/issues",
+  "version": "0.7.0",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "contributors": [
+    {
+      "name": "STMicroelectronics",
+      "url": "https://www.st.com/"
+    },
+    {
+      "name": "Eclipse emf.cloud Project",
+      "email": "emfcloud-dev@eclipse.org",
+      "url": "https://projects.eclipse.org/projects/ecd.emfcloud"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "events": "^3.3.0",
+    "ws": "^7.4.6",
+    "isomorphic-ws": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/ws": "8.2.2",
+    "typescript": "^3.9.2",
+    "@types/moxios": "^0.4.14",
+    "moxios": "^0.4.0"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "tsc && yarn run lint",
+    "lint": "eslint -c ../../.eslintrc.js --ext .ts ./src",
+    "watch": "tsc -w",
+    "test": "mocha --config ../../configs/.mocharc.json \"./src/**/*.spec.?(ts|tsx)\""
+  }
+}

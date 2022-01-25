@@ -6,39 +6,41 @@
     "node": ">=12.14.1 <13"
   },
   "scripts": {
-    "prepare": "lerna run prepare && yarn download:plugins",
+    "prepare": "lerna run prepare",
     "rebuild:browser": "theia rebuild:browser",
     "watch": "lerna run --parallel watch",
     "test": "lerna run test",
     "publish": "yarn && yarn publish:latest",
     "publish:latest": "lerna publish",
     "publish:next": "lerna publish --exact --canary=next --npm-tag=next --yes",
-    "start": "yarn rebuild:browser && yarn --cwd example/browser-app start",
-    "download:plugins": "theia download:plugins",
-    "download:server": "yarn --cwd example/coffee-theia download:server"
+    "start": "yarn rebuild:browser && yarn --cwd examples/browser-app start",
+    "upgrade:theia": "yarn upgrade -p \"@theia/.*\"",
+    "download:plugins": "yarn --cwd examples/browser-app download:plugins",
+    "download:server": "yarn --cwd examples/coffee-theia download:server"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.16.0",
-    "@typescript-eslint/parser": "^2.16.0",
-    "eslint": "^6.8.0",
-    "eslint-plugin-header": "^3.0.0",
-    "eslint-plugin-import": "^2.20.0",
+    "@babel/runtime": "^7.16.3",
+    "@types/chai": "^4.2.22",
+    "@types/mocha": "^9.0.0",
+    "@types/sinon": "^10.0.6",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
+    "chai": "^4.3.4",
+    "eslint": "^7.32.0",
+    "eslint-plugin-chai-friendly": "^0.7.2",
+    "eslint-plugin-header": "^3.1.1",
+    "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-no-null": "^1.0.2",
     "lerna": "^2.11.0",
-    "rimraf": "^2.6.2",
+    "mocha": "^9.1.3",
+    "mocha-jenkins-reporter": "^0.4.7",
+    "rimraf": "^3.0.2",
+    "sinon": "^12.0.1",
+    "ts-node": "10.4.0",
     "typescript": "3.9.2"
   },
   "workspaces": [
-    "modelserver-theia",
-    "modelserver-markers-theia",
-    "example/browser-app",
-    "example/coffee-theia",
-    "example/dev-example"
-  ],
-  "theiaPluginsDir": "plugins",
-  "theiaPlugins": {
-    "vscode-builtin-json": "https://open-vsx.org/api/vscode/json/1.46.1/file/vscode.json-1.46.1.vsix",
-    "vscode-builtin-json-language-features": "https://open-vsx.org/api/vscode/json-language-features/1.46.1/file/vscode.json-language-features-1.46.1.vsix",
-    "vscode-builtin-xml": "https://open-vsx.org/api/vscode/xml/1.44.2/file/vscode.xml-1.44.2.vsix"
-  }
+    "packages/*",
+    "examples/*"
+  ]
 }

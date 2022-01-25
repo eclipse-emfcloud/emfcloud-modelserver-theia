@@ -1,0 +1,12 @@
+{
+  "extends": "../../configs/base.tsconfig",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib",
+    "reactNamespace": "JSX",
+    "baseUrl": "src",
+    "types": ["node", "reflect-metadata","mocha", "chai"],
+    "esModuleInterop": true
+  },
+  "include": ["src"]
+}
