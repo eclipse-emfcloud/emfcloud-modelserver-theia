@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
+/* eslint-disable @typescript-eslint/ban-types */
 import {
     AddCommand,
     AnyObject,

@@ -32,6 +32,7 @@ export namespace ModelElementRange {
     /**
      * Checks whether the given literal conforms to the ModelElementRange interface.
      */
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     export function is(value: any): value is ModelElementRange {
         return 'uriFragment' in value && Range.is(value);
     }

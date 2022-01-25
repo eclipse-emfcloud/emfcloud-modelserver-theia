@@ -237,8 +237,8 @@ export interface ModelServerClientApiV1 {
     /**
      * Retrieves the JSON schema representation of the Ecore model with the given URI.
      * Note: currently the JSON schema can only be derived from the Ecore (i.e. Meta) model. So the given URI
-     * has to point to the Ecore model and not a concrete model instance. (e.g. `Coffee.ecore` instead of `superbrewer3000.coffee)
-     * @param modeluri The URI of the ecore model whose JSON schema should be retrieved
+     * has to point to the Ecore model and not a concrete model instance. (e.g. `Coffee.ecore` instead of `Superbrewer3000.coffee)
+     * @param modeluri The URI of the Ecore model whose JSON schema should be retrieved
      * @returns The corresponding JSON schema  as string.
      */
     getTypeSchema(modeluri: string): Promise<string>;
@@ -260,12 +260,12 @@ export interface ModelServerClientApiV1 {
 
     /**
      * Can be used to check whether the model server is alive and reachable.
-     * @returns A boolean indicating whether the ping was successfully.
+     * @returns A boolean indicating whether the ping was successful.
      */
     ping(): Promise<boolean>;
 
     /**
-     * Modifies the model with the given URI by executing the give {@link ModelServerCommand}.
+     * Modifies the model with the given URI by executing the given {@link ModelServerCommand}.
      * @param modeluri The URI of the model that should be edited.
      * @param command The command that should be executed.
      * @returns A promise indicating whether the command execution was successful.
@@ -273,14 +273,14 @@ export interface ModelServerClientApiV1 {
     edit(modeluri: string, command: ModelServerCommand): Promise<boolean>;
 
     /**
-     * Can be used to undo the latest edit change i.e command execution for the model with the given URI.
+     * Can be used to undo the latest edit change (i.e. command execution) for the model with the given URI.
      * @param modeluri The URI the model whose change should be undone.
      * @returns A string message indicating whether the change was successfully undone.
      */
     undo(modeluri: string): Promise<string>;
 
     /**
-     * Can be used to redo the latest edit change (i.e command execution) for the model with the given URI.
+     * Can be used to redo the latest edit change (i.e. command execution) for the model with the given URI.
      * @param modeluri The URI the model whose change should be redone.
      * @returns A string message indicating whether the change was successfully redone.
      */
