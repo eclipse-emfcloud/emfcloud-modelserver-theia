@@ -153,12 +153,12 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         );
     }
 
-    getTypeSchema(modeluri: string): Promise<string> {
-        return this.process(this.restClient.get(ModelServerPaths.TYPE_SCHEMA, { params: { modeluri } }), MessageDataMapper.asString);
+    getTypeSchema(modeluri: string): Promise<AnyObject> {
+        return this.process(this.restClient.get(ModelServerPaths.TYPE_SCHEMA, { params: { modeluri } }), MessageDataMapper.asObject);
     }
 
-    getUiSchema(schemaname: string): Promise<string> {
-        return this.process(this.restClient.get(ModelServerPaths.UI_SCHEMA, { params: { schemaname } }), MessageDataMapper.asString);
+    getUiSchema(schemaname: string): Promise<AnyObject> {
+        return this.process(this.restClient.get(ModelServerPaths.UI_SCHEMA, { params: { schemaname } }), MessageDataMapper.asObject);
     }
 
     configureServer(configuration: ServerConfiguration): Promise<boolean> {

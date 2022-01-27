@@ -235,20 +235,20 @@ export interface ModelServerClientApiV1 {
     getValidationConstraints(modeluri: string): Promise<string>;
 
     /**
-     * Retrieves the JSON schema representation of the Ecore model with the given URI.
+     * Retrieves the JSON schema representation of the Ecore model with the given URI as plain JSON object.
      * Note: currently the JSON schema can only be derived from the Ecore (i.e. Meta) model. So the given URI
      * has to point to the Ecore model and not a concrete model instance. (e.g. `Coffee.ecore` instead of `Superbrewer3000.coffee)
      * @param modeluri The URI of the Ecore model whose JSON schema should be retrieved
-     * @returns The corresponding JSON schema  as string.
+     * @returns The corresponding JSON schema as plain JSON object.
      */
-    getTypeSchema(modeluri: string): Promise<string>;
+    getTypeSchema(modeluri: string): Promise<AnyObject>;
 
     /**
-     * Retrieves the JSONForms UI schema for the given EClass literal.
+     * Retrieves the JSONForms UI schema for the given EClass literal as plain JSON object.
      * @param schemaname The EClass for which the schema should be retrieved.
-     * @returns The UI schema as string.
+     * @returns The UI schema as plain JSON object.
      */
-    getUiSchema(schemaname: string): Promise<string>;
+    getUiSchema(schemaname: string): Promise<AnyObject>;
 
     /**
      * Configures the workspace location and optionally the UI schema folder location for the model server.
