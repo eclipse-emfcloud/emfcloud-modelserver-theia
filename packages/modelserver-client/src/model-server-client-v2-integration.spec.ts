@@ -46,7 +46,7 @@ describe('Integration tests for ModelServerClientV2', () => {
 
     beforeEach(() => {
         client = new ModelServerClientV2();
-        client.initialize(baseUrl);
+        client.initialize(baseUrl, 'json-v2');
     });
 
     describe('test requests', () => {
@@ -88,19 +88,19 @@ describe('Integration tests for ModelServerClientV2', () => {
             const initialModel = await client.get(modeluri, ModelServerObjectV2.is);
 
             // Add a second workflow to the model; we'll use it to move a Task from a workflow to the other
-            const createWorkflow = create(modeluri, initialModel, 'workflows', 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow', {name: "New Workflow"});
+            const createWorkflow = create(modeluri, initialModel, 'workflows', 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow', {name: 'New Workflow'});
             await client.edit(modeluri, createWorkflow);
             const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
             const sourceWF = (originalModel as any).workflows[0];
             const targetWF = (originalModel as any).workflows[1];
 
-            const patch = add(modeluri, targetWF, "nodes", sourceWF.nodes[0]);
+            const patch = add(modeluri, targetWF, 'nodes', sourceWF.nodes[0]);
             await client.edit(modeluri, patch);
             const patchedModel = await client.get(modeluri);
-            
+
             const patchedSourceWF = (patchedModel as any).workflows[0];
             const patchedTargetWF = (patchedModel as any).workflows[1];
-            
+
             expect(patchedSourceWF.nodes).to.be.undefined;
             expect(patchedTargetWF.nodes).to.be.an('array').of.length(1);
             expect(patchedTargetWF.nodes[0].name).to.be.equal(sourceWF.nodes[0].name); // Node was moved

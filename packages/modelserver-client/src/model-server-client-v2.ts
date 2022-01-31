@@ -13,13 +13,13 @@ import { Operation } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
 import { ModelServerError, ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
-import { ModelServerClientApiV2 } from './model-server-client-api-v2';
+import { Format, ModelServerClientApiV2 } from './model-server-client-api-v2';
 import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
 import { SubscriptionListener } from './subscription-listener';
-import { AnyObject, asObject, asString, asType, TypeGuard } from './utils/type-util';
+import { AnyObject, asObject, asString, asType, encodeRequestBody, TypeGuard } from './utils/type-util';
 
 /**
  * A client to interact with a model server.
@@ -28,10 +28,11 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
     protected restClient: AxiosInstance;
     protected openSockets: Map<string, WebSocket> = new Map();
     protected _baseUrl: string;
-    protected defaultFormat = 'json';
+    protected defaultFormat: Format = 'json';
 
-    initialize(baseUrl: string): void | Promise<void> {
+    initialize(baseUrl: string, defaultFormat: Format = 'json'): void | Promise<void> {
         this._baseUrl = baseUrl;
+        this.defaultFormat = defaultFormat;
         this.restClient = axios.create(this.getAxiosConfig(baseUrl));
     }
 
@@ -39,25 +40,25 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         return { baseURL };
     }
 
-    get(modeluri: string, format?: string): Promise<AnyObject>;
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
-    get<M>(modeluri: string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
+    get(modeluri: string, format?: Format): Promise<AnyObject>;
+    get<M>(modeluri: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    get<M>(modeluri: string, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
         if (typeof formatOrGuard === 'function') {
             const typeGuard = formatOrGuard;
             return this.process(this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri, format } }), msg =>
                 MessageDataMapper.as(msg, typeGuard)
             );
         }
-        format = formatOrGuard;
+        format = formatOrGuard ?? this.defaultFormat;
         return this.process(this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri, format } }), MessageDataMapper.asObject);
     }
 
     getAll(): Promise<Model[]>;
     getAll<M>(typeGuard: TypeGuard<M>): Promise<Model<M>[]>;
-    getAll(format: string): Promise<Model<string>[]>;
+    getAll(format: Format): Promise<Model<string>[]>;
     getAll<M>(formatOrGuard?: FormatOrGuard<M>): Promise<Array<Model | Model<string> | Model<M>>> {
         let modelMapper: (model: Model) => Model<string | AnyObject | M>;
-        let format = 'json';
+        let format = this.defaultFormat;
         if (!formatOrGuard) {
             modelMapper = (model: Model) => mapModel(model);
         } else if (typeof formatOrGuard === 'string') {
@@ -76,10 +77,10 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         return this.process(this.restClient.get(ModelServerPaths.MODEL_URIS), MessageDataMapper.asStringArray);
     }
 
-    getElementById(modeluri: string, elementid: string, format?: string): Promise<AnyObject>;
+    getElementById(modeluri: string, elementid: string, format?: Format): Promise<AnyObject>;
     getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>): Promise<M>;
     getElementById<M>(modeluri: string, elementid: string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
-        format = format ?? 'json';
+        format = format ?? this.defaultFormat;
         if (formatOrGuard) {
             if (typeof formatOrGuard === 'function') {
                 const typeGuard = formatOrGuard;
@@ -95,10 +96,10 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         );
     }
 
-    getElementByName(modeluri: string, elementname: string, format?: string): Promise<AnyObject>;
-    getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
-    getElementByName<M>(modeluri: string, elementname: string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
-        format = format ?? 'json';
+    getElementByName(modeluri: string, elementname: string, format?: Format): Promise<AnyObject>;
+    getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    getElementByName<M>(modeluri: string, elementname: string, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
+        format = format ?? this.defaultFormat;
         if (formatOrGuard) {
             if (typeof formatOrGuard === 'function') {
                 const typeGuard = formatOrGuard;
@@ -115,47 +116,47 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         );
     }
 
-    create(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
-    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
-    create<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
-        format = format ?? 'json';
+    create(modeluri: string, model: AnyObject | string, format?: Format): Promise<AnyObject>;
+    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    create<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
+        format = format ?? this.defaultFormat;
         if (formatOrGuard) {
             if (typeof formatOrGuard === 'function') {
                 const typeGuard = formatOrGuard;
                 return this.process(
-                    this.restClient.post(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
+                    this.restClient.post(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), { params: { modeluri, format } }),
                     msg => MessageDataMapper.as(msg, typeGuard)
                 );
             }
             format = formatOrGuard;
         }
         return this.process(
-            this.restClient.post(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
+            this.restClient.post(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), { params: { modeluri, format } }),
             MessageDataMapper.asObject
         );
     }
 
-    update(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
-    update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    update(modeluri: string, model: AnyObject | string, format?: Format): Promise<AnyObject>;
+    update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
     update<M>(
         modeluri: string,
         model: AnyObject | string,
         formatOrGuard?: FormatOrGuard<M>,
-        format?: string
+        format?: Format
     ): Promise<AnyObject> | Promise<M> {
-        format = format ?? 'json';
+        format = format ?? this.defaultFormat;
         if (formatOrGuard) {
             if (typeof formatOrGuard === 'function') {
                 const typeGuard = formatOrGuard;
                 return this.process(
-                    this.restClient.put(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
+                    this.restClient.put(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), { params: { modeluri, format } }),
                     msg => MessageDataMapper.as(msg, typeGuard)
                 );
             }
             format = formatOrGuard;
         }
         return this.process(
-            this.restClient.put(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
+            this.restClient.put(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), { params: { modeluri, format } }),
             MessageDataMapper.asObject
         );
     }
@@ -231,7 +232,7 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         return this.process(
             this.restClient.patch(
                 ModelServerPaths.MODEL_CRUD,
-                { data: patchMessage },
+                encodeRequestBody(this.defaultFormat)(patchMessage),
                 { params: { modeluri, format: this.defaultFormat } }
             ),
             MessageDataMapper.isSuccess
@@ -324,7 +325,7 @@ function isAxiosError(error: any): error is AxiosError {
  * Helper type for method overloads where on parameter could either be
  * a 'format' string or a typeguard to cast the response to a concrete type.
  */
-type FormatOrGuard<M> = string | TypeGuard<M>;
+type FormatOrGuard<M> = Format | TypeGuard<M>;
 
 function mapModel<M>(model: Model, guard?: TypeGuard<M>, toString = false): Model<AnyObject | M | string> {
     const { modelUri, content } = model;

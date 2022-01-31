@@ -17,6 +17,12 @@ import { Diagnostic } from './model/diagnostic';
 import { SubscriptionListener } from './subscription-listener';
 import { AnyObject, TypeGuard } from './utils/type-util';
 
+/** JSON formats supported by the V2 client API. */
+export type JsonFormat = 'json' | 'json-v2';
+
+/** Message formats supported by the V2 client API. */
+export type Format = 'xml' | JsonFormat;
+
 /**
  * Basic client API to interact with a model server that conforms to the Modelserver API Version 2.
  */
@@ -29,42 +35,37 @@ export interface ModelServerClientApiV2 {
      * Any requests to the model server before the client has been initialized are expected to fail (i.e. throw an error)
      * @param baseUrl Url pointing to the API entry point
      * @param defaultFormat Optional fallback format that should used when a request method is invoked and no explicit format argument
-     *                      has been passed.
+     *                      has been passed. The default-default is `'json'`
      */
-    initialize(baseUrl: string, defaultFormat?: string): void | Promise<void>;
+    initialize(baseUrl: string, defaultFormat?: Format): void | Promise<void>;
 
     /**
      * Retrieves all available models of the current workspace.
-     * @param format
      */
     getAll(): Promise<Model[]>;
-    /**
-     * 3
-     * @param format
-     */
     getAll<M>(typeGuard: TypeGuard<M>): Promise<Model<M>[]>;
-    getAll(format: string): Promise<Model<string>[]>;
+    getAll(format: Format): Promise<Model<string>[]>;
 
-    get(modeluri: string, format?: string): Promise<AnyObject>;
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    get(modeluri: string, format?: Format): Promise<AnyObject>;
+    get<M>(modeluri: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
     getModelUris(): Promise<string[]>;
 
-    getElementById(modeluri: string, elementid: string, format?: string): Promise<AnyObject>;
-    getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    getElementById(modeluri: string, elementid: string, format?: Format): Promise<AnyObject>;
+    getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
-    getElementByName(modeluri: string, elementname: string, format?: string): Promise<AnyObject>;
-    getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    getElementByName(modeluri: string, elementname: string, format?: Format): Promise<AnyObject>;
+    getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
     delete(modeluri: string): Promise<boolean>;
 
     close(modeluri: string): Promise<boolean>;
 
-    create(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
-    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    create(modeluri: string, model: AnyObject | string, format?: Format): Promise<AnyObject>;
+    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
-    update(modeluri: string, model: AnyObject | string, format?: string): Promise<AnyObject>;
-    update<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    update(modeluri: string, model: AnyObject | string, format?: Format): Promise<AnyObject>;
+    update<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
     save(modeluri: string): Promise<boolean>;
 
@@ -82,8 +83,8 @@ export interface ModelServerClientApiV2 {
 
     ping(): Promise<boolean>;
 
-    edit(modeluri: string, patch: Operation | Operation[], format?: string): Promise<boolean>;
-    edit(modeluri: string, command: ModelServerCommand, format?: string): Promise<boolean>;
+    edit(modeluri: string, patch: Operation | Operation[], format?: Format): Promise<boolean>;
+    edit(modeluri: string, command: ModelServerCommand, format?: Format): Promise<boolean>;
 
     undo(modeluri: string): Promise<string>;
 
