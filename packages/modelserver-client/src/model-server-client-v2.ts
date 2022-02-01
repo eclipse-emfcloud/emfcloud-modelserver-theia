@@ -13,7 +13,7 @@ import { Operation } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
 import { ModelServerError, ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
-import { Format, ModelServerClientApiV2 } from './model-server-client-api-v2';
+import { Format, ModelServerClientApiV2, ModelUpdateResult } from './model-server-client-api-v2';
 import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
 import { ModelServerCommand } from './model/command-model';
@@ -212,10 +212,10 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         return this.process(this.restClient.get(ModelServerPaths.SERVER_PING), MessageDataMapper.isSuccess);
     }
 
-    edit(modeluri: string, patch: Operation): Promise<boolean>;
-    edit(modeluri: string, patch: Operation[]): Promise<boolean>;
-    edit(modeluri: string, command: ModelServerCommand): Promise<boolean>;
-    edit(modeluri: string, patchOrCommand: Operation | Operation[] | ModelServerCommand): Promise<boolean> {
+    edit(modeluri: string, patch: Operation): Promise<ModelUpdateResult>;
+    edit(modeluri: string, patch: Operation[]): Promise<ModelUpdateResult>;
+    edit(modeluri: string, command: ModelServerCommand): Promise<ModelUpdateResult>;
+    edit(modeluri: string, patchOrCommand: Operation | Operation[] | ModelServerCommand): Promise<ModelUpdateResult> {
         let patchMessage: any;
         if (patchOrCommand instanceof ModelServerCommand) {
             patchMessage = {
@@ -235,7 +235,7 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
                 encodeRequestBody(this.defaultFormat)(patchMessage),
                 { params: { modeluri, format: this.defaultFormat } }
             ),
-            MessageDataMapper.isSuccess
+            MessageDataMapper.patchModel
         );
     }
 

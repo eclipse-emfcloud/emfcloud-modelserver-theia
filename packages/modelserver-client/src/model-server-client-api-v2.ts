@@ -12,6 +12,7 @@ import { Operation } from 'fast-json-patch';
 
 import { ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
 import { Model, ModelServerMessage } from './model-server-message';
+import { ModelServerElement } from './model/base-model';
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
 import { SubscriptionListener } from './subscription-listener';
@@ -83,8 +84,8 @@ export interface ModelServerClientApiV2 {
 
     ping(): Promise<boolean>;
 
-    edit(modeluri: string, patch: Operation | Operation[], format?: Format): Promise<boolean>;
-    edit(modeluri: string, command: ModelServerCommand, format?: Format): Promise<boolean>;
+    edit(modeluri: string, patch: Operation | Operation[], format?: Format): Promise<ModelUpdateResult>;
+    edit(modeluri: string, command: ModelServerCommand, format?: Format): Promise<ModelUpdateResult>;
 
     undo(modeluri: string): Promise<string>;
 
@@ -99,4 +100,20 @@ export interface ModelServerClientApiV2 {
 
 export namespace ModelServerClientApiV2 {
     export const API_ENDPOINT = '/api/v2';
+}
+
+/**
+ * Result sent to client after requesting a model update.
+ */
+export interface ModelUpdateResult {
+    /**
+     * True if the edit request was successful, false otherwise.
+     */
+    success: boolean;
+    /**
+     * A function to update the model. Only present if the edit request was successful.
+     * The function can be applied to the original model (before edition) and will return
+     * the new model (after edition).
+     */
+    patch?(oldModel: ModelServerElement): ModelServerElement;
 }

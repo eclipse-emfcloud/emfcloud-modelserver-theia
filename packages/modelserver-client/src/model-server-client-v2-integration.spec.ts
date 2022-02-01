@@ -158,6 +158,27 @@ describe('Integration tests for ModelServerClientV2', () => {
             await testUndoRedo(modeluri, originalModel, model);
         });
 
+        it('incremental patch update', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const newName = 'Super Brewer 6000';
+            const machine = await client.get(modeluri, ModelServerObjectV2.is);
+            const patch = replace(modeluri, machine, 'name', newName);
+            const updateResult = await client.edit(modeluri, patch);
+            expect(updateResult.success).to.be.true;
+            expect(updateResult.patch).to.not.be.undefined;
+
+            // Patch a copy of the model (machine), to make sure the original model is
+            // unchanged. We'll need it later to check undo/redo behavior.
+            const patchedMachine = updateResult.patch!({...machine});
+            expect((patchedMachine as any).name).to.be.equal(newName);
+
+            // Check that the incremental update is consistent with the server version of the model
+            const newMachine = await client.get(modeluri, ModelServerObjectV2.is);
+            expect(newMachine).to.deep.equal(patchedMachine);
+
+            await testUndoRedo(modeluri, machine, patchedMachine);
+        });
+
         it('subscribe to changes', async () => {
             const modeluri = 'SuperBrewer3000.coffee';
             const newName = 'Super Brewer 6000';
