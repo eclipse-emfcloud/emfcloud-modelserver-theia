@@ -239,12 +239,12 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         );
     }
 
-    undo(modeluri: string): Promise<string> {
-        return this.process(this.restClient.get(ModelServerPaths.UNDO, { params: { modeluri } }), MessageDataMapper.asString);
+    undo(modeluri: string): Promise<ModelUpdateResult> {
+        return this.process(this.restClient.get(ModelServerPaths.UNDO, { params: { modeluri } }), MessageDataMapper.patchModel);
     }
 
-    redo(modeluri: string): Promise<string> {
-        return this.process(this.restClient.get(ModelServerPaths.REDO, { params: { modeluri } }), MessageDataMapper.asString);
+    redo(modeluri: string): Promise<ModelUpdateResult> {
+        return this.process(this.restClient.get(ModelServerPaths.REDO, { params: { modeluri } }), MessageDataMapper.patchModel);
     }
 
     send(modelUri: string, message: ModelServerMessage): void {

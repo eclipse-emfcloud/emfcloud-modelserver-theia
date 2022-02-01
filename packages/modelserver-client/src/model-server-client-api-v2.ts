@@ -87,9 +87,9 @@ export interface ModelServerClientApiV2 {
     edit(modeluri: string, patch: Operation | Operation[], format?: Format): Promise<ModelUpdateResult>;
     edit(modeluri: string, command: ModelServerCommand, format?: Format): Promise<ModelUpdateResult>;
 
-    undo(modeluri: string): Promise<string>;
+    undo(modeluri: string): Promise<ModelUpdateResult>;
 
-    redo(modeluri: string): Promise<string>;
+    redo(modeluri: string): Promise<ModelUpdateResult>;
 
     // WebSocket connection
     subscribe(modeluri: string, listener: SubscriptionListener, options?: SubscriptionOptions): SubscriptionListener;
@@ -114,6 +114,11 @@ export interface ModelUpdateResult {
      * A function to update the model. Only present if the edit request was successful.
      * The function can be applied to the original model (before edition) and will return
      * the new model (after edition).
+     *
+     * @param oldModel the model to patch
+     * @param copy by default, the patch will be directly applied to the oldModel, modifying
+     * it in-place. If copy is true, the patch will be applied on a copy of the model, leaving
+     * the original model unchanged.
      */
-    patch?(oldModel: ModelServerElement): ModelServerElement;
+    patch?(oldModel: ModelServerElement, copy?: boolean): ModelServerElement;
 }

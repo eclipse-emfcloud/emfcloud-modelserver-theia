@@ -32,13 +32,21 @@ describe('Integration tests for ModelServerClientV2', () => {
     const baseUrl = `http://localhost:8081${ModelServerClientApiV2.API_ENDPOINT}`;
 
     const testUndoRedo: (modeluri: string, originalModel: any, patchedModel: any) => void = async (modeluri, originalModel, patchedModel) => {
-        await client.undo(modeluri);
-        const undoModel = await client.get(modeluri);
+        // Expected: originalModel === undoModel === patchedUndoModel
+        // Expected: patchedModel === redoModel === patchedRedoModel
+        const undoPatch = await client.undo(modeluri);
+        const undoModel = await client.get(modeluri, ModelServerObjectV2.is);
         expect(undoModel).to.deep.equal(originalModel);
 
-        await client.redo(modeluri);
-        const redoModel = await client.get(modeluri);
+        const patchedUndoModel = undoPatch.patch!(patchedModel, true);
+        expect(patchedUndoModel).to.deep.equal(originalModel);
+
+        const redoPatch = await client.redo(modeluri);
+        const redoModel = await client.get(modeluri, ModelServerObjectV2.is);
         expect(redoModel).to.deep.equal(patchedModel);
+
+        const patchedRedoModel = redoPatch.patch!(patchedUndoModel, true);
+        expect(patchedRedoModel).to.deep.equal(patchedModel);
 
         // Restore initial state
         await client.undo(modeluri);
@@ -169,7 +177,7 @@ describe('Integration tests for ModelServerClientV2', () => {
 
             // Patch a copy of the model (machine), to make sure the original model is
             // unchanged. We'll need it later to check undo/redo behavior.
-            const patchedMachine = updateResult.patch!({...machine});
+            const patchedMachine = updateResult.patch!(machine, true);
             expect((patchedMachine as any).name).to.be.equal(newName);
 
             // Check that the incremental update is consistent with the server version of the model

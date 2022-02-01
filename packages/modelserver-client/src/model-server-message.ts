@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
 import * as jsonpatch from 'fast-json-patch';
+import { deepClone } from 'fast-json-patch';
 
 import { ModelUpdateResult } from './model-server-client-api-v2';
 import { ModelServerElement } from './model/base-model';
@@ -201,7 +202,10 @@ export namespace MessageDataMapper {
             if (patch && Operations.isPatch(patch)) {
                 return {
                     success: isSuccess(message),
-                    patch: oldModel => jsonpatch.applyPatch(oldModel, patch).newDocument as ModelServerElement
+                    patch: (oldModel, copy) => {
+                        const modelToPatch = copy ? deepClone(oldModel) : oldModel;
+                        return jsonpatch.applyPatch(modelToPatch, patch).newDocument as ModelServerElement;
+                    }
                 };
             } else {
                 return { success: true };
