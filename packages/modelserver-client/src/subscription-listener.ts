@@ -179,6 +179,7 @@ export class NotificationSubscriptionListenerV2 extends NotificationSubscription
             switch (type) {
                 case MessageType.incrementalUpdate: {
                     this.notificationListener.onIncrementalUpdateV2?.({
+                        type: message.type,
                         modelUri,
                         patch: MessageDataMapper.as(message, Operations.isPatch)
                     });

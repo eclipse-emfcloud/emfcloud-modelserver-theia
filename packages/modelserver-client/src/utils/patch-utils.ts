@@ -11,7 +11,7 @@
 import { AddOperation, Operation, RemoveOperation, ReplaceOperation } from 'fast-json-patch';
 
 import { ModelServerObjectV2, ModelServerReferenceDescriptionV2 } from '../model/base-model';
-import { TypeGuard } from './type-util';
+import { AnyObject, TypeGuard } from './type-util';
 
 // Utility methods to create Json Patches
 
@@ -48,7 +48,7 @@ export function replace<T>(modeluri: string, object: ModelServerObjectV2, featur
  * @param attributes the attributes to initialize for the new element
  * @returns The Json Patch AddOperation to create the element.
  */
-export function create(modeluri: string, parent: ModelServerObjectV2, feature: string, $type: string, attributes?: any): AddOperation<TypeDefinition> {
+export function create(modeluri: string, parent: ModelServerObjectV2, feature: string, $type: string, attributes?: AnyObject): AddOperation<TypeDefinition> {
     return {
         op: 'add',
         path: getPropertyPath(modeluri, parent, feature),
@@ -111,12 +111,12 @@ export function removeValueAt(modeluri: string, object: ModelServerObjectV2, fea
  * @param modeluri the uri of the model to edit
  * @param object the object from which a value will be removed
  * @param feature the property from which a value will be removed
- * @param index the value to remove
+ * @param value the value to remove
  */
-export function removeValue(modeluri: string, object: ModelServerObjectV2, feature: string, value: any): RemoveOperation | undefined {
+export function removeValue(modeluri: string, object: ModelServerObjectV2, feature: string, value: AnyObject): RemoveOperation | undefined {
     const index = findIndex(object, feature, value);
     if (index >= 0) {
-        return removeValue(modeluri, object, feature, index);
+        return removeValueAt(modeluri, object, feature, index);
     }
     return undefined;
 }
@@ -143,7 +143,7 @@ export function getPropertyPath(modeluri: string, object: ModelServerObjectV2, f
     return `${getObjectPath(modeluri, object)}/${feature}${indexSuffix}`;
 }
 
-function findIndex(object: ModelServerObjectV2, feature: string, value: any): number {
+function findIndex(object: ModelServerObjectV2, feature: string, value: AnyObject): number {
     const propertyValue = (object as any)[feature];
     if (Array.isArray(propertyValue)) {
         return propertyValue.indexOf(value);
@@ -155,17 +155,21 @@ function findIndex(object: ModelServerObjectV2, feature: string, value: any): nu
  * Utility functions for working with JSON Patch operations.
  */
 export namespace Operations {
-    export function isOperation(object: any): object is Operation {
-        return (
-            'op' in object &&
-            typeof object.op === 'string' && //
-            'path' in object &&
-            typeof object.path === 'string'
-        );
+    export function isOperation(object: unknown): object is Operation {
+        if (AnyObject.is(object)){
+            return (
+                'op' in object &&
+                typeof object.op === 'string' && //
+                'path' in object &&
+                typeof object.path === 'string'
+            );
+        } else {
+            return false;
+        }
     }
 
-    export function isPatch(object: any): object is Operation[] {
-        return (Array.isArray(object) && object.length === 0) || isOperation(object[0]);
+    export function isPatch(object: unknown): object is Operation[] {
+        return Array.isArray(object) && (object.length === 0 || isOperation(object[0]));
     }
 
     /** Type guard testing whether an operation is a replace operation, with a nested guard on the value type. */

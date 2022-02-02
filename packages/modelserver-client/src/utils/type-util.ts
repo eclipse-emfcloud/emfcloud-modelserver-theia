@@ -10,6 +10,7 @@
  *********************************************************************************/
 import { Format, JsonFormat } from '../model-server-client-api-v2';
 import { Model } from '../model-server-message';
+
 /**
  * The built-in 'object' & 'Object' types are currently hard to use
  * an should be avoided. It's recommended to use Record instead to describe the
@@ -310,7 +311,7 @@ function traverse<T>(object: any, fn: (target: any, props: string[]) => T | unde
     return false;
 }
 
-function isNonEmptyObjectArray(value: any): value is object[] {
+function isNonEmptyObjectArray(value: any): value is AnyObject[] {
     // TODO: More correct would be value.every(e => typeof e === 'object' && !Array.isArray(value[0]))
     return Array.isArray(value) && value.length > 0 && typeof value[0] === 'object' && !Array.isArray(value[0]);
 }
