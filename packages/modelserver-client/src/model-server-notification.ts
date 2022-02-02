@@ -10,7 +10,7 @@
  *********************************************************************************/
 import { Operation } from 'fast-json-patch';
 
-import { MessageType } from '.';
+import { MessageType, ModelServerObjectV2 } from '.';
 import { ModelServerMessage } from './model-server-message';
 import { CommandExecutionResult } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
@@ -99,6 +99,16 @@ export namespace IncrementalUpdateNotification {
 export interface IncrementalUpdateNotificationV2 extends ModelServerNotification {
     /** The description of the incremental change */
     patch: Operation[];
+
+    /**
+     * A function to apply the patch on the previous version of the model.
+     * @param oldModel The model to patch.
+     * @param copy by default, the patch will be directly applied to the oldModel, modifying
+     * it in-place. If copy is true, the patch will be applied on a copy of the model, leaving
+     * the original model unchanged.
+     * @return the patched model.
+     */
+    patchModel(oldModel: ModelServerObjectV2, copy?: boolean): ModelServerObjectV2;
 }
 
 /**

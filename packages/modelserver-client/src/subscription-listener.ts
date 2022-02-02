@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
+import { applyPatch, deepClone } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
 import { Operations } from '.';
@@ -178,10 +179,15 @@ export class NotificationSubscriptionListenerV2 extends NotificationSubscription
             const type = MessageType.asMessageType(message.type);
             switch (type) {
                 case MessageType.incrementalUpdate: {
+                    const patch = MessageDataMapper.as(message, Operations.isPatch);
                     this.notificationListener.onIncrementalUpdateV2?.({
                         type: message.type,
                         modelUri,
-                        patch: MessageDataMapper.as(message, Operations.isPatch)
+                        patch,
+                        patchModel: (model, copy) => {
+                            const modelToPatch = copy ? deepClone(model) : model;
+                            return applyPatch(modelToPatch, patch).newDocument;
+                        }
                     });
                     break;
                 }

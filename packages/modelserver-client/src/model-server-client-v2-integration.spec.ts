@@ -38,14 +38,14 @@ describe('Integration tests for ModelServerClientV2', () => {
         const undoModel = await client.get(modeluri, ModelServerObjectV2.is);
         expect(undoModel).to.deep.equal(originalModel);
 
-        const patchedUndoModel = undoPatch.patch!(patchedModel, true);
+        const patchedUndoModel = undoPatch.patchModel!(patchedModel, true);
         expect(patchedUndoModel).to.deep.equal(originalModel);
 
         const redoPatch = await client.redo(modeluri);
         const redoModel = await client.get(modeluri, ModelServerObjectV2.is);
         expect(redoModel).to.deep.equal(patchedModel);
 
-        const patchedRedoModel = redoPatch.patch!(patchedUndoModel, true);
+        const patchedRedoModel = redoPatch.patchModel!(patchedUndoModel, true);
         expect(patchedRedoModel).to.deep.equal(patchedModel);
 
         // Restore initial state
@@ -173,11 +173,12 @@ describe('Integration tests for ModelServerClientV2', () => {
             const patch = replace(modeluri, machine, 'name', newName);
             const updateResult = await client.edit(modeluri, patch);
             expect(updateResult.success).to.be.true;
+            expect(updateResult.patchModel).to.not.be.undefined;
             expect(updateResult.patch).to.not.be.undefined;
 
             // Patch a copy of the model (machine), to make sure the original model is
             // unchanged. We'll need it later to check undo/redo behavior.
-            const patchedMachine = updateResult.patch!(machine, true);
+            const patchedMachine = updateResult.patchModel!(machine, true);
             expect((patchedMachine as any).name).to.be.equal(newName);
 
             // Check that the incremental update is consistent with the server version of the model
@@ -224,6 +225,47 @@ describe('Integration tests for ModelServerClientV2', () => {
             if (Operations.isReplace(operation, 'string')) {
                 expect(operation.value).to.be.equal(newName);
             }
+
+            await client.undo(modeluri);
+            client.unsubscribe(modeluri);
+        });
+
+        it('subscribe to incremental updates', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const newName = 'Super Brewer 6000';
+            const machine = await client.get(modeluri, ModelServerObjectV2.is);
+            const owner = {
+                eClass: machine.$type,
+                $ref: `SuperBrewer3000.coffee#${machine.$id}`
+            };
+            const command = new SetCommand(owner, 'name', [newName]);
+
+            const listener: ModelServerNotificationListenerV2 = {};
+
+            const patchNotification: Promise<IncrementalUpdateNotificationV2> = new Promise((resolve, _rej) => {
+                listener.onIncrementalUpdateV2 = resolve;
+            });
+
+            const subscription: Promise<ModelServerNotification> = new Promise((resolve, _rej) => {
+                listener.onSuccess = resolve;
+            });
+
+            client.subscribe(modeluri, new NotificationSubscriptionListenerV2(listener));
+            // Make sure the subscription is initialized before editing the model,
+            // so that we don't miss the notification
+            await subscription;
+
+            await client.edit(modeluri, command);
+            const notification = await patchNotification;
+
+            // Apply the incremental patch on the original model
+            const incrementalPatchedModel = notification.patchModel(machine, true);
+            // Retrieve the current model from the model server
+            const patchedModel = await client.get(modeluri, ModelServerObjectV2.is);
+
+            // Check that the incrementally-patched model to be identical to the version
+            // from the model server.
+            expect(incrementalPatchedModel).to.deep.equal(patchedModel);
 
             await client.undo(modeluri);
             client.unsubscribe(modeluri);

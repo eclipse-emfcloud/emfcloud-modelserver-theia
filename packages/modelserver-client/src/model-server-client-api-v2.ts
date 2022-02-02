@@ -106,10 +106,12 @@ export namespace ModelServerClientApiV2 {
  * Result sent to client after requesting a model update.
  */
 export interface ModelUpdateResult {
+
     /**
      * True if the edit request was successful, false otherwise.
      */
     success: boolean;
+
     /**
      * A function to update the model. Only present if the edit request was successful.
      * The function can be applied to the original model (before edition) and will return
@@ -119,6 +121,13 @@ export interface ModelUpdateResult {
      * @param copy by default, the patch will be directly applied to the oldModel, modifying
      * it in-place. If copy is true, the patch will be applied on a copy of the model, leaving
      * the original model unchanged.
+     * @return the patched model.
      */
-    patch?(oldModel: ModelServerElement, copy?: boolean): ModelServerElement;
+    patchModel?(oldModel: ModelServerElement, copy?: boolean): ModelServerElement;
+
+    /**
+     * The Json Patch describing the changes that were applied to the model. Only present if
+     * the edit request was successful.
+     */
+    patch?: Operation[];
 }

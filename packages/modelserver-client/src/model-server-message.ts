@@ -202,7 +202,8 @@ export namespace MessageDataMapper {
             if (patch && Operations.isPatch(patch)) {
                 return {
                     success: isSuccess(message),
-                    patch: (oldModel, copy) => {
+                    patch,
+                    patchModel: (oldModel, copy) => {
                         const modelToPatch = copy ? deepClone(oldModel) : oldModel;
                         return jsonpatch.applyPatch(modelToPatch, patch).newDocument as ModelServerElement;
                     }
