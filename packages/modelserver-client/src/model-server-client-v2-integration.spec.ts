@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
 import { expect } from 'chai';
+import jsonpatch, { deepClone, Operation } from 'fast-json-patch';
 
 import {
     add,
@@ -269,6 +270,70 @@ describe('Integration tests for ModelServerClientV2', () => {
 
             await client.undo(modeluri);
             client.unsubscribe(modeluri);
+        });
+
+        it('pure Json Patch changes', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const newName = 'Super Brewer 6000';
+            const machine = await client.get(modeluri, ModelServerObjectV2.is);
+
+            const patchedMachine = deepClone(machine);
+
+            // Directly change the model
+            patchedMachine.name = newName;
+            patchedMachine.children[1].processor.clockSpeed = 6;
+
+            // Generate patch by diffing the original model and the patched one
+            const patch = jsonpatch.compare(machine, patchedMachine);
+
+            await client.edit(modeluri, patch);
+            const model = await client.get(modeluri);
+            expect(model.name).to.be.equal(newName);
+            expect((model as any).children[1].processor.clockSpeed).to.be.equal(6);
+
+            await testUndoRedo(modeluri, machine, model);
+        });
+
+        it('clear list with "remove" patch operation', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const machine = await client.get(modeluri, ModelServerObjectV2.is);
+
+            const initialWorkflowsSize = (machine as any).workflows.length;
+            expect(initialWorkflowsSize).to.not.be.equal(0);
+
+            const patch: Operation[] = [{
+                'op': 'remove',
+                'path': '/workflows'
+            }];
+
+            await client.edit(modeluri, patch);
+            const model = await client.get(modeluri);
+
+            const newWorkflows = (model as any).workflows;
+            expect(newWorkflows).to.be.undefined;
+
+            await testUndoRedo(modeluri, machine, model);
+        });
+
+        it('unset value with "remove" patch operation', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const machine = await client.get(modeluri, ModelServerObjectV2.is);
+
+            const initialValue = (machine as any).children[1].processor.thermalDesignPower;
+            expect(initialValue).to.not.be.oneOf([undefined, 0]);
+
+            const patch: Operation[] = [{
+                'op': 'remove',
+                'path': '/children/1/processor/thermalDesignPower'
+            }];
+
+            await client.edit(modeluri, patch);
+            const model = await client.get(modeluri);
+
+            const newValue = (model as any).children[1].processor.thermalDesignPower;
+            expect(newValue).to.be.oneOf([undefined, 0]); // Should be === 0, but default values are not converted to Json at the moment; so we also expect 'undefined'
+
+            await testUndoRedo(modeluri, machine, model);
         });
     });
 });
