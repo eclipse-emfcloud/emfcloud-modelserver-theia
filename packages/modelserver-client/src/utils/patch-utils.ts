@@ -172,10 +172,26 @@ export namespace Operations {
         return Array.isArray(object) && (object.length === 0 || isOperation(object[0]));
     }
 
+    /** Type guard testing whether an operation is an add operation, with a nested guard on the value type. */
+    export function isAdd(op: Operation, typeGuard: 'string'): op is AddOperation<string>;
+    export function isAdd(op: Operation, typeGuard: 'number'): op is AddOperation<number>;
+    export function isAdd(op: Operation, typeGuard: 'boolean'): op is AddOperation<boolean>;
+    export function isAdd<T = unknown>(op: Operation, typeGuard: TypeGuard<T>): op is AddOperation<T>;
+    export function isAdd<T = unknown>(op: Operation, typeGuard?: string | TypeGuard<T>): op is AddOperation<T> {
+        if (typeof typeGuard === 'function') {
+            return op?.op === 'add' && (!typeGuard || typeGuard(op.value));
+        }
+        if (!typeGuard) {
+            return op?.op === 'add';
+        }
+        return op?.op === 'add' && typeof op.value === typeGuard;
+    }
+
     /** Type guard testing whether an operation is a replace operation, with a nested guard on the value type. */
     export function isReplace(op: Operation, typeGuard: 'string'): op is ReplaceOperation<string>;
     export function isReplace(op: Operation, typeGuard: 'number'): op is ReplaceOperation<number>;
     export function isReplace(op: Operation, typeGuard: 'boolean'): op is ReplaceOperation<boolean>;
+    export function isReplace<T = unknown>(op: Operation, typeGuard: TypeGuard<T>): op is ReplaceOperation<T>;
     export function isReplace<T = unknown>(op: Operation, typeGuard?: string | TypeGuard<T>): op is ReplaceOperation<T> {
         if (typeof typeGuard === 'function') {
             return op?.op === 'replace' && (!typeGuard || typeGuard(op.value));
@@ -184,5 +200,10 @@ export namespace Operations {
             return op?.op === 'replace';
         }
         return op?.op === 'replace' && typeof op.value === typeGuard;
+    }
+
+    /** Type guard testing whether an operation is a remove operation. */
+    export function isRemove(op: Operation): op is RemoveOperation {
+        return op?.op === 'replace';
     }
 }
