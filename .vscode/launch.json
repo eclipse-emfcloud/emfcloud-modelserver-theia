@@ -58,7 +58,32 @@
         "--config",
         "${workspaceFolder}/configs/.mocharc.json",
         "--no-timeouts",
-        "${workspaceFolder}/packages/*/src/**/*.spec.ts"
+        "--extension",
+        "spec.ts",
+        "${workspaceFolder}/packages/*/src",
+        "--recursive",
+      ],
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run all unit tests",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": [
+        "--config",
+        "${workspaceFolder}/configs/.mocharc.json",
+        "--no-timeouts",
+        "--extension",
+        "spec.ts",
+        "${workspaceFolder}/packages/*/src",
+        "--recursive",
+        "--ignore",
+        "**/*integration.spec.ts"
       ],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
