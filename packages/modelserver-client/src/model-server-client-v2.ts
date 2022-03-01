@@ -13,7 +13,7 @@ import { Operation } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
 import { ModelServerError, ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
-import { Format, ModelServerClientApiV2, ModelUpdateResult } from './model-server-client-api-v2';
+import { Format, FORMAT_JSON_V2, ModelServerClientApiV2, ModelUpdateResult } from './model-server-client-api-v2';
 import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
 import { ModelServerCommand } from './model/command-model';
@@ -28,9 +28,9 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
     protected restClient: AxiosInstance;
     protected openSockets: Map<string, WebSocket> = new Map();
     protected _baseUrl: string;
-    protected defaultFormat: Format = 'json';
+    protected defaultFormat: Format = FORMAT_JSON_V2;
 
-    initialize(baseUrl: string, defaultFormat: Format = 'json'): void | Promise<void> {
+    initialize(baseUrl: string, defaultFormat: Format = FORMAT_JSON_V2): void | Promise<void> {
         this._baseUrl = baseUrl;
         this.defaultFormat = defaultFormat;
         this.restClient = axios.create(this.getAxiosConfig(baseUrl));

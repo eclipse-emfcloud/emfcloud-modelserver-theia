@@ -15,7 +15,7 @@ import moxios from 'moxios';
 import { spy } from 'sinon';
 
 import { ServerConfiguration } from './model-server-client-api-v1';
-import { ModelServerClientApiV2 } from './model-server-client-api-v2';
+import { FORMAT_JSON_V2, FORMAT_XMI, ModelServerClientApiV2 } from './model-server-client-api-v2';
 import { ModelServerClientV2 } from './model-server-client-v2';
 import { Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
@@ -42,16 +42,16 @@ describe('tests for ModelServerClientV2', () => {
     describe('test requests', () => {
         it('getAll', done => {
             client.getAll();
-            client.getAll('xml');
+            client.getAll(FORMAT_XMI);
             client.getAll();
             moxios.wait(() => {
                 let request = moxios.requests.at(0);
                 expect(request.config.method).to.be.equal('get');
-                expect(request.config.params).to.include({ format: 'json' });
+                expect(request.config.params).to.include({ format: FORMAT_JSON_V2 });
                 expect(request.config.baseURL).to.be.equal(baseUrl);
                 expect(request.config.url).to.be.equal(ModelServerPaths.MODEL_CRUD);
                 request = moxios.requests.at(1);
-                expect(request.config.params).to.include({ format: 'xml' });
+                expect(request.config.params).to.include({ format: FORMAT_XMI });
                 done();
             });
         });
@@ -73,16 +73,16 @@ describe('tests for ModelServerClientV2', () => {
             const elementid = 'myElement';
 
             client.getElementById(modeluri, elementid);
-            client.getElementById(modeluri, elementid, 'xml');
+            client.getElementById(modeluri, elementid, FORMAT_XMI);
 
             moxios.wait(() => {
                 let request = moxios.requests.at(0);
                 expect(request.config.method).to.be.equal('get');
-                expect(request.config.params).to.include({ format: 'json', elementid, modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_JSON_V2, elementid, modeluri });
                 expect(request.config.baseURL).to.be.equal(baseUrl);
                 expect(request.config.url).to.be.equal(ModelServerPaths.MODEL_ELEMENT);
                 request = moxios.requests.at(1);
-                expect(request.config.params).to.include({ format: 'xml', elementid, modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_XMI, elementid, modeluri });
                 done();
             });
         });
@@ -92,16 +92,16 @@ describe('tests for ModelServerClientV2', () => {
             const elementname = 'myElement';
 
             client.getElementByName(modeluri, elementname);
-            client.getElementByName(modeluri, elementname, 'xml');
+            client.getElementByName(modeluri, elementname, FORMAT_XMI);
 
             moxios.wait(() => {
                 let request = moxios.requests.at(0);
                 expect(request.config.method).to.be.equal('get');
-                expect(request.config.params).to.include({ format: 'json', elementname, modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_JSON_V2, elementname, modeluri });
                 expect(request.config.baseURL).to.be.equal(baseUrl);
                 expect(request.config.url).to.be.equal(ModelServerPaths.MODEL_ELEMENT);
                 request = moxios.requests.at(1);
-                expect(request.config.params).to.include({ format: 'xml', elementname, modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_XMI, elementname, modeluri });
                 done();
             });
         });
@@ -137,17 +137,17 @@ describe('tests for ModelServerClientV2', () => {
             const model = { name: 'myModel', id: 'myModelId' };
             const data = JSON.stringify(model);
             client.create(modeluri, data);
-            client.create(modeluri, data, 'xml');
+            client.create(modeluri, data, FORMAT_XMI);
 
             moxios.wait(() => {
                 let request = moxios.requests.at(0);
                 expect(request.config.method).to.be.equal('post');
                 expect(request.config.data).to.be.equal(JSON.stringify({ data }));
-                expect(request.config.params).to.include({ format: 'json', modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_JSON_V2, modeluri });
                 expect(request.config.baseURL).to.be.equal(baseUrl);
                 expect(request.config.url).to.be.equal(ModelServerPaths.MODEL_CRUD);
                 request = moxios.requests.at(1);
-                expect(request.config.params).to.include({ format: 'xml', modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_XMI, modeluri });
                 done();
             });
         });
@@ -157,17 +157,17 @@ describe('tests for ModelServerClientV2', () => {
             const model = { name: 'myModel', id: 'myModelId' };
             const data = JSON.stringify(model);
             client.update(modeluri, data);
-            client.update(modeluri, data, 'xml');
+            client.update(modeluri, data, FORMAT_XMI);
 
             moxios.wait(() => {
                 let request = moxios.requests.at(0);
                 expect(request.config.method).to.be.equal('put');
                 expect(request.config.data).to.be.equal(JSON.stringify({ data }));
-                expect(request.config.params).to.include({ format: 'json', modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_JSON_V2, modeluri });
                 expect(request.config.baseURL).to.be.equal(baseUrl);
                 expect(request.config.url).to.be.equal(ModelServerPaths.MODEL_CRUD);
                 request = moxios.requests.at(1);
-                expect(request.config.params).to.include({ format: 'xml', modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_XMI, modeluri });
                 done();
             });
         });
@@ -297,7 +297,7 @@ describe('tests for ModelServerClientV2', () => {
                 const request = moxios.requests.at(0);
                 expect(request.config.method).to.be.equal('patch');
                 expect(request.config.data).to.be.equal(JSON.stringify({ data: expected }));
-                expect(request.config.params).to.include({ format: 'json', modeluri });
+                expect(request.config.params).to.include({ format: FORMAT_JSON_V2, modeluri });
                 expect(request.config.baseURL).to.be.equal(baseUrl);
                 expect(request.config.url).to.be.equal(ModelServerPaths.MODEL_CRUD);
                 done();

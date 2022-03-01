@@ -8,7 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
-import { Format, JsonFormat } from '../model-server-client-api-v2';
+import { Format, FORMAT_JSON_V1, FORMAT_JSON_V2, FORMAT_XMI, JsonFormat } from '../model-server-client-api-v2';
 import { Model } from '../model-server-message';
 
 /**
@@ -170,11 +170,11 @@ export function encodeRequestBody(format: Format): Encoder<{ data: any }> {
  */
 export function encode(format: Format): Encoder {
     switch (format) {
-        case 'xml':
+        case FORMAT_XMI:
             return asXML;
-        case 'json':
+        case FORMAT_JSON_V1:
             return handleString(asJsonV1);
-        case 'json-v2':
+        case FORMAT_JSON_V2:
             return handleString(asJsonV2);
         default:
             throw new Error(`Unsupported message format: ${format}`);
@@ -208,11 +208,11 @@ function asXML(object: string | AnyObject): string {
 }
 
 function asJsonV1(object: AnyObject): any {
-    return isJsonV1(object) ? object : copy(object, 'json');
+    return isJsonV1(object) ? object : copy(object, FORMAT_JSON_V1);
 }
 
 function asJsonV2(object: AnyObject): any {
-    return isJsonV2(object) ? object : copy(object, 'json-v2');
+    return isJsonV2(object) ? object : copy(object, FORMAT_JSON_V2);
 }
 
 function isJsonV1(object: AnyObject): boolean {
@@ -241,10 +241,10 @@ function copy(object: any, format: JsonFormat): any {
     const copier = (target: any): void => {
         const theCopy = { ...target };
 
-        if (format === 'json' && '$type' in theCopy) {
+        if (format === FORMAT_JSON_V1 && '$type' in theCopy) {
             theCopy.eClass = theCopy.$type;
             delete theCopy.$type;
-        } else if (format === 'json-v2' && 'eClass' in theCopy) {
+        } else if (format === FORMAT_JSON_V2 && 'eClass' in theCopy) {
             theCopy.$type = theCopy.eClass;
             delete theCopy.eClass;
         }

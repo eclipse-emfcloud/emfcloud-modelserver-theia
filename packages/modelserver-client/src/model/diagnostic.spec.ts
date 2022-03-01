@@ -32,15 +32,15 @@ describe('tests for Diagnostic', () => {
         });
 
         it('one arg', () => {
-            const only = d(WARNING, 'This is a warning.');
+            const only = diag(WARNING, 'This is a warning.');
             const merged = Diagnostic.merge(only);
             expect(merged).to.be.eql(only);
         });
 
         it('several args', () => {
-            const warning = { ...d(WARNING, 'Not so bad.'), source: 'a' };
-            const ok =  { ...d(OK, 'It\'s okay.'), source: 'b' };
-            const error =  { ...d(ERROR, 'Pretty bad.'), source: 'c' };
+            const warning = { ...diag(WARNING, 'Not so bad.'), source: 'a' };
+            const ok = { ...diag(OK, 'It\'s okay.'), source: 'b' };
+            const error = { ...diag(ERROR, 'Pretty bad.'), source: 'c' };
             const merged = Diagnostic.merge(warning, ok, error);
             expect(merged.severity).to.be.equal(ERROR);
             expect(merged.source).to.be.equal('c');
@@ -55,22 +55,22 @@ describe('tests for Diagnostic', () => {
         });
 
         it('one arg', () => {
-            const only = d(WARNING, 'This is a warning.');
+            const only = diag(WARNING, 'This is a warning.');
             const worst = Diagnostic.worstOf([only]);
             expect(worst).to.be.equal(only);
         });
 
         it('several args', () => {
-            const warning = { ...d(WARNING, 'Not so bad.'), source: 'a' };
-            const ok =  { ...d(OK, 'It\'s okay.'), source: 'b' };
-            const error =  { ...d(ERROR, 'Pretty bad.'), source: 'c' };
+            const warning = { ...diag(WARNING, 'Not so bad.'), source: 'a' };
+            const ok = { ...diag(OK, 'It\'s okay.'), source: 'b' };
+            const error = { ...diag(ERROR, 'Pretty bad.'), source: 'c' };
             const worst = Diagnostic.worstOf([warning, ok, error]);
             expect(worst).to.be.equal(error);
         });
     });
 });
 
-function d(severity: number, message = 'A problem occurred.', ...children: Diagnostic[]): Diagnostic {
+function diag(severity: number, message = 'A problem occurred.', ...children: Diagnostic[]): Diagnostic {
     return {
         severity,
         message,

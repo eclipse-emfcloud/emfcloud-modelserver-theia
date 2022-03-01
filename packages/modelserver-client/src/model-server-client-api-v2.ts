@@ -18,11 +18,26 @@ import { Diagnostic } from './model/diagnostic';
 import { SubscriptionListener } from './subscription-listener';
 import { AnyObject, TypeGuard } from './utils/type-util';
 
+/**
+ * Message Format for Json Models (V1).
+ */
+export const FORMAT_JSON_V1 = 'json';
+
+/**
+ * Message Format for Json Models (V2).
+ */
+export const FORMAT_JSON_V2 = 'json-v2';
+
+/**
+ * Message Format for XMI Models.
+ */
+export const FORMAT_XMI = 'xmi';
+
 /** JSON formats supported by the V2 client API. */
 export type JsonFormat = 'json' | 'json-v2';
 
 /** Message formats supported by the V2 client API. */
-export type Format = 'xml' | JsonFormat;
+export type Format = string;
 
 /**
  * Basic client API to interact with a model server that conforms to the Modelserver API Version 2.
@@ -36,7 +51,7 @@ export interface ModelServerClientApiV2 {
      * Any requests to the model server before the client has been initialized are expected to fail (i.e. throw an error)
      * @param baseUrl Url pointing to the API entry point
      * @param defaultFormat Optional fallback format that should used when a request method is invoked and no explicit format argument
-     *                      has been passed. The default-default is `'json'`
+     *                      has been passed. The default-default is `'json-v2'`
      */
     initialize(baseUrl: string, defaultFormat?: Format): void | Promise<void>;
 

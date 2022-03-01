@@ -13,7 +13,11 @@ import { AddOperation, Operation, RemoveOperation, ReplaceOperation } from 'fast
 import { ModelServerObjectV2, ModelServerReferenceDescriptionV2 } from '../model/base-model';
 import { AnyObject, TypeGuard } from './type-util';
 
-// Utility methods to create Json Patches
+// Json Patch Operation types
+
+const REPLACE = 'replace';
+const ADD = 'add';
+const REMOVE = 'remove';
 
 /**
  * The definition of a Type. Used e.g. to indicate which type of object
@@ -22,6 +26,12 @@ import { AnyObject, TypeGuard } from './type-util';
 export interface TypeDefinition {
     $type: string;
 }
+
+//
+// Functions to generate Json Patch operations, specific to the ModelServer syntax.
+// These operations can only be used with the model server, as they use a custom
+// syntax to define the Path attribute, which relies on the ModelURI and Object $id.
+//
 
 /**
  * Create a ReplaceOperation, to change the value of a property of the specified object.
@@ -33,7 +43,7 @@ export interface TypeDefinition {
  */
 export function replace<T>(modeluri: string, object: ModelServerObjectV2, feature: string, value: T): ReplaceOperation<T> {
     return {
-        op: 'replace',
+        op: REPLACE,
         path: getPropertyPath(modeluri, object, feature),
         value: value
     };
@@ -50,7 +60,7 @@ export function replace<T>(modeluri: string, object: ModelServerObjectV2, featur
  */
 export function create(modeluri: string, parent: ModelServerObjectV2, feature: string, $type: string, attributes?: AnyObject): AddOperation<TypeDefinition> {
     return {
-        op: 'add',
+        op: ADD,
         path: getPropertyPath(modeluri, parent, feature),
         value: {
             $type: $type,
@@ -70,7 +80,7 @@ export function create(modeluri: string, parent: ModelServerObjectV2, feature: s
 export function add(modeluri: string, parent: ModelServerObjectV2, feature: string,
     value: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): AddOperation<ModelServerObjectV2> {
     return {
-        op: 'add',
+        op: ADD,
         path: getPropertyPath(modeluri, parent, feature),
         value: {
             $type: value.$type,
@@ -87,7 +97,7 @@ export function add(modeluri: string, parent: ModelServerObjectV2, feature: stri
  */
 export function deleteElement(modeluri: string, object: ModelServerObjectV2): RemoveOperation {
     return {
-        op: 'remove',
+        op: REMOVE,
         path: getObjectPath(modeluri, object)
     };
 }
@@ -101,7 +111,7 @@ export function deleteElement(modeluri: string, object: ModelServerObjectV2): Re
  */
 export function removeValueAt(modeluri: string, object: ModelServerObjectV2, feature: string, index: number): RemoveOperation {
     return {
-        op: 'remove',
+        op: REMOVE,
         path: getPropertyPath(modeluri, object, feature, index)
     };
 }
@@ -128,17 +138,39 @@ export function removeValue(modeluri: string, object: ModelServerObjectV2, featu
  */
 export function removeObject(modeluri: string, objectToRemove: ModelServerObjectV2): RemoveOperation {
     return {
-        op: 'remove',
+        op: REMOVE,
         path: getObjectPath(modeluri, objectToRemove)
     };
 }
 
-export function getObjectPath(modeluri: string, object: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): string {
+/**
+ * Return the custom Json Path for this object. The result is a path that
+ * can be used to define Json Patch operations. It uses object ids ($id
+ * attribute) and ModelURI, which are not standard Json Patch concepts.
+ * As such, operations using this path will only work with the ModelServer.
+ * They won't work with a standard Json Patch library.
+ * @param modeluri The URI of the model to edit.
+ * @param object The object.
+ * @returns the custom Json Path for this object.
+ */
+function getObjectPath(modeluri: string, object: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): string {
     const id = ModelServerReferenceDescriptionV2.is(object) ? object.$ref : object.$id;
     return `${modeluri}#${id}`;
 }
 
-export function getPropertyPath(modeluri: string, object: ModelServerObjectV2, feature: string, index?: number): string {
+/**
+ * Return the custom Json Path for this property. The result is a path that
+ * can be used to define Json Patch operations. It uses object ids ($id
+ * attribute) and ModelURI, which are not standard Json Patch concepts.
+ * As such, operations using this path will only work with the ModelServer.
+ * They won't work with a standard Json Patch library.
+ * @param modeluri The URI of the model to edit.
+ * @param object The object.
+ * @param feature The name of the property to edit.
+ * @param index An optional index, for list properties.
+ * @returns the custom Json Path to edit this property.
+ */
+function getPropertyPath(modeluri: string, object: ModelServerObjectV2, feature: string, index?: number): string {
     const indexSuffix = index === undefined ? '' : `/${index}`;
     return `${getObjectPath(modeluri, object)}/${feature}${indexSuffix}`;
 }
@@ -155,8 +187,14 @@ function findIndex(object: ModelServerObjectV2, feature: string, value: AnyObjec
  * Utility functions for working with JSON Patch operations.
  */
 export namespace Operations {
+
+    /**
+     * Tests is the given object is a Json Patch {@link Operation}
+     * @param object the object to test
+     * @returns true if the object is an Operation, false otherwise.
+     */
     export function isOperation(object: unknown): object is Operation {
-        if (AnyObject.is(object)){
+        if (AnyObject.is(object)) {
             return (
                 'op' in object &&
                 typeof object.op === 'string' && //
@@ -168,6 +206,11 @@ export namespace Operations {
         }
     }
 
+    /**
+     * Tests is the given object is a Json Patch (Which is an array of {@link Operation Operations})
+     * @param object the object to test
+     * @returns true if the object is a Json Patch, false otherwise.
+     */
     export function isPatch(object: unknown): object is Operation[] {
         return Array.isArray(object) && (object.length === 0 || isOperation(object[0]));
     }
@@ -179,12 +222,12 @@ export namespace Operations {
     export function isAdd<T = unknown>(op: Operation, typeGuard: TypeGuard<T>): op is AddOperation<T>;
     export function isAdd<T = unknown>(op: Operation, typeGuard?: string | TypeGuard<T>): op is AddOperation<T> {
         if (typeof typeGuard === 'function') {
-            return op?.op === 'add' && (!typeGuard || typeGuard(op.value));
+            return op?.op === ADD && (!typeGuard || typeGuard(op.value));
         }
         if (!typeGuard) {
-            return op?.op === 'add';
+            return op?.op === ADD;
         }
-        return op?.op === 'add' && typeof op.value === typeGuard;
+        return op?.op === ADD && typeof op.value === typeGuard;
     }
 
     /** Type guard testing whether an operation is a replace operation, with a nested guard on the value type. */
@@ -194,16 +237,16 @@ export namespace Operations {
     export function isReplace<T = unknown>(op: Operation, typeGuard: TypeGuard<T>): op is ReplaceOperation<T>;
     export function isReplace<T = unknown>(op: Operation, typeGuard?: string | TypeGuard<T>): op is ReplaceOperation<T> {
         if (typeof typeGuard === 'function') {
-            return op?.op === 'replace' && (!typeGuard || typeGuard(op.value));
+            return op?.op === REPLACE && (!typeGuard || typeGuard(op.value));
         }
         if (!typeGuard) {
-            return op?.op === 'replace';
+            return op?.op === REPLACE;
         }
-        return op?.op === 'replace' && typeof op.value === typeGuard;
+        return op?.op === REPLACE && typeof op.value === typeGuard;
     }
 
     /** Type guard testing whether an operation is a remove operation. */
     export function isRemove(op: Operation): op is RemoveOperation {
-        return op?.op === 'replace';
+        return op?.op === REMOVE;
     }
 }
