@@ -25,3 +25,41 @@ export class ModelServerReferenceDescription extends ModelServerObject {
         super();
     }
 }
+
+/**
+ * A ModelServer model element. ModelServerElements may be actual objects,
+ * or references to an object defined in another part of the model, or even
+ * in a different model.
+ */
+export abstract class ModelServerElement {
+    readonly $type: string;
+
+    static is(object: unknown): object is ModelServerElement {
+        return AnyObject.is(object) && isString(object, '$type');
+    }
+}
+
+/**
+ * A ModelServer object.
+ */
+export class ModelServerObjectV2 extends ModelServerElement {
+    readonly $id: string;
+
+    static is(object: unknown): object is ModelServerObjectV2 {
+        return AnyObject.is(object) && isString(object, '$type') && isString(object, '$id');
+    }
+}
+
+/**
+ * A ModelServer Reference. References an object defined in another part of the model,
+ * or even in a different model.
+ */
+export class ModelServerReferenceDescriptionV2 extends ModelServerElement {
+    constructor(public $type: string, public $ref: string) {
+        super();
+    }
+
+    static is(object: unknown): object is ModelServerReferenceDescriptionV2 {
+        return AnyObject.is(object) && isString(object, '$type') && isString(object, '$ref');
+    }
+}

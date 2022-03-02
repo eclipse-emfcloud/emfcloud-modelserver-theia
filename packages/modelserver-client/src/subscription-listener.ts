@@ -8,8 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *********************************************************************************/
+import { applyPatch, deepClone } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
+import { Operations } from '.';
 import { MessageDataMapper, MessageType, ModelServerMessage } from './model-server-message';
 import {
     CloseNotification,
@@ -17,6 +19,7 @@ import {
     ErrorNotification,
     FullUpdateNotification,
     IncrementalUpdateNotification,
+    IncrementalUpdateNotificationV2,
     ModelServerNotification,
     UnknownNotification,
     ValidationNotification
@@ -156,4 +159,54 @@ export class NotificationSubscriptionListener implements SubscriptionListener {
             }
         }
     }
+}
+
+/**
+ * Default implementation of {@link SubscriptionListener} that maps received websocket events to the
+ * corresponding {@link ModelServerNotification} and delegates them to the
+ * {@link ModelServerNotificationListenerV2} implementation passed via constructor.
+ *
+ * This class supports the V2 Client API.
+ */
+export class NotificationSubscriptionListenerV2 extends NotificationSubscriptionListener {
+    constructor(protected notificationListener: ModelServerNotificationListenerV2 = {}) {
+        super(notificationListener);
+    }
+
+    onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
+        const message = JSON.parse(event.data.toString());
+        if (ModelServerMessage.is(message)) {
+            const type = MessageType.asMessageType(message.type);
+            switch (type) {
+                case MessageType.incrementalUpdate: {
+                    const patch = MessageDataMapper.as(message, Operations.isPatch);
+                    this.notificationListener.onIncrementalUpdateV2?.({
+                        type: message.type,
+                        modelUri,
+                        patch,
+                        patchModel: (model, copy) => {
+                            const modelToPatch = copy ? deepClone(model) : model;
+                            return applyPatch(modelToPatch, patch).newDocument;
+                        }
+                    });
+                    break;
+                }
+                default: {
+                    super.onMessage(modelUri, event);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A {@link ModelServerNotificationListener} for V2 Client API. Uses JsonPatch for incremental
+ * update notifications, instead of CommandExecutionResults.
+ */
+export interface ModelServerNotificationListenerV2 extends ModelServerNotificationListener {
+    /**
+     * Can be implemented to react to {@link IncrementalUpdateNotificationV2}s.
+     * @param notification The incremental update notification.
+     */
+    onIncrementalUpdateV2?(notification: IncrementalUpdateNotificationV2): void;
 }

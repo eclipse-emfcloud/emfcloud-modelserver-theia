@@ -8,6 +8,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  ********************************************************************************/
+import * as jsonpatch from 'fast-json-patch';
+import { deepClone } from 'fast-json-patch';
+
+import { ModelUpdateResult } from './model-server-client-api-v2';
+import { ModelServerElement } from './model/base-model';
+import { Operations } from './utils/patch-utils';
 import * as Type from './utils/type-util';
 
 /**
@@ -171,12 +177,42 @@ export namespace MessageDataMapper {
     }
 
     /**
-     * Maps the {@link ModelServerMessage.data} property of the given message to a `boolean` indicating wether the message
+     * Maps the {@link ModelServerMessage.data} property of the given message to a `boolean` indicating whether the message
      * has the {@link MessageType.success} type.
      * @param message The message to map.
      * @returns `true` if the type of the message is {@link MessageType.success}, `false` otherwise.
      */
     export function isSuccess(message: ModelServerMessage): boolean {
         return message.type === 'success';
+    }
+
+    /**
+     * Maps the {@link ModelServerMessage.data} property of the given message to a {@link ModelUpdateResult}, indicating
+     * if the edit operation was successful (success: true), and if it was, how to patch the original model
+     * to get the updated version of the model.
+     *
+     * @param message The message to map.
+     * @returns a {@link ModelUpdateResult} indicating if the operation was successful, and how to patch the local
+     * model to get the new model if it was.
+     */
+    export function patchModel(message: ModelServerMessage): ModelUpdateResult {
+        if (isSuccess(message)){
+            const data = message.data as any;
+            const patch = data ? data.patch : undefined;
+            if (patch && Operations.isPatch(patch)) {
+                return {
+                    success: isSuccess(message),
+                    patch,
+                    patchModel: (oldModel, copy) => {
+                        const modelToPatch = copy ? deepClone(oldModel) : oldModel;
+                        return jsonpatch.applyPatch(modelToPatch, patch).newDocument as ModelServerElement;
+                    }
+                };
+            } else {
+                return { success: true };
+            }
+        } else {
+            return {success: false };
+        }
     }
 }

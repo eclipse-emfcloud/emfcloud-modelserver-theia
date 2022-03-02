@@ -17,15 +17,18 @@ import {
     ErrorNotification,
     FullUpdateNotification,
     IncrementalUpdateNotification,
+    IncrementalUpdateNotificationV2,
     MessageDataMapper,
     MessageType,
     ModelServerMessage,
     ModelServerNotification,
+    Operations,
     UnknownNotification,
     ValidationNotification
 } from '@eclipse-emfcloud/modelserver-client';
 import { Emitter, Event } from '@theia/core';
 import { injectable } from '@theia/core/shared/inversify';
+import { applyPatch, deepClone } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
 import { ModelServerFrontendClient } from '../common';
@@ -43,6 +46,12 @@ export interface ModelServerSubscriptionService {
     readonly onUnknownMessageListener: Event<UnknownNotification>;
     readonly onValidationResultListener: Event<ValidationNotification>;
 }
+
+export const ModelServerSubscriptionServiceV2 = Symbol('ModelServerSubscriptionServiceV2');
+export interface ModelServerSubscriptionServiceV2 extends ModelServerSubscriptionService {
+    readonly onIncrementalUpdateListenerV2: Event<IncrementalUpdateNotificationV2>;
+}
+
 @injectable()
 export class ModelServerSubscriptionClient implements ModelServerFrontendClient, ModelServerSubscriptionService {
     onOpen(modelUri: string, _event: WebSocket.Event): void {
@@ -152,5 +161,42 @@ export class ModelServerSubscriptionClient implements ModelServerFrontendClient,
     protected onValidationResultEmitter = new Emitter<Readonly<ValidationNotification>>();
     get onValidationResultListener(): Event<ValidationNotification> {
         return this.onValidationResultEmitter.event;
+    }
+}
+
+/**
+ * Implementation of {@link ModelServerSubscriptionClient} compatible with API V2 Notifications,
+ * supporting Json Patch for incremental updates.
+ */
+@injectable()
+export class ModelServerSubscriptionClientV2 extends ModelServerSubscriptionClient implements ModelServerSubscriptionServiceV2 {
+
+    protected onIncrementalUpdateEmitterV2 = new Emitter<Readonly<IncrementalUpdateNotificationV2>>();
+    get onIncrementalUpdateListenerV2(): Event<IncrementalUpdateNotificationV2> {
+        return this.onIncrementalUpdateEmitterV2.event;
+    }
+
+    onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
+        const message = JSON.parse(event.data.toString());
+        if (ModelServerMessage.is(message)) {
+            const type = MessageType.asMessageType(message.type);
+            switch (type) {
+                case MessageType.incrementalUpdate: {
+                    const patch = MessageDataMapper.as(message, Operations.isPatch);
+                    this.onIncrementalUpdateEmitterV2.fire(
+                        {
+                            type,
+                            modelUri,
+                            patch,
+                            patchModel: (model, copy) => {
+                                const modelToPatch = copy ? deepClone(model) : model;
+                                return applyPatch(modelToPatch, patch).newDocument;
+                            }
+                        });
+                    break;
+                }
+            }
+        }
+        super.onMessage(modelUri, event);
     }
 }
