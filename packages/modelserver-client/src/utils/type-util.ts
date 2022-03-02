@@ -312,6 +312,5 @@ function traverse<T>(object: any, fn: (target: any, props: string[]) => T | unde
 }
 
 function isNonEmptyObjectArray(value: any): value is AnyObject[] {
-    // TODO: More correct would be value.every(e => typeof e === 'object' && !Array.isArray(value[0]))
     return Array.isArray(value) && value.length > 0 && typeof value[0] === 'object' && !Array.isArray(value[0]);
 }
