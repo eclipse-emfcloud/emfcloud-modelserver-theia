@@ -282,6 +282,11 @@ function copy(object: any, format: JsonFormat): any {
 }
 
 function traverse<T>(object: any, fn: (target: any, props: string[]) => T | undefined, visited = new Set()): boolean {
+    // Only traverse into objects. Null, undefined, strings, numbers, booleans are primitive values in JSON and functions don't exist.
+    // eslint-disable-next-line no-null/no-null
+    if (typeof object !== 'object' || object === null) { // JSON uses null
+        return false;
+    }
     if (visited.has(object)) {
         return false;
     }
