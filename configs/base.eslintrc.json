@@ -1,8 +1,9 @@
 {
+  "$schema": "https://json.schemastore.org/eslintrc",
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "sourceType": "module",
-    "ecmaVersion": 6,
+    "ecmaVersion": 8,
     "ecmaFeatures": {
       "jsx": true
     }
@@ -11,8 +12,9 @@
     "@typescript-eslint",
     "header",
     "import",
-    "chai-friendly",
-    "no-null"
+    "simple-import-sort",
+    "no-null",
+    "prettier"
   ],
   "extends": [
     "eslint:recommended",
@@ -20,7 +22,10 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:import/errors",
     "plugin:import/warnings",
-    "plugin:import/typescript"
+    "plugin:import/typescript",
+    "./errors.eslintrc.json",
+    "./warnings.eslintrc.json",
+    "prettier"
   ],
   "env": {
     "browser": true,
@@ -30,5 +35,13 @@
   "ignorePatterns": [
     "node_modules",
     "*.d.ts"
-  ]
+  ],
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
+  }
 }

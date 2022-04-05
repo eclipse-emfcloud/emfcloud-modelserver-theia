@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2021-2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,17 +7,17 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { strictEqual } from 'assert';
 import { expect } from 'chai';
 import moxios from 'moxios';
 import { spy } from 'sinon';
 
+import { SetCommand } from './model/command-model';
 import { ModelServerClient } from './model-server-client';
 import { ModelServerClientApiV1, ServerConfiguration } from './model-server-client-api-v1';
 import { Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
-import { SetCommand } from './model/command-model';
 
 describe('tests for ModelServerClient', () => {
     let client: ModelServerClient;

@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 export * from './frontend-module';
 export * from './model-server-frontend-contribution';
 export * from './model-server-subscription-client';

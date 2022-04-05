@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2021-2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,11 +7,13 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { applyPatch, deepClone } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
 import { Operations } from '.';
+import { CommandExecutionResult } from './model/command-model';
+import { Diagnostic } from './model/diagnostic';
 import { MessageDataMapper, MessageType, ModelServerMessage } from './model-server-message';
 import {
     CloseNotification,
@@ -24,8 +26,6 @@ import {
     UnknownNotification,
     ValidationNotification
 } from './model-server-notification';
-import { CommandExecutionResult } from './model/command-model';
-import { Diagnostic } from './model/diagnostic';
 
 /**
  * A `SubscriptionListener` is used to react to subscription notifications received by the model server.
@@ -105,7 +105,7 @@ export interface ModelServerNotificationListener {
  * {@link ModelServerNotificationListener} implementation passed via constructor.
  */
 export class NotificationSubscriptionListener implements SubscriptionListener {
-    constructor(protected notificationListener: ModelServerNotificationListener = {}) { }
+    constructor(protected notificationListener: ModelServerNotificationListener = {}) {}
 
     onOpen(modelUri: string, _event: WebSocket.Event): void {
         this.notificationListener.onOpen?.({ modelUri, type: MessageType.open });

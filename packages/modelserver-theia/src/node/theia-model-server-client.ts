@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { ModelServerClient, SubscriptionOptions } from '@eclipse-emfcloud/modelserver-client';
 import { decorate, inject, injectable, optional } from '@theia/core/shared/inversify';
 
@@ -18,7 +18,6 @@ decorate(injectable(), ModelServerClient);
 
 @injectable()
 export class TheiaBackendModelServerClient extends ModelServerClient implements TheiaModelServerClient {
-
     constructor(@inject(LaunchOptions) @optional() protected readonly launchOptions: LaunchOptions = DEFAULT_LAUNCH_OPTIONS) {
         super();
         const baseUrl = this.getBaseUrl();
@@ -28,7 +27,6 @@ export class TheiaBackendModelServerClient extends ModelServerClient implements 
     protected getBaseUrl(): string {
         const baseUrl = `http://${this.launchOptions.hostname}:${this.launchOptions.serverPort}/${this.launchOptions.baseURL}`;
         return baseUrl;
-
     }
 
     protected subscriptionClient?: ModelServerFrontendClient;

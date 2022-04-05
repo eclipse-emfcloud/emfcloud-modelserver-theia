@@ -7,12 +7,11 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 /**
  * Utility collection of all the available endpoint paths of a (default) modelserver.
  */
 export namespace ModelServerPaths {
-
     /** Endpoint to retrieve the uris of all available models in the workspace */
     export const MODEL_URIS = 'modeluris';
     /** Endpoint for executing CRUD model operations or retrieving all available models in the workspace */
@@ -52,5 +51,4 @@ export namespace ModelServerPaths {
     export const VALIDATION = 'validation';
     /** Endpoint to get a list of validation constraints of a model */
     export const VALIDATION_CONSTRAINTS = 'validation/constraints';
-
 }

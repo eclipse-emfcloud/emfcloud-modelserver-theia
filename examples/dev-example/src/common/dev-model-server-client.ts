@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { AnyObject, ModelServerCommand } from '@eclipse-emfcloud/modelserver-client';
 import { TheiaModelServerClient } from '@eclipse-emfcloud/modelserver-theia';
 

@@ -7,10 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *
- * Contributors:
- *    Vincent HEMERY (CS GROUP - France) - initial API and implementation
- ********************************************************************************/
+ *******************************************************************************/
 import { AnyObject, isArray, isNumber, isString } from '../utils/type-util';
 
 /** The bit mask value for okay severity */

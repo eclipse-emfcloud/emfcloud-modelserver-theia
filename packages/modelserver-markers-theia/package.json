@@ -26,6 +26,11 @@
       "name": "Eclipse emf.cloud Project",
       "email": "emfcloud-dev@eclipse.org",
       "url": "https://projects.eclipse.org/projects/ecd.emfcloud"
+    },
+    {
+      "name": "Vincent HEMERY (CS GROUP - France)",
+      "email": "vincent.hemery@csgroup.eu",
+      "url": "https://www.csgroup.eu/"
     }
   ],
   "repository": {
@@ -40,7 +45,8 @@
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
     "build": "tsc && yarn run lint",
-    "lint": "eslint -c ../../.eslintrc.js --ext .ts ./src",
+    "lint": "eslint --ext .ts,.tsx ./src",
+    "lint:fix": "eslint --fix --ext .ts,.tsx ./src",
     "watch": "tsc -w"
   },
   "theiaExtensions": [

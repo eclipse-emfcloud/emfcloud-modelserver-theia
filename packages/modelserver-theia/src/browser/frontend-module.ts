@@ -7,13 +7,13 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { ModelServerClient } from '@eclipse-emfcloud/modelserver-client';
 import { FrontendApplicationContribution, WebSocketConnectionProvider } from '@theia/core/lib/browser';
 import { ContainerModule } from '@theia/core/shared/inversify';
 
-import { ModelServerSubscriptionClientV2 } from '.';
 import { MODEL_SERVER_CLIENT_SERVICE_PATH, ModelServerFrontendClient, TheiaModelServerClient } from '../common';
+import { ModelServerSubscriptionClientV2 } from '.';
 import { ModelServerFrontendContribution } from './model-server-frontend-contribution';
 import { ModelServerSubscriptionClient, ModelServerSubscriptionService } from './model-server-subscription-client';
 
@@ -28,7 +28,8 @@ export default new ContainerModule(bind => {
             const connection = ctx.container.get(WebSocketConnectionProvider);
             const client: ModelServerFrontendClient = ctx.container.get(ModelServerFrontendClient);
             return connection.createProxy<ModelServerClient>(MODEL_SERVER_CLIENT_SERVICE_PATH, client);
-        }).inSingletonScope();
+        })
+        .inSingletonScope();
 });
 
 export const FrontendModuleV2 = new ContainerModule((bind, _unbind, _isBound, rebind) => {

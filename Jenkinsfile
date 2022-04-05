@@ -8,11 +8,11 @@ spec:
     tty: true
     resources:
       limits:
-        memory: "4Gi"
-        cpu: "2"
+        memory: "2Gi"
+        cpu: "1"
       requests:
-        memory: "4Gi"
-        cpu: "2"
+        memory: "2Gi"
+        cpu: "1"
     command:
     - cat
     volumeMounts:
@@ -22,10 +22,18 @@ spec:
     - mountPath: "/.yarn"
       name: "yarn-global"
       readOnly: false
+    - name: global-cache
+      mountPath: /.cache     
+    - name: global-npm
+      mountPath: /.npm      
   volumes:
   - name: "jenkins-home"
     emptyDir: {}
   - name: "yarn-global"
+    emptyDir: {}
+  - name: global-cache
+    emptyDir: {}
+  - name: global-npm
     emptyDir: {}
 """
 
@@ -50,7 +58,7 @@ pipeline {
         stage('Build package') {
             steps {
                 container('node') {
-                    sh "yarn install"
+                    sh "yarn install --ignore-engines"
                 }
             }
         }

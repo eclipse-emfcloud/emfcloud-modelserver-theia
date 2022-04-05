@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { ModelServerObject, ModelServerReferenceDescription } from './base-model';
 
 export namespace ChangePackage {

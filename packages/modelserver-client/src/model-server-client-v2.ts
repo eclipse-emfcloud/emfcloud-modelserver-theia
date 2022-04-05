@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,17 +7,17 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Operation } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
+import { ModelServerCommand } from './model/command-model';
+import { Diagnostic } from './model/diagnostic';
 import { ModelServerError, ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
 import { Format, FORMAT_JSON_V2, ModelServerClientApiV2, ModelUpdateResult } from './model-server-client-api-v2';
 import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
-import { ModelServerCommand } from './model/command-model';
-import { Diagnostic } from './model/diagnostic';
 import { SubscriptionListener } from './subscription-listener';
 import { AnyObject, asObject, asString, asType, encodeRequestBody, TypeGuard } from './utils/type-util';
 
@@ -230,11 +230,9 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
             };
         }
         return this.process(
-            this.restClient.patch(
-                ModelServerPaths.MODEL_CRUD,
-                encodeRequestBody(this.defaultFormat)(patchMessage),
-                { params: { modeluri, format: this.defaultFormat } }
-            ),
+            this.restClient.patch(ModelServerPaths.MODEL_CRUD, encodeRequestBody(this.defaultFormat)(patchMessage), {
+                params: { modeluri, format: this.defaultFormat }
+            }),
             MessageDataMapper.patchModel
         );
     }

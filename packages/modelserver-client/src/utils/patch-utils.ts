@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { AddOperation, Operation, RemoveOperation, ReplaceOperation } from 'fast-json-patch';
 
 import { ModelServerObjectV2, ModelServerReferenceDescriptionV2 } from '../model/base-model';
@@ -58,7 +58,13 @@ export function replace<T>(modeluri: string, object: ModelServerObjectV2, featur
  * @param attributes the attributes to initialize for the new element
  * @returns The Json Patch AddOperation to create the element.
  */
-export function create(modeluri: string, parent: ModelServerObjectV2, feature: string, $type: string, attributes?: AnyObject): AddOperation<TypeDefinition> {
+export function create(
+    modeluri: string,
+    parent: ModelServerObjectV2,
+    feature: string,
+    $type: string,
+    attributes?: AnyObject
+): AddOperation<TypeDefinition> {
     return {
         op: ADD,
         path: getPropertyPath(modeluri, parent, feature),
@@ -77,8 +83,12 @@ export function create(modeluri: string, parent: ModelServerObjectV2, feature: s
  * @param value the element to add
  * @returns The Json Patch AddOperation to add the element in the parent.
  */
-export function add(modeluri: string, parent: ModelServerObjectV2, feature: string,
-    value: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): AddOperation<ModelServerObjectV2> {
+export function add(
+    modeluri: string,
+    parent: ModelServerObjectV2,
+    feature: string,
+    value: ModelServerObjectV2 | ModelServerReferenceDescriptionV2
+): AddOperation<ModelServerObjectV2> {
     return {
         op: ADD,
         path: getPropertyPath(modeluri, parent, feature),
@@ -187,7 +197,6 @@ function findIndex(object: ModelServerObjectV2, feature: string, value: AnyObjec
  * Utility functions for working with JSON Patch operations.
  */
 export namespace Operations {
-
     /**
      * Tests is the given object is a Json Patch {@link Operation}
      * @param object the object to test

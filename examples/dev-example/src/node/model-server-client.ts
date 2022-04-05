@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { AnyObject, MessageDataMapper, MessageType, SubscriptionOptions } from '@eclipse-emfcloud/modelserver-client';
 import { TheiaBackendModelServerClient } from '@eclipse-emfcloud/modelserver-theia/lib/node';
 import { injectable } from '@theia/core/shared/inversify';
@@ -27,7 +27,10 @@ export class CustomDevModelServerClient extends TheiaBackendModelServerClient im
 
     private setKeepAliveInterval(modelUri: string, timeout: number): void {
         if (!this.isSocketOpen(modelUri) && modelUri === 'Coffee.ecore') {
-            this.intervalId = setInterval(() => this.send(modelUri, { type: MessageType.keepAlive, data: undefined }), timeout > 1000 ? timeout - 1000 : 1);
+            this.intervalId = setInterval(
+                () => this.send(modelUri, { type: MessageType.keepAlive, data: undefined }),
+                timeout > 1000 ? timeout - 1000 : 1
+            );
         }
     }
 

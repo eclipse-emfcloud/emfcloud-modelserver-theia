@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { strictEqual } from 'assert';
 import { expect } from 'chai';
 import { Operation } from 'fast-json-patch';

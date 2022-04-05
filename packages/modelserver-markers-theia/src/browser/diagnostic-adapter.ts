@@ -7,10 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *
- * Contributors:
- *    Vincent HEMERY (CS GROUP - France) - initial API and implementation
- ********************************************************************************/
+ *******************************************************************************/
 import { Diagnostic as EMFDiagnostic } from '@eclipse-emfcloud/modelserver-client';
 import { Diagnostic as LangServerDiagnostic, DiagnosticSeverity, Range } from 'vscode-languageserver-types';
 
