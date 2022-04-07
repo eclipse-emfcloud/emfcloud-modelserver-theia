@@ -8,14 +8,24 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
-import { ModelServerClient } from '@eclipse-emfcloud/modelserver-client';
+import { ModelServerClient, ModelServerClientV2 } from '@eclipse-emfcloud/modelserver-client';
 import { FrontendApplicationContribution, WebSocketConnectionProvider } from '@theia/core/lib/browser';
 import { ContainerModule } from '@theia/core/shared/inversify';
 
-import { MODEL_SERVER_CLIENT_SERVICE_PATH, ModelServerFrontendClient, TheiaModelServerClient } from '../common';
-import { ModelServerSubscriptionClientV2 } from '.';
+import {
+    MODEL_SERVER_CLIENT_SERVICE_PATH,
+    MODEL_SERVER_CLIENT_V2_SERVICE_PATH,
+    ModelServerFrontendClient,
+    TheiaModelServerClient,
+    TheiaModelServerClientV2
+} from '../common';
 import { ModelServerFrontendContribution } from './model-server-frontend-contribution';
-import { ModelServerSubscriptionClient, ModelServerSubscriptionService } from './model-server-subscription-client';
+import {
+    ModelServerSubscriptionClient,
+    ModelServerSubscriptionClientV2,
+    ModelServerSubscriptionService,
+    ModelServerSubscriptionServiceV2
+} from './model-server-subscription-client';
 
 export default new ContainerModule(bind => {
     bind(ModelServerFrontendContribution).toSelf().inSingletonScope();
@@ -30,9 +40,21 @@ export default new ContainerModule(bind => {
             return connection.createProxy<ModelServerClient>(MODEL_SERVER_CLIENT_SERVICE_PATH, client);
         })
         .inSingletonScope();
+    bind(TheiaModelServerClientV2)
+        .toDynamicValue(ctx => {
+            const connection = ctx.container.get(WebSocketConnectionProvider);
+            const client: ModelServerFrontendClient = ctx.container.get(ModelServerFrontendClient);
+            return connection.createProxy<ModelServerClientV2>(MODEL_SERVER_CLIENT_V2_SERVICE_PATH, client);
+        })
+        .inSingletonScope();
 });
 
-export const FrontendModuleV2 = new ContainerModule((bind, _unbind, _isBound, rebind) => {
+export const FrontendModuleV2 = new ContainerModule((bind, _unbind, isBound, rebind) => {
     bind(ModelServerSubscriptionClientV2).toSelf().inSingletonScope();
-    rebind(ModelServerSubscriptionClient).toService(ModelServerSubscriptionClientV2);
+    if (isBound(ModelServerSubscriptionClient)) {
+        rebind(ModelServerSubscriptionClient).toService(ModelServerSubscriptionClientV2);
+    } else {
+        bind(ModelServerSubscriptionClient).toService(ModelServerSubscriptionClientV2);
+    }
+    bind(ModelServerSubscriptionServiceV2).toService(ModelServerSubscriptionClientV2);
 });
