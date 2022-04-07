@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,12 +7,12 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { expect } from 'chai';
+
 import { encode } from './type-util';
 
 describe('tests for type-util', () => {
-
     describe('encode', () => {
         const emptyArray: any[] = [];
         const tags = ['high-prio', 'red'];
@@ -21,27 +21,31 @@ describe('tests for type-util', () => {
         const emptyObj = {};
 
         it('JSON v1 as JSON v1', () => {
-            const object = { eClass: 'Foo', name: 'test', nested: [{ eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}]};
+            const object = { eClass: 'Foo', name: 'test', nested: [{ eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }] };
             const encoded = encode('json')(object);
             expect(encoded).to.be.equal(encoded);
         });
 
         it('JSON v1 as JSON v2', () => {
-            const object = { eClass: 'Foo', name: 'test', nested: [{ eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}]};
-            const expected = { $type: 'Foo', name: 'test', nested: [{ $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}]};
+            const object = { eClass: 'Foo', name: 'test', nested: [{ eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }] };
+            const expected = { $type: 'Foo', name: 'test', nested: [{ $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }] };
             const encoded = encode('json-v2')(object);
             expect(encoded).to.be.eql(expected);
         });
 
         it('JSON v2 as JSON v1', () => {
-            const object = { $type: 'Foo', name: 'test', nested: [{ $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}]};
-            const expected = { eClass: 'Foo', name: 'test', nested: [{ eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}]};
+            const object = { $type: 'Foo', name: 'test', nested: [{ $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }] };
+            const expected = {
+                eClass: 'Foo',
+                name: 'test',
+                nested: [{ eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }]
+            };
             const encoded = encode('json')(object);
             expect(encoded).to.be.eql(expected);
         });
 
         it('JSON v2 as JSON v2', () => {
-            const object = { $type: 'Foo', name: 'test', nested: [{ $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}]};
+            const object = { $type: 'Foo', name: 'test', nested: [{ $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }] };
             const encoded = encode('json-v2')(object);
             expect(encoded).to.be.equal(encoded);
         });
@@ -55,29 +59,45 @@ describe('tests for type-util', () => {
         const emptyObj = {};
 
         it('JSON v1 as JSON v1', () => {
-            const object = JSON.stringify({ eClass: 'Foo', name: 'test', nested: { eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}});
+            const object = JSON.stringify({
+                eClass: 'Foo',
+                name: 'test',
+                nested: { eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }
+            });
             const encoded = encode('json')(object);
             expect(encoded).to.be.equal(encoded);
         });
 
         it('JSON v1 as JSON v2', () => {
-            const object = JSON.stringify({ eClass: 'Foo', name: 'test', nested: { eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}});
-            const expected = { $type: 'Foo', name: 'test', nested: { $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}};
+            const object = JSON.stringify({
+                eClass: 'Foo',
+                name: 'test',
+                nested: { eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }
+            });
+            const expected = { $type: 'Foo', name: 'test', nested: { $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj } };
             const encoded = encode('json-v2')(object);
             expect(encoded).to.be.a('string');
             expect(JSON.parse(encoded as string)).to.be.eql(expected);
         });
 
         it('JSON v2 as JSON v1', () => {
-            const object = JSON.stringify({ $type: 'Foo', name: 'test', nested: { $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}});
-            const expected = { eClass: 'Foo', name: 'test', nested: { eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}};
+            const object = JSON.stringify({
+                $type: 'Foo',
+                name: 'test',
+                nested: { $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }
+            });
+            const expected = { eClass: 'Foo', name: 'test', nested: { eClass: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj } };
             const encoded = encode('json')(object);
             expect(encoded).to.be.a('string');
             expect(JSON.parse(encoded as string)).to.be.eql(expected);
         });
 
         it('JSON v2 as JSON v2', () => {
-            const object = JSON.stringify({ $type: 'Foo', name: 'test', nested: { $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj}});
+            const object = JSON.stringify({
+                $type: 'Foo',
+                name: 'test',
+                nested: { $type: 'Nested', name: 'inner', tags, emptyArray, nada, emptyObj }
+            });
             const encoded = encode('json-v2')(object);
             expect(encoded).to.be.equal(encoded);
         });

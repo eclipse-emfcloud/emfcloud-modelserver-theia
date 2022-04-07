@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { ConnectionHandler, JsonRpcConnectionHandler } from '@theia/core';
 import { BackendApplicationContribution } from '@theia/core/lib/node';
 import { ContainerModule } from '@theia/core/shared/inversify';
@@ -24,15 +24,14 @@ export default new ContainerModule(bind => {
     bind(TheiaModelServerClient).to(TheiaBackendModelServerClient).inSingletonScope();
 
     bind(ConnectionHandler)
-        .toDynamicValue(ctx =>
-            new JsonRpcConnectionHandler<ModelServerFrontendClient>(
-                MODEL_SERVER_CLIENT_SERVICE_PATH,
-                client => {
+        .toDynamicValue(
+            ctx =>
+                new JsonRpcConnectionHandler<ModelServerFrontendClient>(MODEL_SERVER_CLIENT_SERVICE_PATH, client => {
                     const modelServerClient = ctx.container.get<TheiaModelServerClient>(TheiaModelServerClient);
                     modelServerClient.setClient(client);
                     client.onDidCloseConnection(() => modelServerClient.dispose());
                     return modelServerClient;
-                }
-            )
-        ).inSingletonScope();
+                })
+        )
+        .inSingletonScope();
 });

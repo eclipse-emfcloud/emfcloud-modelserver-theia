@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { expect } from 'chai';
 import jsonpatch, { deepClone, Operation } from 'fast-json-patch';
 
@@ -32,7 +32,11 @@ describe('Integration tests for ModelServerClientV2', () => {
     let client: ModelServerClientV2;
     const baseUrl = `http://localhost:8081${ModelServerClientApiV2.API_ENDPOINT}`;
 
-    const testUndoRedo: (modeluri: string, originalModel: any, patchedModel: any) => void = async (modeluri, originalModel, patchedModel) => {
+    const testUndoRedo: (modeluri: string, originalModel: any, patchedModel: any) => void = async (
+        modeluri,
+        originalModel,
+        patchedModel
+    ) => {
         // Expected: originalModel === undoModel === patchedUndoModel
         // Expected: patchedModel === redoModel === patchedRedoModel
         const undoPatch = await client.undo(modeluri);
@@ -77,7 +81,13 @@ describe('Integration tests for ModelServerClientV2', () => {
             const newWorkflowName = 'New Test Workflow';
             const initialWorkflowsCount: number = (originalModel as any).workflows.length;
 
-            const patch = create(modeluri, originalModel, 'workflows', 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow', {name: newWorkflowName});
+            const patch = create(
+                modeluri,
+                originalModel,
+                'workflows',
+                'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
+                { name: newWorkflowName }
+            );
             await client.edit(modeluri, patch);
             const patchedModel = await client.get(modeluri);
 
@@ -97,7 +107,13 @@ describe('Integration tests for ModelServerClientV2', () => {
             const initialModel = await client.get(modeluri, ModelServerObjectV2.is);
 
             // Add a second workflow to the model; we'll use it to move a Task from a workflow to the other
-            const createWorkflow = create(modeluri, initialModel, 'workflows', 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow', {name: 'New Workflow'});
+            const createWorkflow = create(
+                modeluri,
+                initialModel,
+                'workflows',
+                'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
+                { name: 'New Workflow' }
+            );
             await client.edit(modeluri, createWorkflow);
             const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
             const sourceWF = (originalModel as any).workflows[0];
@@ -301,10 +317,12 @@ describe('Integration tests for ModelServerClientV2', () => {
             const initialWorkflowsSize = (machine as any).workflows.length;
             expect(initialWorkflowsSize).to.not.be.equal(0);
 
-            const patch: Operation[] = [{
-                'op': 'remove',
-                'path': '/workflows'
-            }];
+            const patch: Operation[] = [
+                {
+                    op: 'remove',
+                    path: '/workflows'
+                }
+            ];
 
             await client.edit(modeluri, patch);
             const model = await client.get(modeluri);
@@ -322,10 +340,12 @@ describe('Integration tests for ModelServerClientV2', () => {
             const initialValue = (machine as any).children[1].processor.thermalDesignPower;
             expect(initialValue).to.not.be.oneOf([undefined, 0]);
 
-            const patch: Operation[] = [{
-                'op': 'remove',
-                'path': '/children/1/processor/thermalDesignPower'
-            }];
+            const patch: Operation[] = [
+                {
+                    op: 'remove',
+                    path: '/children/1/processor/thermalDesignPower'
+                }
+            ];
 
             await client.edit(modeluri, patch);
             const model = await client.get(modeluri);
@@ -337,4 +357,3 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
     });
 });
-

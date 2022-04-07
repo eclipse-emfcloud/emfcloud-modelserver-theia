@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import {
     AnyObject,
     CloseNotification,
@@ -170,7 +170,6 @@ export class ModelServerSubscriptionClient implements ModelServerFrontendClient,
  */
 @injectable()
 export class ModelServerSubscriptionClientV2 extends ModelServerSubscriptionClient implements ModelServerSubscriptionServiceV2 {
-
     protected onIncrementalUpdateEmitterV2 = new Emitter<Readonly<IncrementalUpdateNotificationV2>>();
     get onIncrementalUpdateListenerV2(): Event<IncrementalUpdateNotificationV2> {
         return this.onIncrementalUpdateEmitterV2.event;
@@ -183,16 +182,15 @@ export class ModelServerSubscriptionClientV2 extends ModelServerSubscriptionClie
             switch (type) {
                 case MessageType.incrementalUpdate: {
                     const patch = MessageDataMapper.as(message, Operations.isPatch);
-                    this.onIncrementalUpdateEmitterV2.fire(
-                        {
-                            type,
-                            modelUri,
-                            patch,
-                            patchModel: (model, copy) => {
-                                const modelToPatch = copy ? deepClone(model) : model;
-                                return applyPatch(modelToPatch, patch).newDocument;
-                            }
-                        });
+                    this.onIncrementalUpdateEmitterV2.fire({
+                        type,
+                        modelUri,
+                        patch,
+                        patchModel: (model, copy) => {
+                            const modelToPatch = copy ? deepClone(model) : model;
+                            return applyPatch(modelToPatch, patch).newDocument;
+                        }
+                    });
                     break;
                 }
             }

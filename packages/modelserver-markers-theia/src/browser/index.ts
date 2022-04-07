@@ -7,10 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *
- * Contributors:
- *    Vincent HEMERY (CS GROUP - France) - initial API and implementation
- ********************************************************************************/
-export * from './frontend-module';
-export * from './diagnostic-manager';
+ *******************************************************************************/
 export * from './diagnostic-adapter';
+export * from './diagnostic-manager';
+export * from './frontend-module';

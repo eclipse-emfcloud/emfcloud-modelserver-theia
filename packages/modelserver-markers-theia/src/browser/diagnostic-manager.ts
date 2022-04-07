@@ -7,10 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *
- * Contributors:
- *    Vincent HEMERY (CS GROUP - France) - initial API and implementation
- ********************************************************************************/
+ *******************************************************************************/
 import { Diagnostic as EMFDiagnostic } from '@eclipse-emfcloud/modelserver-client';
 import URI from '@theia/core/lib/common/uri';
 import { inject, injectable } from '@theia/core/shared/inversify';
@@ -21,7 +18,6 @@ import { DiagnosticAdapter } from './diagnostic-adapter';
 
 @injectable()
 export class DiagnosticManager {
-
     /** The problem manager to which we delegate */
     @inject(ProblemManager)
     protected readonly problemManager: ProblemManager;

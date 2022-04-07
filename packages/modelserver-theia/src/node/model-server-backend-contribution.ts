@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { BackendApplicationContribution } from '@theia/core/lib/node';
 import { inject, injectable, optional } from '@theia/core/shared/inversify';
 import { ProcessErrorEvent } from '@theia/process/lib/node/process';
@@ -101,5 +101,4 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
     onStop(): void {
         this.dispose();
     }
-
 }

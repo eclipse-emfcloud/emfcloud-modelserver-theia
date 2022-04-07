@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 /* eslint-disable @typescript-eslint/ban-types */
 import {
     AddCommand,
@@ -44,14 +44,14 @@ import { DevModelServerClient, UpdateTaskNameCommand } from '../common/dev-model
 /**
  * The configuration parameters for used
  * for prompting messages received from the modelserver.
-*/
+ */
 interface MessageParams {
-    message: string,
-    details: object | string | boolean | number,
-    sender?: string,
-    level?: MessageLevel,
-    detailsLabel?: string
-    detailsTitle?: string
+    message: string;
+    details: object | string | boolean | number;
+    sender?: string;
+    level?: MessageLevel;
+    detailsLabel?: string;
+    detailsTitle?: string;
 }
 
 /* ModelServer commands */
@@ -310,7 +310,7 @@ export const EditRemoveSuperBrewer3000JsonCommand: Command = {
 
 export const UpdateTaskNameSuperBrewer3000JsonCustomCommand: Command = {
     id: 'ApiTest.UpdateTaskName.SuperBrewer3000Json',
-    label: 'edit(SuperBrewer3000.json,{type:updateTaskName},\'Coffee\')'
+    label: "edit(SuperBrewer3000.json,{type:updateTaskName},'Coffee')"
 };
 
 export const UndoSuperBrewer3000JsonCommand: Command = {
@@ -430,40 +430,35 @@ export const CUSTOM_TEST_MENU = [...MAIN_MENU_BAR, '9_4_API_TEST_MENU_CUSTOM'];
 export const CUSTOM_TEST_COUNTER_SECTION = [...CUSTOM_TEST_MENU, '1_COUNTER'];
 
 const superBrewer3000JsonPatch = {
-    'eClass':
-        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Machine',
-    'children': [
+    eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Machine',
+    children: [
         {
-            'eClass':
-                'http://www.eclipsesource.com/modelserver/example/coffeemodel#//BrewingUnit'
+            eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//BrewingUnit'
         },
         {
-            'eClass':
-                'http://www.eclipsesource.com/modelserver/example/coffeemodel#//ControlUnit',
-            'processor': {
-                'clockSpeed': 50,
-                'numberOfCores': 20,
-                'socketconnectorType': 'Z51',
-                'thermalDesignPower': 200
+            eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//ControlUnit',
+            processor: {
+                clockSpeed: 50,
+                numberOfCores: 20,
+                socketconnectorType: 'Z51',
+                thermalDesignPower: 200
             },
-            'display': {
-                'width': 50,
-                'height': 50
+            display: {
+                width: 50,
+                height: 50
             }
         }
     ],
-    'name': 'Super Brewer 5000',
-    'workflows': [
+    name: 'Super Brewer 5000',
+    workflows: [
         {
-            'nodes': [
+            nodes: [
                 {
-                    'eClass':
-                        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
-                    'name': 'PreHeat',
-                    'component': {
-                        'eClass':
-                            'http://www.eclipsesource.com/modelserver/example/coffeemodel#//BrewingUnit',
-                        '$ref': '//@children.0'
+                    eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
+                    name: 'PreHeat',
+                    component: {
+                        eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//BrewingUnit',
+                        $ref: '//@children.0'
                     }
                 }
             ]
@@ -473,7 +468,6 @@ const superBrewer3000JsonPatch = {
 
 @injectable()
 export class ApiTestMenuContribution implements MenuContribution, CommandContribution {
-
     @inject(MessageService) protected readonly messageService: MessageService;
     @inject(DevModelServerClient) protected readonly modelServerClient: DevModelServerClient;
 
@@ -501,9 +495,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         const message = `${now.toISOString()} | ${sender} ${params.message}`;
 
         const showDetail = params.detailsLabel ?? 'Show details';
-        const detailsMsg = params.details instanceof Error
-            ? `${params.details.message} \n\n${params.details.stack ?? ''} `
-            : asString(params.details);
+        const detailsMsg =
+            params.details instanceof Error ? `${params.details.message} \n\n${params.details.stack ?? ''} ` : asString(params.details);
         const level = params.level ?? MessageLevel.Info;
         let action: string | undefined = undefined;
 
@@ -521,7 +514,11 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         }
     }
 
-    protected printResponse(request: string, response: object | string | boolean | number, level: MessageLevel = MessageLevel.Info): Promise<void> {
+    protected printResponse(
+        request: string,
+        response: object | string | boolean | number,
+        level: MessageLevel = MessageLevel.Info
+    ): Promise<void> {
         const messageParams: MessageParams = {
             message: `Received response for '${request}' request`,
             details: response,
@@ -559,7 +556,6 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
             level
         };
         return this.printMessage(messageParams);
-
     }
 
     protected showResponse(title: string, msg: string): void {
@@ -570,53 +566,39 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         /* ModelServer commands */
         commands.registerCommand(PingCommand, {
             execute: () => {
-                this.modelServerClient
-                    .ping()
-                    .then(result => this.printResponse('ping', result));
+                this.modelServerClient.ping().then(result => this.printResponse('ping', result));
             }
         });
         commands.registerCommand(GetAllCommand, {
             execute: () => {
-                this.modelServerClient
-                    .getAll()
-                    .then(result => this.printResponse('getAll', result));
+                this.modelServerClient.getAll().then(result => this.printResponse('getAll', result));
             }
         });
         commands.registerCommand(GetModelUrisCommand, {
             execute: () => {
-                this.modelServerClient
-                    .getModelUris()
-                    .then(result => this.printResponse('getModelUris', result));
+                this.modelServerClient.getModelUris().then(result => this.printResponse('getModelUris', result));
             }
         });
         commands.registerCommand(SaveAllCommand, {
             execute: () => {
-                this.modelServerClient
-                    .saveAll()
-                    .then(result => this.printResponse('saveAll', result));
+                this.modelServerClient.saveAll().then(result => this.printResponse('saveAll', result));
             }
         });
         commands.registerCommand(GetTypeSchemaCommand, {
             execute: () => {
-                this.modelServerClient
-                    .getTypeSchema('Coffee.ecore')
-                    .then(result => this.printResponse('getTypeSchema', result));
+                this.modelServerClient.getTypeSchema('Coffee.ecore').then(result => this.printResponse('getTypeSchema', result));
             }
         });
         commands.registerCommand(GetUiSchemaCommand, {
             execute: () => {
-                this.modelServerClient.
-                    getUiSchema('controlunit')
-                    .then(result => this.printResponse('getUiSchema', result));
+                this.modelServerClient.getUiSchema('controlunit').then(result => this.printResponse('getUiSchema', result));
             }
         });
 
         /* SuperBrewer3000.coffee commands */
         commands.registerCommand(GetModelCommand, {
             execute: () => {
-                this.modelServerClient
-                    .get('SuperBrewer3000.coffee')
-                    .then(result => this.printResponse('get', result));
+                this.modelServerClient.get('SuperBrewer3000.coffee').then(result => this.printResponse('get', result));
             }
         });
         commands.registerCommand(GetModelElementByIdCommand, {
@@ -636,10 +618,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(EditSetCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
-                    '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0/@nodes.0`
+                    eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
+                    $ref: `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0/@nodes.0`
                 };
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
@@ -652,10 +632,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(EditRemoveCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
-                    '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0`
+                    eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
+                    $ref: `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0`
                 };
                 const feature = 'nodes';
                 const indices = [0];
@@ -668,10 +646,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(EditAddCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
-                    '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0`
+                    eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
+                    $ref: `${this.workspaceUri}/SuperBrewer3000.coffee#//@workflows.0`
                 };
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];
@@ -690,47 +666,35 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(UndoCommand, {
             execute: () => {
-                this.modelServerClient
-                    .undo('SuperBrewer3000.coffee')
-                    .then(result => this.printResponse('undo', result));
+                this.modelServerClient.undo('SuperBrewer3000.coffee').then(result => this.printResponse('undo', result));
             }
         });
         commands.registerCommand(RedoCommand, {
             execute: () => {
-                this.modelServerClient
-                    .redo('SuperBrewer3000.coffee')
-                    .then(result => this.printResponse('redo', result));
+                this.modelServerClient.redo('SuperBrewer3000.coffee').then(result => this.printResponse('redo', result));
             }
         });
         commands.registerCommand(SaveCommand, {
             execute: () => {
-                this.modelServerClient
-                    .save('SuperBrewer3000.coffee')
-                    .then(result => this.printResponse('save', result));
+                this.modelServerClient.save('SuperBrewer3000.coffee').then(result => this.printResponse('save', result));
             }
         });
         commands.registerCommand(CloseCommand, {
             execute: () => {
-                this.modelServerClient
-                    .close('SuperBrewer3000.coffee')
-                    .then(result => this.printResponse('close', result));
+                this.modelServerClient.close('SuperBrewer3000.coffee').then(result => this.printResponse('close', result));
             }
         });
         commands.registerCommand(ValidationCommand, {
             execute: () => {
-                this.modelServerClient
-                    .validate('SuperBrewer3000.coffee')
-                    .then(result => this.printResponse('validate', result));
+                this.modelServerClient.validate('SuperBrewer3000.coffee').then(result => this.printResponse('validate', result));
             }
         });
         commands.registerCommand(ValidationMarkersCommand, {
             execute: () => {
-                this.modelServerClient
-                    .validate('SuperBrewer3000.coffee')
-                    .then(result => {
-                        const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('SuperBrewer3000.coffee'), result);
-                        this.messageService.info(message);
-                    });
+                this.modelServerClient.validate('SuperBrewer3000.coffee').then(result => {
+                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('SuperBrewer3000.coffee'), result);
+                    this.messageService.info(message);
+                });
             }
         });
         commands.registerCommand(ValidationConstraintsCommand, {
@@ -759,16 +723,12 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         /* Coffee.ecore commands */
         commands.registerCommand(GetModelCoffeeEcoreCommand, {
             execute: () => {
-                this.modelServerClient
-                    .get<AnyObject>('Coffee.ecore', AnyObject.is)
-                    .then(result => this.printResponse('get', result));
+                this.modelServerClient.get<AnyObject>('Coffee.ecore', AnyObject.is).then(result => this.printResponse('get', result));
             }
         });
         commands.registerCommand(GetModelXmiCoffeeEcoreCommand, {
             execute: () => {
-                this.modelServerClient
-                    .get('Coffee.ecore', 'xmi')
-                    .then(result => this.printResponse('get in xmi format', result));
+                this.modelServerClient.get('Coffee.ecore', 'xmi').then(result => this.printResponse('get in xmi format', result));
             }
         });
         commands.registerCommand(GetModelElementByIdCoffeeEcoreCommand, {
@@ -802,20 +762,16 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(EditCompoundCoffeeEcoreCommand, {
             execute: () => {
                 const ownerA = {
-                    'eClass':
-                        'http://www.eclipse.org/emf/2002/Ecore#//EClass',
-                    '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
+                    eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EClass',
+                    $ref: `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
                 };
                 const featureA = 'name';
                 const changedValuesA = ['ControlUnitNew'];
                 const setCommandA = new SetCommand(ownerA, featureA, changedValuesA);
 
                 const ownerB = {
-                    'eClass':
-                        'http://www.eclipse.org/emf/2002/Ecore#//EClass',
-                    '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.5`
+                    eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EClass',
+                    $ref: `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.5`
                 };
                 const featureB = 'name';
                 const changedValuesB = ['WaterTankNew'];
@@ -831,94 +787,70 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(EditSetCoffeeEcoreCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipse.org/emf/2002/Ecore#//EClass',
-                    '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
+                    eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EClass',
+                    $ref: `${this.workspaceUri}/Coffee.ecore#//@eClassifiers.2`
                 };
                 const feature = 'name';
                 const changedValues = ['ControlUnitNew'];
                 const setCommand = new SetCommand(owner, feature, changedValues);
-                this.modelServerClient
-                    .edit('Coffee.ecore', setCommand)
-                    .then(result => this.printResponse('edit SetCommand', result));
+                this.modelServerClient.edit('Coffee.ecore', setCommand).then(result => this.printResponse('edit SetCommand', result));
             }
         });
         commands.registerCommand(EditRemoveCoffeeEcoreCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipse.org/emf/2002/Ecore#//EPackage',
-                    '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#/`
+                    eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EPackage',
+                    $ref: `${this.workspaceUri}/Coffee.ecore#/`
                 };
                 const feature = 'eClassifiers';
                 const indices = [5];
                 const removeCommand = new RemoveCommand(owner, feature, indices);
-                this.modelServerClient
-                    .edit('Coffee.ecore', removeCommand)
-                    .then(result => this.printResponse('edit RemoveCommand', result));
+                this.modelServerClient.edit('Coffee.ecore', removeCommand).then(result => this.printResponse('edit RemoveCommand', result));
             }
         });
         commands.registerCommand(EditAddCoffeeEcoreCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipse.org/emf/2002/Ecore#//EPackage',
-                    '$ref':
-                        `${this.workspaceUri}/Coffee.ecore#/`
+                    eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EPackage',
+                    $ref: `${this.workspaceUri}/Coffee.ecore#/`
                 };
                 const feature = 'eClassifiers';
                 const toAdd = [{ eClass: 'http://www.eclipse.org/emf/2002/Ecore#//EClass', name: 'NewEClassifier' }];
                 const addCommand = new AddCommand(owner, feature, toAdd);
-                this.modelServerClient
-                    .edit('Coffee.ecore', addCommand)
-                    .then(result => this.printResponse('edit', result));
+                this.modelServerClient.edit('Coffee.ecore', addCommand).then(result => this.printResponse('edit', result));
             }
         });
         commands.registerCommand(UndoCoffeeEcoreCommand, {
             execute: () => {
-                this.modelServerClient
-                    .undo('Coffee.ecore')
-                    .then(result => this.printResponse('undo', result));
+                this.modelServerClient.undo('Coffee.ecore').then(result => this.printResponse('undo', result));
             }
         });
         commands.registerCommand(RedoCoffeeEcoreCommand, {
             execute: () => {
-                this.modelServerClient
-                    .redo('Coffee.ecore')
-                    .then(result => this.printResponse('redo', result));
+                this.modelServerClient.redo('Coffee.ecore').then(result => this.printResponse('redo', result));
             }
         });
         commands.registerCommand(SaveCoffeeEcoreCommand, {
             execute: () => {
-                this.modelServerClient
-                    .save('Coffee.ecore')
-                    .then(result => this.printResponse('save', result));
+                this.modelServerClient.save('Coffee.ecore').then(result => this.printResponse('save', result));
             }
         });
         commands.registerCommand(CloseCoffeeEcoreCommand, {
             execute: () => {
-                this.modelServerClient
-                    .close('Coffee.ecore')
-                    .then(result => this.printResponse('close', result));
+                this.modelServerClient.close('Coffee.ecore').then(result => this.printResponse('close', result));
             }
         });
         commands.registerCommand(ValidationCoffeeEcoreCommand, {
             execute: () => {
-                this.modelServerClient
-                    .validate('Coffee.ecore')
-                    .then(result => this.printResponse('validate', result));
+                this.modelServerClient.validate('Coffee.ecore').then(result => this.printResponse('validate', result));
             }
         });
         commands.registerCommand(ValidationMarkersCoffeeEcoreCommand, {
             execute: () => {
-                this.modelServerClient
-                    .validate('Coffee.ecore')
-                    .then(result => {
-                        const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('Coffee.ecore'), result);
-                        this.messageService.info(message);
-                    });
+                this.modelServerClient.validate('Coffee.ecore').then(result => {
+                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('Coffee.ecore'), result);
+                    this.messageService.info(message);
+                });
             }
         });
         commands.registerCommand(ValidationConstraintsCoffeeEcoreCommand, {
@@ -952,9 +884,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         /* SuperBrewer3000.json commands */
         commands.registerCommand(GetModelSuperBrewer3000JsonCommand, {
             execute: () => {
-                this.modelServerClient
-                    .get('SuperBrewer3000.json')
-                    .then(result => this.printResponse('get', result));
+                this.modelServerClient.get('SuperBrewer3000.json').then(result => this.printResponse('get', result));
             }
         });
         commands.registerCommand(GetModelElementByIdSuperBrewer3000JsonCommand, {
@@ -974,10 +904,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(EditSetSuperBrewer3000JsonCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
-                    '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0/@nodes.0`
+                    eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask',
+                    $ref: `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0/@nodes.0`
                 };
                 const feature = 'name';
                 const changedValues = ['Auto Brew'];
@@ -990,10 +918,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(EditRemoveSuperBrewer3000JsonCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
-                    '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
+                    eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
+                    $ref: `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
                 };
                 const feature = 'nodes';
                 const indices = [0];
@@ -1006,10 +932,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(EditAddSuperBrewer3000JsonCommand, {
             execute: () => {
                 const owner = {
-                    'eClass':
-                        'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
-                    '$ref':
-                        `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
+                    eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//Workflow',
+                    $ref: `${this.workspaceUri}/SuperBrewer3000.json#//@workflows.0`
                 };
                 const feature = 'nodes';
                 const toAdd = [{ eClass: 'http://www.eclipsesource.com/modelserver/example/coffeemodel#//AutomaticTask' }];
@@ -1022,53 +946,42 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(UpdateTaskNameSuperBrewer3000JsonCustomCommand, {
             execute: () => {
                 const updateTaskName = new UpdateTaskNameCommand('Coffee');
-                this.modelServerClient.edit('SuperBrewer3000.json', updateTaskName)
+                this.modelServerClient
+                    .edit('SuperBrewer3000.json', updateTaskName)
                     .then(result => this.printResponse('edit CustomCommand', result));
             }
         });
         commands.registerCommand(UndoSuperBrewer3000JsonCommand, {
             execute: () => {
-                this.modelServerClient
-                    .undo('SuperBrewer3000.json')
-                    .then(result => this.printResponse('undo', result));
+                this.modelServerClient.undo('SuperBrewer3000.json').then(result => this.printResponse('undo', result));
             }
         });
         commands.registerCommand(RedoSuperBrewer3000JsonCommand, {
             execute: () => {
-                this.modelServerClient
-                    .redo('SuperBrewer3000.json')
-                    .then(result => this.printResponse('redo', result));
+                this.modelServerClient.redo('SuperBrewer3000.json').then(result => this.printResponse('redo', result));
             }
         });
         commands.registerCommand(SaveSuperBrewer3000JsonCommand, {
             execute: () => {
-                this.modelServerClient
-                    .save('SuperBrewer3000.json')
-                    .then(result => this.printResponse('save', result));
+                this.modelServerClient.save('SuperBrewer3000.json').then(result => this.printResponse('save', result));
             }
         });
         commands.registerCommand(CloseSuperBrewer3000JsonCommand, {
             execute: () => {
-                this.modelServerClient
-                    .close('SuperBrewer3000.json')
-                    .then(result => this.printResponse('close', result));
+                this.modelServerClient.close('SuperBrewer3000.json').then(result => this.printResponse('close', result));
             }
         });
         commands.registerCommand(ValidationSuperBrewer3000JsonCommand, {
             execute: () => {
-                this.modelServerClient
-                    .validate('SuperBrewer3000.json')
-                    .then(result => this.printResponse('validate', result));
+                this.modelServerClient.validate('SuperBrewer3000.json').then(result => this.printResponse('validate', result));
             }
         });
         commands.registerCommand(ValidationMarkersSuperBrewer3000JsonCommand, {
             execute: () => {
-                this.modelServerClient
-                    .validate('SuperBrewer3000.json')
-                    .then(result => {
-                        const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('SuperBrewer3000.json'), result);
-                        this.messageService.info(message);
-                    });
+                this.modelServerClient.validate('SuperBrewer3000.json').then(result => {
+                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('SuperBrewer3000.json'), result);
+                    this.messageService.info(message);
+                });
             }
         });
         commands.registerCommand(ValidationConstraintsSuperBrewer3000JsonCommand, {
@@ -1100,31 +1013,23 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
 
         commands.registerCommand(CustomCounterAdd3, {
-            execute: () => this.modelServerClient
-                .counter('add', 3)
-                .then(result => this.printResponse('counter', result))
+            execute: () => this.modelServerClient.counter('add', 3).then(result => this.printResponse('counter', result))
         });
         commands.registerCommand(CustomCounterAdd, {
-            execute: () => this.modelServerClient
-                .counter('add', undefined).
-                then(result => this.printResponse('counter', result))
+            execute: () => this.modelServerClient.counter('add', undefined).then(result => this.printResponse('counter', result))
         });
         commands.registerCommand(CustomCounterSubtract2, {
-            execute: () => this.modelServerClient
-                .counter('subtract', 2)
-                .then(result => this.printResponse('counter', result))
+            execute: () => this.modelServerClient.counter('subtract', 2).then(result => this.printResponse('counter', result))
         });
         commands.registerCommand(CustomCounterSubtract, {
-            execute: () => this.modelServerClient
-                .counter('subtract', undefined)
-                .then(result => this.printResponse('counter', result))
+            execute: () => this.modelServerClient.counter('subtract', undefined).then(result => this.printResponse('counter', result))
         });
         commands.registerCommand(CustomCounter, {
-            execute: () => this.modelServerClient
-                .counter(undefined, undefined)
-                .then(result => this.printResponse('counter', result))
-                .catch(error => this.printResponse('counter', error, MessageLevel.Error))
-
+            execute: () =>
+                this.modelServerClient
+                    .counter(undefined, undefined)
+                    .then(result => this.printResponse('counter', result))
+                    .catch(error => this.printResponse('counter', error, MessageLevel.Error))
         });
     }
 
@@ -1201,7 +1106,10 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
 
         menus.registerMenuAction(SUPERBREWER_JSON_GET_SECTION, { commandId: GetModelSuperBrewer3000JsonCommand.id, order: 'a' });
         menus.registerMenuAction(SUPERBREWER_JSON_GET_SECTION, { commandId: GetModelElementByIdSuperBrewer3000JsonCommand.id, order: 'b' });
-        menus.registerMenuAction(SUPERBREWER_JSON_GET_SECTION, { commandId: GetModelElementByNameSuperBrewer3000JsonCommand.id, order: 'c' });
+        menus.registerMenuAction(SUPERBREWER_JSON_GET_SECTION, {
+            commandId: GetModelElementByNameSuperBrewer3000JsonCommand.id,
+            order: 'c'
+        });
 
         menus.registerMenuAction(SUPERBREWER_JSON_EDIT_SECTION, { commandId: EditSetSuperBrewer3000JsonCommand.id });
         menus.registerMenuAction(SUPERBREWER_JSON_EDIT_SECTION, { commandId: EditRemoveSuperBrewer3000JsonCommand.id });
@@ -1218,7 +1126,10 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         menus.registerMenuAction(SUPERBREWER_JSON_VALIDATION_SECTION, { commandId: ValidationConstraintsSuperBrewer3000JsonCommand.id });
 
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: SubscribeWithTimeoutCommand.id, order: 'a' });
-        menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: SubscribeWithValidationSuperBrewer3000JsonCommand.id, order: 'b' });
+        menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, {
+            commandId: SubscribeWithValidationSuperBrewer3000JsonCommand.id,
+            order: 'b'
+        });
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: KeepSubscriptionAliveCommand.id, order: 'c' });
         menus.registerMenuAction(SUPERBREWER_JSON_WEBSOCKET_SECTION, { commandId: UnsubscribeTimeoutCommand.id, order: 'd' });
 
@@ -1241,16 +1152,15 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         this.modelServerSubscriptionService.onErrorListener(msg => this.printNotification(msg));
         this.modelServerSubscriptionService.onValidationResultListener(msg => this.printNotification(msg));
     }
-
 }
 
 /**
-  * Create the markers in the problem view
-  * @param diagnosticManager the diagnostic manager
-  * @param modelURI the concerned model URI
-  * @param response the validation response
-  * @returns the message to log
-  */
+ * Create the markers in the problem view
+ * @param diagnosticManager the diagnostic manager
+ * @param modelURI the concerned model URI
+ * @param response the validation response
+ * @returns the message to log
+ */
 function createMarkersFromDiagnostic(diagnosticManager: DiagnosticManager, modelURI: URI, diagnostic: Diagnostic): string {
     // print markers in Problems view
     diagnosticManager.setDiagnostic(modelURI, diagnostic);
@@ -1263,10 +1173,10 @@ function createMarkersFromDiagnostic(diagnosticManager: DiagnosticManager, model
 }
 
 /**
-  * Wraps the given message in a pre-formatted,
-  * scrollable div.
-  * @param msg
-  */
+ * Wraps the given message in a pre-formatted,
+ * scrollable div.
+ * @param msg
+ */
 function wrapMessage(msg: string): HTMLDivElement {
     // Convert line breaks to proper html line breaks
     const scrollDiv = document.createElement('div');
@@ -1277,4 +1187,3 @@ function wrapMessage(msg: string): HTMLDivElement {
     scrollDiv.appendChild(pre);
     return scrollDiv;
 }
-

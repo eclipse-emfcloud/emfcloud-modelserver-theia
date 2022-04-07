@@ -7,12 +7,8 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
-import {
-    isModelServerObjectArray,
-    isModelServerReferenceDescriptionArray,
-    isNumberArray
-} from '../utils/model-server-utils';
+ *******************************************************************************/
+import { isModelServerObjectArray, isModelServerReferenceDescriptionArray, isNumberArray } from '../utils/model-server-utils';
 import { DataValueType, ModelServerObject, ModelServerReferenceDescription } from './base-model';
 import { ChangeDescription } from './change-model';
 
@@ -167,7 +163,7 @@ export class CommandExecutionResult implements ModelServerObject {
     affectedObjects?: ModelServerReferenceDescription[];
     details?: { [key: string]: string };
 
-    constructor(public type: string, public source: ModelServerCommand, public changeDescription: ChangeDescription) { }
+    constructor(public type: string, public source: ModelServerCommand, public changeDescription: ChangeDescription) {}
 
     static is(object?: unknown): object is CommandExecutionResult {
         return (

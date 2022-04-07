@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2021-2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,13 +7,13 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { Operation } from 'fast-json-patch';
 
 import { MessageType, ModelServerObjectV2 } from '.';
-import { ModelServerMessage } from './model-server-message';
 import { CommandExecutionResult } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
+import { ModelServerMessage } from './model-server-message';
 import { AnyObject, isString } from './utils/type-util';
 
 /**

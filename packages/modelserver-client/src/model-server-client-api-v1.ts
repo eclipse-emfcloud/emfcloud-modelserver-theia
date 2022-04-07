@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2021-2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,10 +7,10 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
-import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
+ *******************************************************************************/
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
+import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { SubscriptionListener } from './subscription-listener';
 import { AnyObject, TypeGuard } from './utils/type-util';
 
@@ -56,7 +56,7 @@ export interface ModelServerClientApiV1 {
      * @param modeluri The URI of the model that should be retrieved
      * @returns The model typed as plain JSON object.
      */
-    get(modeluri: string,): Promise<AnyObject>;
+    get(modeluri: string): Promise<AnyObject>;
     /**
      * Retrieves the {@link Model} for a given URI as typed JSON object
      * The result promise is rejected if no matching model for the URI could be retrieved, or
@@ -65,7 +65,7 @@ export interface ModelServerClientApiV1 {
      * @param typeGuard A guard function to check if the received model is of the expected type.
      * @returns The model casted to the given type.
      */
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>,): Promise<M>;
+    get<M>(modeluri: string, typeGuard: TypeGuard<M>): Promise<M>;
     /**
      * Retrieves the {@link Model} for a given URI in string representation derived from a given format (e.g. 'xml' or 'json').
      * The result promise is rejected if no matching model for the URI could be retrieved.

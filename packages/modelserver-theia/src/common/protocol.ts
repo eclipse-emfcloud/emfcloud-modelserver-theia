@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { ModelServerClientApiV1 } from '@eclipse-emfcloud/modelserver-client';
 import { JsonRpcServer } from '@theia/core';
 import WebSocket from 'isomorphic-ws';
@@ -23,6 +23,4 @@ export interface ModelServerFrontendClient {
 }
 
 export const TheiaModelServerClient = Symbol('TheiaModelServerClient');
-export interface TheiaModelServerClient extends ModelServerClientApiV1, JsonRpcServer<ModelServerFrontendClient> {
-
-}
+export interface TheiaModelServerClient extends ModelServerClientApiV1, JsonRpcServer<ModelServerFrontendClient> {}

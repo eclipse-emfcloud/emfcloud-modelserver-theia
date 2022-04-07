@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import { LaunchOptions } from '@eclipse-emfcloud/modelserver-theia/lib/node';
 import { ContainerModule, injectable } from '@theia/core/shared/inversify';
 import { join, resolve } from 'path';
@@ -24,4 +24,3 @@ export class SimpleLaunchOptions implements LaunchOptions {
     jarPath = resolve(join(__dirname, '..', '..', 'build', 'org.eclipse.emfcloud.modelserver.example-0.7.0-SNAPSHOT-standalone.jar'));
     additionalArgs = ['--errorsOnly'];
 }
-

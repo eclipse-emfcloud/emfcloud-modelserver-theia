@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2021-2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,20 +7,15 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import WebSocket from 'isomorphic-ws';
 
-import {
-    ModelServerClientApiV1,
-    ModelServerError,
-    ServerConfiguration,
-    SubscriptionOptions
-} from './model-server-client-api-v1';
-import { IdentityMapper, Mapper, MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
-import { ModelServerPaths } from './model-server-paths';
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
+import { ModelServerClientApiV1, ModelServerError, ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
+import { IdentityMapper, Mapper, MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
+import { ModelServerPaths } from './model-server-paths';
 import { SubscriptionListener } from './subscription-listener';
 import { AnyObject, asObject, asString, asType, TypeGuard } from './utils/type-util';
 
@@ -42,8 +37,8 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         return { baseURL };
     }
 
-    get(modeluri: string,): Promise<AnyObject>;
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>,): Promise<M>;
+    get(modeluri: string): Promise<AnyObject>;
+    get<M>(modeluri: string, typeGuard: TypeGuard<M>): Promise<M>;
     get(modeluri: string, format: string): Promise<string>;
     get<M>(modeluri: string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
         const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
@@ -82,10 +77,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     getElementById<M>(modeluri: string, elementid: string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
         const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
         const mapper = createMapper<M>(formatOrGuard);
-        return this.process(
-            this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementid, format } }),
-            mapper
-        );
+        return this.process(this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementid, format } }), mapper);
     }
 
     getElementByName(modeluri: string, elementname: string): Promise<AnyObject>;
@@ -94,10 +86,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     getElementByName<M>(modeluri: string, elementname: string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
         const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
         const mapper = createMapper<M>(formatOrGuard);
-        return this.process(
-            this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementname, format } }),
-            mapper
-        );
+        return this.process(this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementname, format } }), mapper);
     }
 
     create(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
@@ -106,10 +95,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     create<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
         const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
         const mapper = createMapper<M>(formatOrGuard);
-        return this.process(
-            this.restClient.post(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
-            mapper
-        );
+        return this.process(this.restClient.post(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }), mapper);
     }
 
     update(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
@@ -118,10 +104,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     update<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>): Promise<AnyObject | M | string> {
         const format = typeof formatOrGuard === 'string' ? formatOrGuard : this.defaultFormat;
         const mapper = createMapper<M>(formatOrGuard);
-        return this.process(
-            this.restClient.patch(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }),
-            mapper
-        );
+        return this.process(this.restClient.patch(ModelServerPaths.MODEL_CRUD, { data: model }, { params: { modeluri, format } }), mapper);
     }
 
     delete(modeluri: string): Promise<boolean> {
@@ -316,7 +299,6 @@ function createMapper<M>(formatOrGuard?: FormatOrGuard<M>): MessageDataMapper<An
         return msg => MessageDataMapper.as(msg, typeGuard);
     }
     return msg => MessageDataMapper.asObject(msg);
-
 }
 
 function mapModel<M>(model: Model, guard?: TypeGuard<M>, toString = false): Model<AnyObject | M | string> {

@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,14 +7,14 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { Operation } from 'fast-json-patch';
 
-import { ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
-import { Model, ModelServerMessage } from './model-server-message';
 import { ModelServerElement } from './model/base-model';
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
+import { ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
+import { Model, ModelServerMessage } from './model-server-message';
 import { SubscriptionListener } from './subscription-listener';
 import { AnyObject, TypeGuard } from './utils/type-util';
 
@@ -121,7 +121,6 @@ export namespace ModelServerClientApiV2 {
  * Result sent to client after requesting a model update.
  */
 export interface ModelUpdateResult {
-
     /**
      * True if the edit request was successful, false otherwise.
      */

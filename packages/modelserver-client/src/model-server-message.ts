@@ -7,12 +7,12 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- ********************************************************************************/
+ *******************************************************************************/
 import * as jsonpatch from 'fast-json-patch';
 import { deepClone } from 'fast-json-patch';
 
-import { ModelUpdateResult } from './model-server-client-api-v2';
 import { ModelServerElement } from './model/base-model';
+import { ModelUpdateResult } from './model-server-client-api-v2';
 import { Operations } from './utils/patch-utils';
 import * as Type from './utils/type-util';
 
@@ -196,7 +196,7 @@ export namespace MessageDataMapper {
      * model to get the new model if it was.
      */
     export function patchModel(message: ModelServerMessage): ModelUpdateResult {
-        if (isSuccess(message)){
+        if (isSuccess(message)) {
             const data = message.data as any;
             const patch = data ? data.patch : undefined;
             if (patch && Operations.isPatch(patch)) {
@@ -212,7 +212,7 @@ export namespace MessageDataMapper {
                 return { success: true };
             }
         } else {
-            return {success: false };
+            return { success: false };
         }
     }
 }

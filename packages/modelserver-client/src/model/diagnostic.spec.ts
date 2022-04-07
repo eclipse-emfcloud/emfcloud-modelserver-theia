@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,12 +7,12 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { expect } from 'chai';
+
 import { Diagnostic, ERROR, OK, WARNING } from './diagnostic';
 
 describe('tests for Diagnostic', () => {
-
     it('ok', () => {
         const ok = Diagnostic.ok();
 
@@ -39,7 +39,7 @@ describe('tests for Diagnostic', () => {
 
         it('several args', () => {
             const warning = { ...diag(WARNING, 'Not so bad.'), source: 'a' };
-            const ok = { ...diag(OK, 'It\'s okay.'), source: 'b' };
+            const ok = { ...diag(OK, "It's okay."), source: 'b' };
             const error = { ...diag(ERROR, 'Pretty bad.'), source: 'c' };
             const merged = Diagnostic.merge(warning, ok, error);
             expect(merged.severity).to.be.equal(ERROR);
@@ -62,7 +62,7 @@ describe('tests for Diagnostic', () => {
 
         it('several args', () => {
             const warning = { ...diag(WARNING, 'Not so bad.'), source: 'a' };
-            const ok = { ...diag(OK, 'It\'s okay.'), source: 'b' };
+            const ok = { ...diag(OK, "It's okay."), source: 'b' };
             const error = { ...diag(ERROR, 'Pretty bad.'), source: 'c' };
             const worst = Diagnostic.worstOf([warning, ok, error]);
             expect(worst).to.be.equal(error);

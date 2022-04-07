@@ -1,4 +1,4 @@
-/*********************************************************************************
+/********************************************************************************
  * Copyright (c) 2021-2022 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
@@ -7,7 +7,7 @@
  * available at https://opensource.org/licenses/MIT.
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
- *********************************************************************************/
+ *******************************************************************************/
 import { Format, FORMAT_JSON_V1, FORMAT_JSON_V2, FORMAT_XMI, JsonFormat } from '../model-server-client-api-v2';
 import { Model } from '../model-server-message';
 
@@ -224,7 +224,7 @@ function isJsonV2(object: AnyObject): boolean {
 }
 
 function findProperty(object: any, name: string, visited = new Set()): boolean {
-    return traverse(object, (target, props) => props.includes(name) ? true : undefined);
+    return traverse(object, (target, props) => (props.includes(name) ? true : undefined));
 }
 
 /**
@@ -284,7 +284,8 @@ function copy(object: any, format: JsonFormat): any {
 function traverse<T>(object: any, fn: (target: any, props: string[]) => T | undefined, visited = new Set()): boolean {
     // Only traverse into objects. Null, undefined, strings, numbers, booleans are primitive values in JSON and functions don't exist.
     // eslint-disable-next-line no-null/no-null
-    if (typeof object !== 'object' || object === null) { // JSON uses null
+    if (typeof object !== 'object' || object === null) {
+        // JSON uses null
         return false;
     }
     if (visited.has(object)) {
