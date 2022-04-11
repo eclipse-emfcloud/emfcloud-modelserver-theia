@@ -50,7 +50,9 @@
     "@types/ws": "8.2.2",
     "typescript": "^3.9.2",
     "@types/moxios": "^0.4.14",
-    "moxios": "^0.4.0"
+    "moxios": "^0.4.0",
+    "babel-register": "^6.26.0",
+    "ignore-styles": "^5.0.1"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",

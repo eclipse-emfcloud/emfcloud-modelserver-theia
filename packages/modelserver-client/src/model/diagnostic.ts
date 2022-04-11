@@ -169,9 +169,7 @@ export namespace Diagnostic {
 
         const max = worstOf(diagnostics);
 
-        // Recompute IDs of the diagnostics because they are now in
-        // a new tree structure and their paths have changed.
-        return recomputeIDs({
+        return {
             severity: max.severity,
             message: `Diagnosis of ${nonOK.length} problems.`,
             source: max.source,
@@ -179,7 +177,7 @@ export namespace Diagnostic {
             data: [],
             children: nonOK,
             id: '/'
-        });
+        };
     }
 
     /**
@@ -206,17 +204,5 @@ export namespace Diagnostic {
         }
 
         return result;
-    }
-
-    /**
-     * Assign IDs of the diagnostics in a tree according to the EMF
-     * path-structured URI fragment algorithm.
-     */
-    function recomputeIDs(diagnostic: Diagnostic, base = '/'): Diagnostic {
-        diagnostic.id = base;
-
-        diagnostic.children?.forEach((child, i) => recomputeIDs(child, `${base}/@children.${i}`));
-
-        return diagnostic;
     }
 }
