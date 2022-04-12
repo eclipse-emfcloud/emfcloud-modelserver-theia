@@ -15,8 +15,8 @@ import { ProcessManager } from '@theia/process/lib/node/process-manager';
 import { RawProcess, RawProcessFactory } from '@theia/process/lib/node/raw-process';
 import * as cp from 'child_process';
 
-import { TheiaModelServerClient } from '../common';
-import { DEFAULT_LAUNCH_OPTIONS, LaunchOptions } from './launch-options';
+import { TheiaModelServerClient, TheiaModelServerClientV2 } from '../common';
+import { DEFAULT_LAUNCH_OPTIONS, DEFAULT_MODELSERVER_NODE_LAUNCH_OPTIONS, LaunchOptions } from './launch-options';
 
 export const ModelServerLauncher = Symbol('ModelServerLauncher');
 
@@ -30,7 +30,7 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
     @inject(LaunchOptions) @optional() protected readonly launchOptions: LaunchOptions = DEFAULT_LAUNCH_OPTIONS;
     @inject(RawProcessFactory) protected readonly processFactory: RawProcessFactory;
     @inject(ProcessManager) protected readonly processManager: ProcessManager;
-    @inject(TheiaModelServerClient) protected readonly modelserverClient: TheiaModelServerClient;
+    @inject(TheiaModelServerClient) protected readonly modelserverClient: TheiaModelServerClient | TheiaModelServerClientV2;
 
     async initialize(): Promise<void> {
         try {
@@ -41,23 +41,35 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
                 throw new Error('Could not reach Model Server');
             }
         } catch (error) {
-            this.logInfo('Starting Model Server from jar');
+            this.logInfo('Starting Model Server');
             this.startServer();
         }
     }
 
     startServer(): boolean {
-        if (this.launchOptions.jarPath) {
-            let args = ['-jar', this.launchOptions.jarPath, '--port', `${this.launchOptions.serverPort}`];
-            if (this.launchOptions.additionalArgs) {
-                args = [...args, ...this.launchOptions.additionalArgs];
-            }
-            this.spawnProcessAsync('java', args);
-        } else {
-            this.logError('Could not start model server. No path to executable is specified');
+        if (this.validateLaunch()) {
+            this.doStartServer();
         }
         return true;
     }
+
+    protected doStartServer(): void {
+        // Note that the existence of the jarPath was previously checked
+        let args = ['-jar', this.launchOptions.jarPath!, '--port', `${this.launchOptions.serverPort}`];
+        if (this.launchOptions.additionalArgs) {
+            args = [...args, ...this.launchOptions.additionalArgs];
+        }
+        this.spawnProcessAsync('java', args);
+    }
+
+    protected validateLaunch(): boolean {
+        if (!this.launchOptions.jarPath) {
+            this.logError('Could not start model server. No path to executable is specified');
+            return false;
+        }
+        return true;
+    }
+
     protected spawnProcessAsync(command: string, args?: string[], options?: cp.SpawnOptions): Promise<RawProcess> {
         const rawProcess = this.processFactory({ command, args, options });
         rawProcess.errorStream.on('data', this.logError.bind(this));
@@ -68,7 +80,7 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
                 if (error.code === 'ENOENT') {
                     const guess = command.split(/\s+/).shift();
                     if (guess) {
-                        reject(new Error(`Failed to spawn ${guess}\nPerhaps it is not on the PATH.`));
+                        reject(new Error(`Failed to spawn ${guess}.\nPerhaps it is not on the PATH.`));
                         return;
                     }
                 }
@@ -84,13 +96,13 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
 
     protected logError(data: string | Buffer): void {
         if (data) {
-            console.error(`ModelServerBackendContribution: ${data}`);
+            console.error(`ModelServerBackendContribution: ${data.toString().trimEnd()}`);
         }
     }
 
     protected logInfo(data: string | Buffer): void {
         if (data) {
-            console.info(`ModelServerBackendContribution: ${data}`);
+            console.info(`ModelServerBackendContribution: ${data.toString().trimEnd()}`);
         }
     }
 
@@ -100,5 +112,41 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
 
     onStop(): void {
         this.dispose();
+    }
+}
+
+@injectable()
+export class DefaultModelServerNodeLauncher extends DefaultModelServerLauncher {
+    @inject(LaunchOptions) @optional() protected readonly launchOptions: LaunchOptions = DEFAULT_MODELSERVER_NODE_LAUNCH_OPTIONS;
+    @inject(TheiaModelServerClientV2) protected readonly modelserverClient: TheiaModelServerClientV2;
+
+    validateLaunch(): boolean {
+        let result = super.validateLaunch();
+
+        if (!this.launchOptions.modelServerNode?.jsPath) {
+            this.logError('Could not start model server (Node). No path to main script is specified');
+            result = false;
+        }
+
+        return result;
+    }
+
+    protected doStartServer(): void {
+        // Launch the Java server
+        super.doStartServer();
+
+        // Then launch the Node server
+
+        // Note that validation previously asserted the existence of the `modelServerNode` property
+        const upstreamPort =
+            this.launchOptions.modelServerNode!.upstreamPort ?? DEFAULT_MODELSERVER_NODE_LAUNCH_OPTIONS.modelServerNode.upstreamPort;
+        const port = this.launchOptions.serverPort;
+
+        // Note that the existence of the jsPath was previously checked
+        let args = [this.launchOptions.modelServerNode!.jsPath!, '--port', `${port}`, '--upstream', `${upstreamPort}`];
+        if (this.launchOptions.modelServerNode?.additionalArgs) {
+            args = [...args, ...this.launchOptions.modelServerNode.additionalArgs];
+        }
+        this.spawnProcessAsync('node', args);
     }
 }

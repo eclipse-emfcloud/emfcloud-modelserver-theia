@@ -40,6 +40,20 @@ export type JsonFormat = 'json' | 'json-v2';
 export type Format = string;
 
 /**
+ * Additional subscription options supported by API v2 model subscriptions.
+ */
+export interface SubscriptionOptionsV2 extends SubscriptionOptions {
+    /**
+     * The scheme to use in the `path` property of {@link Operation}s in the
+     * JSON Patches reported by API V2 queries. Supported values (case insensitive)
+     * include `'jsonPointer'` (the default for standard JSON Patches) and
+     * `'uriFragments'` (for a custom EMF-specific scheme based on the URI
+     * fragments of `EObject`s) .
+     */
+    paths?: string;
+}
+
+/**
  * Basic client API to interact with a model server that conforms to the Modelserver API Version 2.
  */
 export interface ModelServerClientApiV2 {
@@ -107,7 +121,7 @@ export interface ModelServerClientApiV2 {
     redo(modeluri: string): Promise<ModelUpdateResult>;
 
     // WebSocket connection
-    subscribe(modeluri: string, listener: SubscriptionListener, options?: SubscriptionOptions): SubscriptionListener;
+    subscribe(modeluri: string, listener: SubscriptionListener, options?: SubscriptionOptionsV2): SubscriptionListener;
 
     send(modelUri: string, message: ModelServerMessage): void;
     unsubscribe(modelUri: string): void;

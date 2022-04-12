@@ -10,6 +10,7 @@
  *******************************************************************************/
 import { ModelServerClient, SubscriptionOptions } from '@eclipse-emfcloud/modelserver-client';
 import { decorate, inject, injectable, optional } from '@theia/core/shared/inversify';
+import { CancellationToken } from 'vscode-jsonrpc';
 
 import { ModelServerFrontendClient, TheiaModelServerClient } from '../common';
 import { DEFAULT_LAUNCH_OPTIONS, LaunchOptions } from './launch-options';
@@ -36,6 +37,11 @@ export class TheiaBackendModelServerClient extends ModelServerClient implements 
     }
 
     subscribe(modeluri: string, options: SubscriptionOptions = {}): void {
+        // Handle optional arguments finding the RPC cancellation token in their place
+        if (CancellationToken.is(options)) {
+            options = {};
+        }
+
         if (!options.listener) {
             options.listener = this.subscriptionClient;
         }
