@@ -5,7 +5,7 @@
     "outDir": "lib",
     "reactNamespace": "JSX",
     "baseUrl": "src",
-    "types": ["node", "reflect-metadata","mocha", "chai"],
+    "types": ["node", "reflect-metadata", "mocha", "chai"],
     "esModuleInterop": true
   },
   "include": ["src"]
