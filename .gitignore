@@ -10,3 +10,6 @@ examples/coffee-theia/build/*\.jar
 plugins
 
 .temp
+
+**/mocha-jenkins-report.xml
+**/eslint.xml

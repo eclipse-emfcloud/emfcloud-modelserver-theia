@@ -51,7 +51,6 @@
     "typescript": "^3.9.2",
     "@types/moxios": "^0.4.14",
     "moxios": "^0.4.0",
-    "babel-register": "^6.26.0",
     "ignore-styles": "^5.0.1"
   },
   "scripts": {
@@ -61,6 +60,7 @@
     "lint": "eslint --ext .ts,.tsx ./src",
     "lint:fix": "eslint --fix --ext .ts,.tsx ./src",
     "watch": "tsc -w",
-    "test": "mocha --config ../../configs/.mocharc.json \"./src/**/*.spec.?(ts|tsx)\""
+    "test": "mocha --config ../../configs/.mocharc.json",
+    "test:ci": "mocha --config ../../configs/.mocharc.ci.json"
   }
 }
