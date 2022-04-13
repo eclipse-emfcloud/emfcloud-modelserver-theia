@@ -43,20 +43,20 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run current test",
+      "name": "Debug current test",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": ["--config", "${workspaceFolder}/configs/.mocharc.json", "${file}"],
+      "args": ["--config", "${workspaceFolder}/configs/.mocharc.debug.json", "${file}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Run all tests",
+      "name": "Debug all tests",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": [
         "--config",
-        "${workspaceFolder}/configs/.mocharc.json",
+        "${workspaceFolder}/configs/.mocharc.debug.json",
         "--no-timeouts",
         "--extension",
         "spec.ts",
@@ -72,11 +72,11 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run all unit tests",
+      "name": "Debug all unit tests",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": [
         "--config",
-        "${workspaceFolder}/configs/.mocharc.json",
+        "${workspaceFolder}/configs/.mocharc.debug.json",
         "--no-timeouts",
         "--extension",
         "spec.ts",

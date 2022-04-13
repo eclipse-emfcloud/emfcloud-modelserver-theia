@@ -4,8 +4,5 @@
   "reporter": "spec",
   "color": true,
   "watch-files": ["*.ts", "*.tsx"],
-  "timeout": 2000,
-  "extension": ["ts"],
-  "recursive": true,
-  "spec": ["**/src/**/*.spec.ts"]
+  "timeout": 2000
 }

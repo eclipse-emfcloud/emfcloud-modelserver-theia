@@ -22,18 +22,10 @@ spec:
     - mountPath: "/.yarn"
       name: "yarn-global"
       readOnly: false
-    - name: global-cache
-      mountPath: /.cache     
-    - name: global-npm
-      mountPath: /.npm      
   volumes:
   - name: "jenkins-home"
     emptyDir: {}
   - name: "yarn-global"
-    emptyDir: {}
-  - name: global-cache
-    emptyDir: {}
-  - name: global-npm
     emptyDir: {}
 """
 
@@ -58,7 +50,30 @@ pipeline {
         stage('Build package') {
             steps {
                 container('node') {
-                    sh "yarn install --ignore-engines"
+                    timeout(30) {
+                        sh "rm -rf ${YARN_CACHE_FOLDER}"
+                        sh "yarn --ignore-engines --unsafe-perm"
+                    }
+                }
+            }
+        }
+
+        stage('Codechecks ESLint') {
+            steps {
+                container('node') {
+                    timeout(30) {
+                        sh "yarn lint -o eslint.xml -f checkstyle"
+                    }
+                }
+            }
+        }
+
+        stage('Run tests') {
+            steps {
+                container('node') {
+                    timeout(30) {
+                        sh "yarn test:ci"
+                    }
                 }
             }
         }
@@ -67,6 +82,19 @@ pipeline {
             when { branch 'master' }
             steps {
                 build job: 'deploy-emfcloud-modelserver-theia-npm', wait: false
+            }
+        }
+    }
+
+    post {
+        always {
+            // Record & publish ESLint issues
+            recordIssues enabledForFailure: true, publishAllIssues: true, aggregatingResults: true, 
+            tools: [esLint(pattern: 'node_modules/**/*/eslint.xml')], 
+            qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+
+            withChecks('Tests') {
+                junit 'node_modules/**/mocha-jenkins-report.xml'
             }
         }
     }

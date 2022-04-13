@@ -7,11 +7,12 @@
   },
   "scripts": {
     "prepare": "lerna run prepare",
-    "lint": "lerna run lint",
+    "lint": "lerna run lint --",
     "lint:fix": "lerna run lint:fix",
     "rebuild:browser": "theia rebuild:browser",
     "watch": "lerna run --parallel watch",
     "test": "lerna run test",
+    "test:ci": "export JUNIT_REPORT_PATH=./mocha-jenkins-report.xml && lerna run test:ci",
     "publish": "yarn && yarn publish:latest",
     "publish:latest": "lerna publish",
     "publish:next": "lerna publish --exact --canary=next --npm-tag=next --yes",

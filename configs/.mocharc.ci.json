@@ -1,11 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/mocharc",
   "require": ["ts-node/register", "reflect-metadata/Reflect", "ignore-styles"],
-  "reporter": "spec",
+  "reporter": "mocha-jenkins-reporter",
   "color": true,
   "watch-files": ["*.ts", "*.tsx"],
   "timeout": 2000,
   "extension": ["ts"],
   "recursive": true,
-  "spec": ["**/src/**/*.spec.ts"]
+  "spec": ["**/src/**/*.spec.ts"],
+  "ignore": ["**/src/**/*integration.spec.ts"]
 }
