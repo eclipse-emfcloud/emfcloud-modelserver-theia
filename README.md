@@ -10,7 +10,7 @@ If you have questions, contact us on our [discussions page](https://github.com/e
 
 ## Available via NPM ![build-status-server](https://img.shields.io/jenkins/build?jobUrl=https://ci.eclipse.org/emfcloud/job/deploy-emfcloud-modelserver-theia-npm/&label=publish)
 
-- <i>Snapshots: </i> https://www.npmjs.com/package/@eclipse-emfcloud/modelserver-theia
+- _Snapshots:_ <https://www.npmjs.com/package/@eclipse-emfcloud/modelserver-theia>
 
 ## Project Structure
 
@@ -23,8 +23,8 @@ This project provides a Theia integration for the Model Server as Typescript API
 
 This project relies on the following projects:
 
-- https://github.com/eclipse-emfcloud/emfcloud-modelserver
-- https://github.com/eclipse-theia/theia
+- <https://github.com/eclipse-emfcloud/emfcloud-modelserver>
+- <https://github.com/eclipse-theia/theia>
 
 ## Prerequisites
 
@@ -47,9 +47,10 @@ Clone this repository and build all packages via the VSCode task `Build all pack
 
     yarn install
 
-> VSCode tasks can be accessed via via menu *Terminal > Run Task...* or shortcut <kbd>Ctrl</kbd>+<kbd>T</kbd>.
+> VSCode tasks can be accessed via via menu _Terminal > Run Task..._ or shortcut <kbd>Ctrl</kbd>+<kbd>T</kbd>.
 
-Next, if you pre-built version of the Model Server you can download it via the following command. If you run a Model Server instance already, this step can be skipped.
+Next, if you pre-built version of the Model Server you can download it via the following command or the VSCode Task `Download latest Model Server standalone JAR`.
+If you run a Model Server instance already, this step can be skipped.
 
     yarn download:server
 
@@ -67,4 +68,4 @@ Start watching all packages via the VSCode task `Watch all packages` or via comm
 
     yarn watch
 
-Launch the `Start Browser Backend` and `Launch Browser Frontend` configurations from the *Run* view in VSCode.
+Launch the `Start Browser Backend` and `Launch Browser Frontend` configurations from the _Run_ view in VSCode.

@@ -42,5 +42,10 @@
   },
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "markdownlint.config": {
+    "no-inline-html": {
+      "allowed_elements": ["br", "details", "kbd", "summary"]
+    }
   }
 }

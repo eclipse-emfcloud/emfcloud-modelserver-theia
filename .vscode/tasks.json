@@ -48,6 +48,17 @@
         "panel": "new"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Download latest Model Server standalone JAR",
+      "type": "shell",
+      "group": "build",
+      "command": "yarn download:server",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
     }
   ]
 }
