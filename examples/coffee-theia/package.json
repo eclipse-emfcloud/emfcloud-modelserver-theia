@@ -32,11 +32,14 @@
     "@theia/workspace": "^1.0.0",
     "@eclipse-emfcloud/modelserver-theia": "0.7.0"
   },
+  "devDependencies": {
+    "mvn-artifact-download": "5.1.0"
+  },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
     "build": "tsc && yarn run lint",
-    "download:server": "cd ./scripts && ./download-server.sh",
+    "download:server": "ts-node ./scripts/download.ts",
     "lint": "eslint -c ../../.eslintrc.js --ext .ts ./src",
     "watch": "tsc -w"
   },
