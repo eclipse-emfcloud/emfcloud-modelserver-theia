@@ -55,11 +55,24 @@ export class DefaultModelServerLauncher implements ModelServerLauncher, BackendA
 
     protected doStartServer(): void {
         // Note that the existence of the jarPath was previously checked
-        let args = ['-jar', this.launchOptions.jarPath!, '--port', `${this.launchOptions.serverPort}`];
+        let args = ['-jar', this.launchOptions.jarPath!, '--port', `${this.resolveJavaServerPort(this.launchOptions)}`];
+        if (this.launchOptions.vmArgs) {
+            args = [...this.launchOptions.vmArgs, ...args];
+        }
         if (this.launchOptions.additionalArgs) {
             args = [...args, ...this.launchOptions.additionalArgs];
         }
         this.spawnProcessAsync('java', args);
+    }
+
+    /**
+     * Resolve the TCP port number that the Java server should be configured to listen on.
+     *
+     * @param options the launch options
+     * @returns the most appropriate port number to configure the Java server process to listen on
+     */
+    protected resolveJavaServerPort(options: LaunchOptions): number {
+        return options.serverPort ?? DEFAULT_LAUNCH_OPTIONS.serverPort;
     }
 
     protected validateLaunch(): boolean {
@@ -132,15 +145,23 @@ export class DefaultModelServerNodeLauncher extends DefaultModelServerLauncher {
     }
 
     protected doStartServer(): void {
-        // Launch the Java server
+        this.startJavaServer();
+        this.startNodeServer();
+    }
+
+    protected startJavaServer(): void {
+        // Launch the Java server as per superclass behavior
         super.doStartServer();
+    }
 
-        // Then launch the Node server
+    protected resolveJavaServerPort(options: LaunchOptions): number {
+        return this.resolveUpstreamPort(options);
+    }
 
+    protected startNodeServer(): void {
         // Note that validation previously asserted the existence of the `modelServerNode` property
-        const upstreamPort =
-            this.launchOptions.modelServerNode!.upstreamPort ?? DEFAULT_MODELSERVER_NODE_LAUNCH_OPTIONS.modelServerNode.upstreamPort;
-        const port = this.launchOptions.serverPort;
+        const upstreamPort = this.resolveUpstreamPort(this.launchOptions);
+        const port = this.resolveNodeServerPort(this.launchOptions);
 
         // Note that the existence of the jsPath was previously checked
         let args = [this.launchOptions.modelServerNode!.jsPath!, '--port', `${port}`, '--upstream', `${upstreamPort}`];
@@ -148,5 +169,26 @@ export class DefaultModelServerNodeLauncher extends DefaultModelServerLauncher {
             args = [...args, ...this.launchOptions.modelServerNode.additionalArgs];
         }
         this.spawnProcessAsync('node', args);
+    }
+
+    /**
+     * Resolve the TCP port number that the Node server should be configured to address its upstream Java server.
+     *
+     * @param options the launch options
+     * @returns the most appropriate port number to configure the Node server process to connect to for the upstream Java server
+     */
+    protected resolveUpstreamPort(options: LaunchOptions): number {
+        // Note that validation previously asserted the existence of the `modelServerNode` property
+        return options.modelServerNode!.upstreamPort ?? DEFAULT_MODELSERVER_NODE_LAUNCH_OPTIONS.modelServerNode.upstreamPort;
+    }
+
+    /**
+     * Resolve the TCP port number that the Node server should be configured to listen on.
+     *
+     * @param options the launch options
+     * @returns the most appropriate port number to configure the Node server process to listen on
+     */
+    protected resolveNodeServerPort(options: LaunchOptions): number {
+        return options.serverPort ?? DEFAULT_MODELSERVER_NODE_LAUNCH_OPTIONS.serverPort;
     }
 }
