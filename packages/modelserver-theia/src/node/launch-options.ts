@@ -15,7 +15,14 @@ export interface LaunchOptions {
     serverPort: number;
     hostname: string;
     jarPath?: string;
+    /**
+     * Additional arguments, besides those implied by other options, passed to server main entrypoint.
+     */
     additionalArgs?: string[];
+    /**
+     * Arguments passed to the Java Virtual Machine, not to the server application `main` entrypoint.
+     */
+    vmArgs?: string[];
 
     /**
      * For a configuration including the `modelserver-node`, launch options
