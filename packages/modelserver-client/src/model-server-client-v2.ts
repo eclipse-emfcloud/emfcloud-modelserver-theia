@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { Operation } from 'fast-json-patch';
+import { deepClone, Operation } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
 import { ModelServerCommand } from './model/command-model';
@@ -228,6 +228,14 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
                 type: 'modelserver.patch',
                 data: fullPatch
             };
+            if (fullPatch.length === 0) {
+                // No-op
+                return Promise.resolve({
+                    success: true,
+                    patchModel: (oldModel, copy, _modelUri) => (copy ? deepClone(oldModel) : oldModel),
+                    patch: []
+                });
+            }
         }
         return this.process(
             this.restClient.patch(ModelServerPaths.MODEL_CRUD, encodeRequestBody(this.defaultFormat)(patchMessage), {
@@ -257,7 +265,7 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
             const errorMsg = `${modeluri} : Cannot open new socket, already subscribed!'`;
             console.warn(errorMsg);
             if (options.errorWhenUnsuccessful) {
-                throw new Error('errorMsg');
+                throw new Error(errorMsg);
             }
         }
         const path = this.createSubscriptionPath(modeluri, options);
