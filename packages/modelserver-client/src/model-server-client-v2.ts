@@ -31,7 +31,7 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
     protected defaultFormat: Format = FORMAT_JSON_V2;
 
     initialize(baseUrl: string, defaultFormat: Format = FORMAT_JSON_V2): void | Promise<void> {
-        this._baseUrl = baseUrl;
+        this._baseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
         this.defaultFormat = defaultFormat;
         this.restClient = axios.create(this.getAxiosConfig(baseUrl));
     }

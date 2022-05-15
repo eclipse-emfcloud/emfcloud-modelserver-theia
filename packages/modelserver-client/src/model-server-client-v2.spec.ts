@@ -38,6 +38,18 @@ describe('tests for ModelServerClientV2', () => {
         const axios = client['restClient'];
         expect(axios.defaults.baseURL).to.be.equal(baseUrl);
     });
+    it('test createSubscriptionPath without trailing slash', () => {
+        client = new ModelServerClientV2();
+        client.initialize(baseUrl);
+        const subscriptionPath = client['createSubscriptionPath']('foo', {});
+        expect(subscriptionPath).to.be.equal(`ws://localhost:8081/api/v2/subscribe?modeluri=foo&format=json-v2`);
+    });
+    it('test createSubscriptionPath with trailing slash', () => {
+        client = new ModelServerClientV2();
+        client.initialize(`${baseUrl}/`);
+        const subscriptionPath = client['createSubscriptionPath']('foo', {});
+        expect(subscriptionPath).to.be.equal(`ws://localhost:8081/api/v2/subscribe?modeluri=foo&format=json-v2`);
+    });
 
     describe('test requests', () => {
         it('getAll', done => {

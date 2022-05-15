@@ -38,6 +38,19 @@ describe('tests for ModelServerClient', () => {
         expect(axios.defaults.baseURL).to.be.equal(baseUrl);
     });
 
+    it('test createSubscriptionPath without trailing slash', () => {
+        client = new ModelServerClient();
+        client.initialize(baseUrl);
+        const subscriptionPath = client['createSubscriptionPath']('foo', {});
+        expect(subscriptionPath).to.be.equal(`ws://localhost:8081/api/v1/subscribe?modeluri=foo`);
+    });
+    it('test createSubscriptionPath with trailing slash', () => {
+        client = new ModelServerClient();
+        client.initialize(`${baseUrl}/`);
+        const subscriptionPath = client['createSubscriptionPath']('foo', {});
+        expect(subscriptionPath).to.be.equal(`ws://localhost:8081/api/v1/subscribe?modeluri=foo`);
+    });
+
     describe('test requests', () => {
         it('getAll', done => {
             client.getAll();

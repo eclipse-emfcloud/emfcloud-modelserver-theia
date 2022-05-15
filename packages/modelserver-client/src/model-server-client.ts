@@ -29,7 +29,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     protected defaultFormat = 'json';
 
     initialize(baseUrl: string): void | Promise<void> {
-        this._baseUrl = baseUrl;
+        this._baseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
         this.restClient = axios.create(this.getAxisConfig(baseUrl));
     }
 
@@ -218,7 +218,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         }
         Object.entries(paramOptions).forEach(entry => queryParams.append(entry[0], entry[1]));
         queryParams.delete('errorWhenUnsuccessful');
-        return `${this._baseUrl}${ModelServerPaths.SUBSCRIPTION}?${queryParams.toString()}`.replace(/^(http|https):\/\//i, 'ws://');
+        return `${this._baseUrl}/${ModelServerPaths.SUBSCRIPTION}?${queryParams.toString()}`.replace(/^(http|https):\/\//i, 'ws://');
     }
 
     protected doSubscribe(listener: SubscriptionListener, modelUri: string, path: string): void {
