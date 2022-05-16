@@ -5,5 +5,7 @@
   "color": true,
   "watch-files": ["*.ts", "*.tsx"],
   "timeout": 0,
-  "extension": ["spec.ts"]
+  "extension": ["spec.ts"],
+  "recursive": true,
+  "spec": ["packages/**/src/**/*.spec.ts"]
 }
