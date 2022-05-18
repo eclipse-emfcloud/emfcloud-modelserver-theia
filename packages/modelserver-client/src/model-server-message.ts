@@ -9,10 +9,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 import * as jsonpatch from 'fast-json-patch';
-import { deepClone } from 'fast-json-patch';
+import { deepClone, Operation } from 'fast-json-patch';
 
 import { ModelServerElement } from './model/base-model';
-import { ModelUpdateResult } from './model-server-client-api-v2';
+import { ModelPatch, ModelUpdateResult } from './model-server-client-api-v2';
 import { Operations } from './utils/patch-utils';
 import * as Type from './utils/type-util';
 
@@ -199,14 +199,19 @@ export namespace MessageDataMapper {
         if (isSuccess(message)) {
             const data = message.data as any;
             const patch = data ? data.patch : undefined;
-            if (patch && Operations.isPatch(patch)) {
+            const allPatches = data ? data.allPatches : undefined;
+            if (patch || allPatches) {
                 return {
                     success: isSuccess(message),
                     patch,
-                    patchModel: (oldModel, copy) => {
+                    patchModel: (oldModel, copy, modelUri) => {
                         const modelToPatch = copy ? deepClone(oldModel) : oldModel;
-                        return jsonpatch.applyPatch(modelToPatch, patch).newDocument as ModelServerElement;
-                    }
+                        const patchToApply = modelUri ? getPatch(allPatches, modelUri) : Operations.isPatch(patch) ? patch : undefined;
+                        return patchToApply
+                            ? (jsonpatch.applyPatch(modelToPatch, patchToApply).newDocument as ModelServerElement)
+                            : modelToPatch;
+                    },
+                    allPatches
                 };
             } else {
                 return { success: true };
@@ -214,5 +219,9 @@ export namespace MessageDataMapper {
         } else {
             return { success: false };
         }
+    }
+
+    function getPatch(patches: ModelPatch[], modelUri: string): Operation[] | undefined {
+        return patches.find(mp => mp.modelUri === modelUri)?.patch;
     }
 }

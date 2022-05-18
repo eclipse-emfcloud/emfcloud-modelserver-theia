@@ -132,6 +132,21 @@ export namespace ModelServerClientApiV2 {
 }
 
 /**
+ * A patch affecting a specific model.
+ */
+export interface ModelPatch {
+    /**
+     * The uri of the patched model.
+     */
+    modelUri: string;
+
+    /**
+     * The patch describing the changes applied to the model.
+     */
+    patch: Operation[];
+}
+
+/**
  * Result sent to client after requesting a model update.
  */
 export interface ModelUpdateResult {
@@ -149,13 +164,24 @@ export interface ModelUpdateResult {
      * @param copy by default, the patch will be directly applied to the oldModel, modifying
      * it in-place. If copy is true, the patch will be applied on a copy of the model, leaving
      * the original model unchanged.
+     * @param modelUri the uri of the model to patch. This can be used when the model is split in multiple
+     * resources, to identify the patch to apply. The modelUri should correspond to the oldModel object.
+     * It can be omitted when patching the main model (or in single-model cases).
      * @return the patched model.
      */
-    patchModel?(oldModel: ModelServerElement, copy?: boolean): ModelServerElement;
+    patchModel?(oldModel: ModelServerElement, copy?: boolean, modelUri?: string): ModelServerElement;
 
     /**
      * The Json Patch describing the changes that were applied to the model. Only present if
      * the edit request was successful.
      */
     patch?: Operation[];
+
+    /**
+     * The list of Json Patches describing the changes that were applied to the models. Only present if
+     * the edit request was successful.
+     *
+     * The list contains one entry per modified model. Unmodified models will not contain any entry.
+     */
+    allPatches?: ModelPatch[];
 }
