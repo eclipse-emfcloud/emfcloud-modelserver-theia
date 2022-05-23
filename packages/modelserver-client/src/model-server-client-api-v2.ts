@@ -123,7 +123,7 @@ export interface ModelServerClientApiV2 {
 
     ping(): Promise<boolean>;
 
-    edit(modeluri: string, patch: PatchOrCommand, format?: Format): Promise<ModelUpdateResult>;
+    edit(modeluri: string, patchOrCommand: PatchOrCommand, format?: Format): Promise<ModelUpdateResult>;
 
     undo(modeluri: string): Promise<ModelUpdateResult>;
 
