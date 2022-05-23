@@ -32,7 +32,7 @@ describe('Integration tests for ModelServerClientV2', () => {
     let client: ModelServerClientV2;
     const baseUrl = `http://localhost:8081${ModelServerClientApiV2.API_ENDPOINT}`;
 
-    const testUndoRedo: (modeluri: string, originalModel: any, patchedModel: any) => void = async (
+    const testUndoRedo: (modeluri: string, originalModel: any, patchedModel: any) => Promise<void> = async (
         modeluri,
         originalModel,
         patchedModel
@@ -371,6 +371,42 @@ describe('Integration tests for ModelServerClientV2', () => {
             const patch = jsonpatch.compare(machine, patchedMachine);
 
             const result = await client.edit(modeluri, patch);
+            expect(result.success).to.be.true;
+
+            expect(result.patch).to.not.be.undefined;
+            expect(result.allPatches).to.not.be.undefined;
+            expect(result.allPatches).to.be.an('array').of.length(1);
+
+            // Patch the main resource
+            const updatedMachineMainPatch = result.patchModel!(machine, true);
+            expect(patchedMachine).to.deep.equal(updatedMachineMainPatch);
+
+            // Patch the first resource
+            const updatedMachineFirstPatch = result.patchModel!(machine, true, result.allPatches![0].modelUri);
+            expect(patchedMachine).to.deep.equal(updatedMachineFirstPatch);
+
+            await testUndoRedo(modeluri, machine, updatedMachineFirstPatch);
+        });
+
+        it('test model patches', async () => {
+            const modeluri = 'SuperBrewer3000.coffee';
+            const newName = 'Super Brewer 6000';
+            const machine = await client.get(modeluri, ModelServerObjectV2.is);
+
+            const patchedMachine = deepClone(machine);
+
+            // Directly change the model
+            patchedMachine.name = newName;
+            patchedMachine.children[1].processor.clockSpeed = 6;
+
+            // Generate patch by diffing the original model and the patched one
+            const patch = jsonpatch.compare(machine, patchedMachine);
+            const modelPatch = {
+                modelUri: modeluri,
+                patch
+            };
+
+            const result = await client.edit(modeluri, modelPatch);
             expect(result.success).to.be.true;
 
             expect(result.patch).to.not.be.undefined;

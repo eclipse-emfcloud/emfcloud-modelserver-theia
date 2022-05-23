@@ -11,17 +11,17 @@
 import {
     AddCommand,
     CompoundCommand,
+    Format,
     ModelServerClientV2,
     ModelServerCommand,
     ModelUpdateResult,
-    Operations,
+    PatchOrCommand,
     RemoveCommand,
     SetCommand,
     SubscriptionListener,
     SubscriptionOptionsV2
 } from '@eclipse-emfcloud/modelserver-client';
 import { decorate, inject, injectable, optional } from '@theia/core/shared/inversify';
-import { Operation } from 'fast-json-patch';
 import { CancellationToken } from 'vscode-jsonrpc';
 
 import { ModelServerFrontendClient, TheiaModelServerClientV2 } from '../common';
@@ -88,14 +88,11 @@ export class TheiaBackendModelServerClientV2 extends ModelServerClientV2 impleme
         this.subscribe(modeluri, undefined, options);
     }
 
-    edit(modeluri: string, patchOrCommand: Operation | Operation[] | ModelServerCommand): Promise<ModelUpdateResult> {
+    edit(modeluri: string, patchOrCommand: PatchOrCommand, format?: Format): Promise<ModelUpdateResult> {
         if (ModelServerCommand.is(patchOrCommand)) {
             return super.edit(modeluri, ensureCommandPrototype(patchOrCommand));
         }
-        if (Operations.isOperation(patchOrCommand)) {
-            return super.edit(modeluri, patchOrCommand);
-        }
-        return super.edit(modeluri, patchOrCommand);
+        return super.edit(modeluri, patchOrCommand, format);
     }
 }
 

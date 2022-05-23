@@ -9,13 +9,13 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { deepClone, Operation } from 'fast-json-patch';
+import { deepClone } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
 
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
 import { ModelServerError, ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
-import { Format, FORMAT_JSON_V2, ModelServerClientApiV2, ModelUpdateResult } from './model-server-client-api-v2';
+import { Format, FORMAT_JSON_V2, ModelServerClientApiV2, ModelUpdateResult, PatchOrCommand } from './model-server-client-api-v2';
 import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
 import { SubscriptionListener } from './subscription-listener';
@@ -212,10 +212,7 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         return this.process(this.restClient.get(ModelServerPaths.SERVER_PING), MessageDataMapper.isSuccess);
     }
 
-    edit(modeluri: string, patch: Operation): Promise<ModelUpdateResult>;
-    edit(modeluri: string, patch: Operation[]): Promise<ModelUpdateResult>;
-    edit(modeluri: string, command: ModelServerCommand): Promise<ModelUpdateResult>;
-    edit(modeluri: string, patchOrCommand: Operation | Operation[] | ModelServerCommand): Promise<ModelUpdateResult> {
+    edit(modeluri: string, patchOrCommand: PatchOrCommand, format = this.defaultFormat): Promise<ModelUpdateResult> {
         let patchMessage: any;
         if (patchOrCommand instanceof ModelServerCommand) {
             patchMessage = {
@@ -223,6 +220,7 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
                 data: patchOrCommand
             };
         } else {
+            // Operation[] and ModelPatch[] are treated in the same way; we don't need to distinguish both cases
             const fullPatch = Array.isArray(patchOrCommand) ? patchOrCommand : [patchOrCommand];
             patchMessage = {
                 type: 'modelserver.patch',
@@ -238,8 +236,8 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
             }
         }
         return this.process(
-            this.restClient.patch(ModelServerPaths.MODEL_CRUD, encodeRequestBody(this.defaultFormat)(patchMessage), {
-                params: { modeluri, format: this.defaultFormat }
+            this.restClient.patch(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(patchMessage), {
+                params: { modeluri, format: format }
             }),
             MessageDataMapper.patchModel
         );

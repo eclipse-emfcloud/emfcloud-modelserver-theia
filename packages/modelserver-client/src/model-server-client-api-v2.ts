@@ -54,6 +54,16 @@ export interface SubscriptionOptionsV2 extends SubscriptionOptions {
 }
 
 /**
+ * A union type that represents all Patches or Commands supported by the model server:
+ * - Operation
+ * - Operation[] (Json Patch)
+ * - ModelPatch
+ * - ModelPatch[]
+ * - ModelServerCommand
+ */
+export type PatchOrCommand = Operation | Operation[] | ModelPatch | ModelPatch[] | ModelServerCommand;
+
+/**
  * Basic client API to interact with a model server that conforms to the Modelserver API Version 2.
  */
 export interface ModelServerClientApiV2 {
@@ -113,8 +123,7 @@ export interface ModelServerClientApiV2 {
 
     ping(): Promise<boolean>;
 
-    edit(modeluri: string, patch: Operation | Operation[], format?: Format): Promise<ModelUpdateResult>;
-    edit(modeluri: string, command: ModelServerCommand, format?: Format): Promise<ModelUpdateResult>;
+    edit(modeluri: string, patchOrCommand: PatchOrCommand, format?: Format): Promise<ModelUpdateResult>;
 
     undo(modeluri: string): Promise<ModelUpdateResult>;
 
