@@ -51,8 +51,10 @@ pipeline {
             steps {
                 container('node') {
                     timeout(30) {
-                        sh "rm -rf ${YARN_CACHE_FOLDER}"
-                        sh "yarn --ignore-engines --unsafe-perm"
+                        withCredentials([string(credentialsId: "github-bot-token", variable: 'GITHUB_TOKEN')]) {
+                            sh "rm -rf ${YARN_CACHE_FOLDER}"
+                            sh "yarn --ignore-engines --unsafe-perm"
+                        }
                     }
                 }
             }
