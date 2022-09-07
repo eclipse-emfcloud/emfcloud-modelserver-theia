@@ -116,7 +116,7 @@ function ensureCommandPrototype<T extends ModelServerCommand>(command: T): T {
         Object.setPrototypeOf(command, CompoundCommand.prototype);
         (command as CompoundCommand).commands.forEach(ensureCommandPrototype);
     }
-    return command;
+    return Object.setPrototypeOf(command, ModelServerCommand.prototype);
 }
 
 /**
