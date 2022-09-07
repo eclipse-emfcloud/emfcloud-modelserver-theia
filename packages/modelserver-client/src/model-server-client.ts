@@ -216,7 +216,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
         if (!options.format) {
             options.format = this.defaultFormat;
         }
-        Object.entries(paramOptions).forEach(entry => queryParams.append(entry[0], entry[1]));
+        Object.entries(paramOptions).forEach(entry => queryParams.append(entry[0], entry[1].toString()));
         queryParams.delete('errorWhenUnsuccessful');
         return `${this._baseUrl}/${ModelServerPaths.SUBSCRIPTION}?${queryParams.toString()}`.replace(/^(http|https):\/\//i, 'ws://');
     }

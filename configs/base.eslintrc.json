@@ -8,14 +8,7 @@
       "jsx": true
     }
   },
-  "plugins": [
-    "@typescript-eslint",
-    "header",
-    "import",
-    "simple-import-sort",
-    "no-null",
-    "prettier"
-  ],
+  "plugins": ["@typescript-eslint", "header", "import", "simple-import-sort", "no-null", "prettier"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
@@ -23,8 +16,6 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
-    "./errors.eslintrc.json",
-    "./warnings.eslintrc.json",
     "prettier"
   ],
   "env": {
@@ -32,10 +23,7 @@
     "mocha": true,
     "es6": true
   },
-  "ignorePatterns": [
-    "node_modules",
-    "*.d.ts"
-  ],
+  "ignorePatterns": ["node_modules", "*.d.ts"],
   "rules": {
     "prettier/prettier": [
       "error",
