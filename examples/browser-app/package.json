@@ -38,8 +38,8 @@
   },
   "theiaPluginsDir": "plugins",
   "theiaPlugins": {
-    "vscode-builtin-json": "https://open-vsx.org/api/vscode/json/1.46.1/file/vscode.json-1.46.1.vsix",
-    "vscode-builtin-json-language-features": "https://open-vsx.org/api/vscode/json-language-features/1.46.1/file/vscode.json-language-features-1.46.1.vsix",
-    "vscode-builtin-xml": "https://open-vsx.org/api/vscode/xml/1.44.2/file/vscode.xml-1.44.2.vsix"
+    "vscode-builtin-json": "https://open-vsx.org/api/vscode/json/1.62.3/file/vscode.json-1.62.3.vsix",
+    "vscode-builtin-json-language-features": "https://open-vsx.org/api/vscode/json-language-features/1.62.3/file/vscode.json-language-features-1.62.3.vsix",
+    "vscode-builtin-xml": "https://open-vsx.org/api/vscode/xml/1.62.3/file/vscode.xml-1.62.3.vsix"
   }
 }

@@ -33,7 +33,9 @@
     "@eclipse-emfcloud/modelserver-theia": "0.7.0"
   },
   "devDependencies": {
-    "mvn-artifact-download": "5.1.0"
+    "mvn-artifact-download": "5.1.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.6.3"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",

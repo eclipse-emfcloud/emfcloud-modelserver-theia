@@ -42,13 +42,13 @@ describe('tests for ModelServerClientV2', () => {
         client = new ModelServerClientV2();
         client.initialize(baseUrl);
         const subscriptionPath = client['createSubscriptionPath']('foo', {});
-        expect(subscriptionPath).to.be.equal(`ws://localhost:8081/api/v2/subscribe?modeluri=foo&format=json-v2`);
+        expect(subscriptionPath).to.be.equal('ws://localhost:8081/api/v2/subscribe?modeluri=foo&format=json-v2');
     });
     it('test createSubscriptionPath with trailing slash', () => {
         client = new ModelServerClientV2();
         client.initialize(`${baseUrl}/`);
         const subscriptionPath = client['createSubscriptionPath']('foo', {});
-        expect(subscriptionPath).to.be.equal(`ws://localhost:8081/api/v2/subscribe?modeluri=foo&format=json-v2`);
+        expect(subscriptionPath).to.be.equal('ws://localhost:8081/api/v2/subscribe?modeluri=foo&format=json-v2');
     });
 
     describe('test requests', () => {

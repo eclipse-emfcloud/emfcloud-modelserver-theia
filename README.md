@@ -30,12 +30,12 @@ This project relies on the following projects:
 
 Install [nvm](https://github.com/creationix/nvm#install-script).
 
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.5/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.39.1/install.sh | bash
 
 Install npm and node.
 
-    nvm install 10.11.0
-    nvm use 10.11.0
+    nvm install 16.15.1
+    nvm use 16.15.1
 
 Install yarn.
 
