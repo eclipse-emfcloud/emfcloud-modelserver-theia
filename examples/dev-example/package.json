@@ -10,7 +10,7 @@
   ],
   "homepage": "https://www.eclipse.org/emfcloud/",
   "bugs": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia/issues",
-  "version": "0.7.0",
+  "version": "0.8.0-theia-cr01",
   "files": [
     "lib",
     "src"
@@ -27,10 +27,10 @@
     "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
   },
   "dependencies": {
+    "@eclipse-emfcloud/modelserver-markers-theia": "^0.8.0-theia-cr01",
+    "@modelserver/coffee-theia": "^0.8.0-theia-cr01",
     "@theia/core": "^1.0.0",
-    "@theia/workspace": "^1.0.0",
-    "@modelserver/coffee-theia": "0.7.0",
-    "@eclipse-emfcloud/modelserver-markers-theia": "0.7.0"
+    "@theia/workspace": "^1.0.0"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
