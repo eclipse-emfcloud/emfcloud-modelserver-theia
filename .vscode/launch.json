@@ -15,7 +15,7 @@
         "--no-cluster",
         "--root-dir=${workspaceRoot}/examples/workspace",
         "--app-project-path=${workspaceRoot}/examples/browser-app",
-        "--plugins=local-dir:${workspaceRoot}/plugins"
+        "--plugins=local-dir:${workspaceRoot}/examples/browser-app/plugins"
       ],
       "env": {
         "NODE_ENV": "development"
@@ -38,31 +38,23 @@
       "request": "launch",
       "url": "http://localhost:3000/",
       "sourceMaps": true,
-      "webRoot": "${workspaceRoot}"
+      "webRoot": "${workspaceRoot}/examples/browser-app"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Debug current test",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": [
-        "--config",
-        "${workspaceFolder}/configs/.mocharc.debug.json",
-        "--file",
-        "${file}"
-      ],
+      "args": ["--config", "${workspaceFolder}/configs/.mocharc.debug.json", "--file", "${file}"],
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
+      "internalConsoleOptions": "neverOpen"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Debug all tests",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": [
-        "--config",
-        "${workspaceFolder}/configs/.mocharc.debug.all.json"
-      ],
+      "args": ["--config", "${workspaceFolder}/configs/.mocharc.debug.all.json"],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
       },
@@ -74,10 +66,7 @@
       "request": "launch",
       "name": "Debug all unit tests",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": [
-        "--config",
-        "${workspaceFolder}/configs/.mocharc.debug.unit.json"
-      ],
+      "args": ["--config", "${workspaceFolder}/configs/.mocharc.debug.unit.json"],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
       },

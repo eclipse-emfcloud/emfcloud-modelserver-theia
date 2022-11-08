@@ -2,6 +2,7 @@ node_modules
 .browser_modules
 lib
 *.log
+*.log.gz
 examples/*-app/*
 !examples/*-app/package.json
 

@@ -7,21 +7,12 @@
     // Best Practices
     "curly": "error",
     "eol-last": "error",
-    "eqeqeq": [
-      "error",
-      "smart"
-    ],
+    "eqeqeq": ["error", "smart"],
     "guard-for-in": "error",
     "no-caller": "error",
     "no-eval": "error",
     "no-redeclare": "off", // allow same name for Symbol and TS types
-    "no-restricted-imports": [
-      "error",
-      "..",
-      "../index",
-      "../..",
-      "../../index"
-    ],
+    "no-restricted-imports": ["error", "..", "../index", "../..", "../../index"],
     "no-sequences": "error",
     "no-throw-literal": "error",
     "no-unused-expressions": [
@@ -57,19 +48,10 @@
         "asyncArrow": "always"
       }
     ],
-    "one-var": [
-      "error",
-      "never"
-    ],
+    "one-var": ["error", "never"],
     // ECMAScript6
-    "arrow-body-style": [
-      "error",
-      "as-needed"
-    ],
-    "arrow-parens": [
-      "error",
-      "as-needed"
-    ],
+    "arrow-body-style": ["error", "as-needed"],
+    "arrow-parens": ["error", "as-needed"],
     "no-var": "error",
     "prefer-const": [
       "error",
@@ -96,10 +78,7 @@
         "avoidEscape": true
       }
     ],
-    "@typescript-eslint/semi": [
-      "error",
-      "always"
-    ],
+    "@typescript-eslint/semi": ["error", "always"],
     // eslint-plugin-header
     "header/header": [
       2,
@@ -123,14 +102,6 @@
     "import/export": "off", // we have multiple exports due to namespaces, enums and classes that share the same name
     "import/no-deprecated": "error",
     // eslint-plugin-no-null
-    "no-null/no-null": "error",
-    // simple-import/sort
-    "sort-imports": "off",
-    "import/order": "off",
-    "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error",
-    "import/first": "error",
-    "import/newline-after-import": "error",
-    "import/no-duplicates": "error"
+    "no-null/no-null": "error"
   }
 }
