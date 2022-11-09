@@ -8,46 +8,44 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
-import { AnyObject, MessageDataMapper, MessageType, SubscriptionOptions } from '@eclipse-emfcloud/modelserver-client';
-import { TheiaBackendModelServerClient } from '@eclipse-emfcloud/modelserver-theia/lib/node';
+import {
+    AnyObject,
+    MessageDataMapper,
+    MessageType,
+    SubscriptionListener,
+    SubscriptionOptionsV2
+} from '@eclipse-emfcloud/modelserver-client';
+import { TheiaBackendModelServerClientV2 } from '@eclipse-emfcloud/modelserver-theia/lib/node';
 import { injectable } from '@theia/core/shared/inversify';
+import URI from 'urijs';
 
 import { DevModelServerClient } from '../common/dev-model-server-client';
 
 @injectable()
-export class CustomDevModelServerClient extends TheiaBackendModelServerClient implements DevModelServerClient {
+export class CustomDevModelServerClient extends TheiaBackendModelServerClientV2 implements DevModelServerClient {
     private intervalId: NodeJS.Timeout;
 
-    subscribe(modeluri: string, options: SubscriptionOptions = {}): void {
+    subscribe(modeluri: URI, listener?: SubscriptionListener, options: SubscriptionOptionsV2 = {}): SubscriptionListener {
         if (options.timeout) {
             this.setKeepAliveInterval(modeluri, options.timeout);
         }
-        return super.subscribe(modeluri, options);
+        return super.subscribe(modeluri, listener, options);
     }
 
-    private setKeepAliveInterval(modelUri: string, timeout: number): void {
-        if (!this.isSocketOpen(modelUri) && modelUri === 'Coffee.ecore') {
+    private setKeepAliveInterval(modeluri: URI, timeout: number): void {
+        if (!this.isSocketOpen(modeluri) && modeluri.toString() === 'Coffee.ecore') {
             this.intervalId = setInterval(
-                () => this.send(modelUri, { type: MessageType.keepAlive, data: undefined }),
-                timeout > 1000 ? timeout - 1000 : 1
+                () => this.send(modeluri, { type: MessageType.keepAlive, data: '' }),
+                timeout > 1000 ? timeout - 50000 : 1
             );
         }
     }
 
-    unsubscribe(modelUri: string): boolean {
-        const openSocket = this.openSockets.get(modelUri);
-        let success = false;
-        if (openSocket) {
-            openSocket.close();
-            this.openSockets.delete(modelUri);
-            success = true;
-        } else {
-            console.warn(modelUri + ': Cannot unsubscribe, no socket opened!');
-        }
-        if (this.intervalId && modelUri === 'Coffee.ecore') {
+    unsubscribe(modeluri: URI): void {
+        if (this.intervalId && modeluri.toString() === 'Coffee.ecore') {
             clearInterval(this.intervalId);
         }
-        return success;
+        super.unsubscribe(modeluri);
     }
 
     async counter(operation?: 'add' | 'subtract', delta?: number): Promise<AnyObject> {

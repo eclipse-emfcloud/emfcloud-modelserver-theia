@@ -8,11 +8,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
-import { TheiaModelServerClient } from '@eclipse-emfcloud/modelserver-theia';
+import { TheiaModelServerClientV2 } from '@eclipse-emfcloud/modelserver-theia';
 import { ContainerModule } from '@theia/core/shared/inversify';
 
 import { CustomDevModelServerClient } from './model-server-client';
 
 export default new ContainerModule((_bind, _unbind, _isBound, rebind) => {
-    rebind(TheiaModelServerClient).to(CustomDevModelServerClient).inSingletonScope();
+    rebind(TheiaModelServerClientV2).to(CustomDevModelServerClient).inSingletonScope();
 });
