@@ -11,13 +11,14 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { deepClone } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
+import URI from 'urijs';
 
-import { ModelServerCommand } from './model/command-model';
-import { Diagnostic } from './model/diagnostic';
 import { ModelServerError, ServerConfiguration, SubscriptionOptions } from './model-server-client-api-v1';
 import { Format, FORMAT_JSON_V2, ModelServerClientApiV2, ModelUpdateResult, PatchOrCommand } from './model-server-client-api-v2';
 import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { ModelServerPaths } from './model-server-paths';
+import { ModelServerCommand } from './model/command-model';
+import { Diagnostic } from './model/diagnostic';
 import { SubscriptionListener } from './subscription-listener';
 import { AnyObject, asObject, asString, asType, encodeRequestBody, TypeGuard } from './utils/type-util';
 
@@ -27,30 +28,34 @@ import { AnyObject, asObject, asString, asType, encodeRequestBody, TypeGuard } f
 export class ModelServerClientV2 implements ModelServerClientApiV2 {
     protected restClient: AxiosInstance;
     protected openSockets: Map<string, WebSocket> = new Map();
-    protected _baseUrl: string;
+    protected _baseUrl: URI;
     protected defaultFormat: Format = FORMAT_JSON_V2;
 
-    initialize(baseUrl: string, defaultFormat: Format = FORMAT_JSON_V2): void | Promise<void> {
-        this._baseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+    initialize(baseUrl: URI, defaultFormat: Format = FORMAT_JSON_V2): void | Promise<void> {
+        this._baseUrl = baseUrl.clone();
         this.defaultFormat = defaultFormat;
         this.restClient = axios.create(this.getAxiosConfig(baseUrl));
     }
 
-    protected getAxiosConfig(baseURL: string): AxiosRequestConfig | undefined {
-        return { baseURL };
+    protected getAxiosConfig(baseURL: URI): AxiosRequestConfig | undefined {
+        return { baseURL: baseURL.toString() };
     }
 
-    get(modeluri: string, format?: Format): Promise<AnyObject>;
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
-    get<M>(modeluri: string, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
+    get(modeluri: URI, format?: Format): Promise<AnyObject>;
+    get<M>(modeluri: URI, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    get<M>(modeluri: URI, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
         if (typeof formatOrGuard === 'function') {
             const typeGuard = formatOrGuard;
-            return this.process(this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri, format } }), msg =>
-                MessageDataMapper.as(msg, typeGuard)
+            return this.process(
+                this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri: modeluri.toString(), format } }),
+                msg => MessageDataMapper.as(msg, typeGuard)
             );
         }
         format = formatOrGuard ?? this.defaultFormat;
-        return this.process(this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri, format } }), MessageDataMapper.asObject);
+        return this.process(
+            this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { modeluri: modeluri.toString(), format } }),
+            MessageDataMapper.asObject
+        );
     }
 
     getAll(): Promise<Model[]>;
@@ -73,73 +78,78 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         return this.process(this.restClient.get(ModelServerPaths.MODEL_CRUD, { params: { format } }), messageMapper);
     }
 
-    getModelUris(): Promise<string[]> {
-        return this.process(this.restClient.get(ModelServerPaths.MODEL_URIS), MessageDataMapper.asStringArray);
+    getModelUris(): Promise<URI[]> {
+        return this.process(this.restClient.get(ModelServerPaths.MODEL_URIS), MessageDataMapper.asURIArray);
     }
 
-    getElementById(modeluri: string, elementid: string, format?: Format): Promise<AnyObject>;
-    getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>): Promise<M>;
-    getElementById<M>(modeluri: string, elementid: string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
-        format = format ?? this.defaultFormat;
-        if (formatOrGuard) {
-            if (typeof formatOrGuard === 'function') {
-                const typeGuard = formatOrGuard;
-                return this.process(this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementid, format } }), msg =>
-                    MessageDataMapper.as(msg, typeGuard)
-                );
-            }
-            format = formatOrGuard;
-        }
-        return this.process(
-            this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementid, format } }),
-            MessageDataMapper.asObject
-        );
-    }
-
-    getElementByName(modeluri: string, elementname: string, format?: Format): Promise<AnyObject>;
-    getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
-    getElementByName<M>(modeluri: string, elementname: string, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
+    getElementById(modeluri: URI, elementid: string, format?: Format): Promise<AnyObject>;
+    getElementById<M>(modeluri: URI, elementid: string, typeGuard: TypeGuard<M>): Promise<M>;
+    getElementById<M>(modeluri: URI, elementid: string, formatOrGuard?: FormatOrGuard<M>, format?: string): Promise<AnyObject | M> {
         format = format ?? this.defaultFormat;
         if (formatOrGuard) {
             if (typeof formatOrGuard === 'function') {
                 const typeGuard = formatOrGuard;
                 return this.process(
-                    this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementname, format } }),
+                    this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri: modeluri.toString(), elementid, format } }),
                     msg => MessageDataMapper.as(msg, typeGuard)
                 );
             }
             format = formatOrGuard;
         }
         return this.process(
-            this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri, elementname, format } }),
+            this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri: modeluri.toString(), elementid, format } }),
             MessageDataMapper.asObject
         );
     }
 
-    create(modeluri: string, model: AnyObject | string, format?: Format): Promise<AnyObject>;
-    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
-    create<M>(modeluri: string, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
+    getElementByName(modeluri: URI, elementname: string, format?: Format): Promise<AnyObject>;
+    getElementByName<M>(modeluri: URI, elementname: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    getElementByName<M>(modeluri: URI, elementname: string, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
         format = format ?? this.defaultFormat;
         if (formatOrGuard) {
             if (typeof formatOrGuard === 'function') {
                 const typeGuard = formatOrGuard;
                 return this.process(
-                    this.restClient.post(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), { params: { modeluri, format } }),
+                    this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri: modeluri.toString(), elementname, format } }),
                     msg => MessageDataMapper.as(msg, typeGuard)
                 );
             }
             format = formatOrGuard;
         }
         return this.process(
-            this.restClient.post(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), { params: { modeluri, format } }),
+            this.restClient.get(ModelServerPaths.MODEL_ELEMENT, { params: { modeluri: modeluri.toString(), elementname, format } }),
             MessageDataMapper.asObject
         );
     }
 
-    update(modeluri: string, model: AnyObject | string, format?: Format): Promise<AnyObject>;
-    update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    create(modeluri: URI, model: AnyObject | string, format?: Format): Promise<AnyObject>;
+    create<M>(modeluri: URI, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    create<M>(modeluri: URI, model: AnyObject | string, formatOrGuard?: FormatOrGuard<M>, format?: Format): Promise<AnyObject | M> {
+        format = format ?? this.defaultFormat;
+        if (formatOrGuard) {
+            if (typeof formatOrGuard === 'function') {
+                const typeGuard = formatOrGuard;
+                return this.process(
+                    this.restClient.post(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), {
+                        params: { modeluri: modeluri.toString(), format }
+                    }),
+                    msg => MessageDataMapper.as(msg, typeGuard)
+                );
+            }
+            format = formatOrGuard;
+        }
+        return this.process(
+            this.restClient.post(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), {
+                params: { modeluri: modeluri.toString(), format }
+            }),
+            MessageDataMapper.asObject
+        );
+    }
+
+    update(modeluri: URI, model: AnyObject | string, format?: Format): Promise<AnyObject>;
+    update<M>(modeluri: URI, model: string | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
     update<M>(
-        modeluri: string,
+        modeluri: URI,
         model: AnyObject | string,
         formatOrGuard?: FormatOrGuard<M>,
         format?: Format
@@ -149,49 +159,65 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
             if (typeof formatOrGuard === 'function') {
                 const typeGuard = formatOrGuard;
                 return this.process(
-                    this.restClient.put(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), { params: { modeluri, format } }),
+                    this.restClient.put(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), {
+                        params: { modeluri: modeluri.toString(), format }
+                    }),
                     msg => MessageDataMapper.as(msg, typeGuard)
                 );
             }
             format = formatOrGuard;
         }
         return this.process(
-            this.restClient.put(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), { params: { modeluri, format } }),
+            this.restClient.put(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(model), {
+                params: { modeluri: modeluri.toString(), format }
+            }),
             MessageDataMapper.asObject
         );
     }
 
-    delete(modeluri: string): Promise<boolean> {
-        return this.process(this.restClient.delete(ModelServerPaths.MODEL_CRUD, { params: { modeluri } }), MessageDataMapper.isSuccess);
+    delete(modeluri: URI): Promise<boolean> {
+        return this.process(
+            this.restClient.delete(ModelServerPaths.MODEL_CRUD, { params: { modeluri: modeluri.toString() } }),
+            MessageDataMapper.isSuccess
+        );
     }
 
-    close(modeluri: string): Promise<boolean> {
-        return this.process(this.restClient.post(ModelServerPaths.CLOSE, undefined, { params: { modeluri } }), MessageDataMapper.isSuccess);
+    close(modeluri: URI): Promise<boolean> {
+        return this.process(
+            this.restClient.post(ModelServerPaths.CLOSE, undefined, { params: { modeluri: modeluri.toString() } }),
+            MessageDataMapper.isSuccess
+        );
     }
 
-    save(modeluri: string): Promise<boolean> {
-        return this.process(this.restClient.get(ModelServerPaths.SAVE, { params: { modeluri } }), MessageDataMapper.isSuccess);
+    save(modeluri: URI): Promise<boolean> {
+        return this.process(
+            this.restClient.get(ModelServerPaths.SAVE, { params: { modeluri: modeluri.toString() } }),
+            MessageDataMapper.isSuccess
+        );
     }
 
     saveAll(): Promise<boolean> {
         return this.process(this.restClient.get(ModelServerPaths.SAVE_ALL), MessageDataMapper.isSuccess);
     }
 
-    validate(modeluri: string): Promise<Diagnostic> {
-        return this.process(this.restClient.get(ModelServerPaths.VALIDATION, { params: { modeluri } }), response =>
+    validate(modeluri: URI): Promise<Diagnostic> {
+        return this.process(this.restClient.get(ModelServerPaths.VALIDATION, { params: { modeluri: modeluri.toString() } }), response =>
             MessageDataMapper.as(response, Diagnostic.is)
         );
     }
 
-    getValidationConstraints(modeluri: string): Promise<string> {
+    getValidationConstraints(modeluri: URI): Promise<string> {
         return this.process(
-            this.restClient.get(ModelServerPaths.VALIDATION_CONSTRAINTS, { params: { modeluri } }),
+            this.restClient.get(ModelServerPaths.VALIDATION_CONSTRAINTS, { params: { modeluri: modeluri.toString() } }),
             MessageDataMapper.asString
         );
     }
 
-    getTypeSchema(modeluri: string): Promise<string> {
-        return this.process(this.restClient.get(ModelServerPaths.TYPE_SCHEMA, { params: { modeluri } }), MessageDataMapper.asString);
+    getTypeSchema(modeluri: URI): Promise<string> {
+        return this.process(
+            this.restClient.get(ModelServerPaths.TYPE_SCHEMA, { params: { modeluri: modeluri.toString() } }),
+            MessageDataMapper.asString
+        );
     }
 
     getUiSchema(schemaname: string): Promise<string> {
@@ -212,7 +238,7 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         return this.process(this.restClient.get(ModelServerPaths.SERVER_PING), MessageDataMapper.isSuccess);
     }
 
-    edit(modeluri: string, patchOrCommand: PatchOrCommand, format = this.defaultFormat): Promise<ModelUpdateResult> {
+    edit(modeluri: URI, patchOrCommand: PatchOrCommand, format = this.defaultFormat): Promise<ModelUpdateResult> {
         let patchMessage: any;
         if (patchOrCommand instanceof ModelServerCommand) {
             patchMessage = {
@@ -230,37 +256,43 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
                 // No-op
                 return Promise.resolve({
                     success: true,
-                    patchModel: (oldModel, copy, _modelUri) => (copy ? deepClone(oldModel) : oldModel),
+                    patchModel: (oldModel, copy, _modeluri) => (copy ? deepClone(oldModel) : oldModel),
                     patch: []
                 });
             }
         }
         return this.process(
             this.restClient.patch(ModelServerPaths.MODEL_CRUD, encodeRequestBody(format)(patchMessage), {
-                params: { modeluri, format: format }
+                params: { modeluri: modeluri.toString(), format: format }
             }),
             MessageDataMapper.patchModel
         );
     }
 
-    undo(modeluri: string): Promise<ModelUpdateResult> {
-        return this.process(this.restClient.get(ModelServerPaths.UNDO, { params: { modeluri } }), MessageDataMapper.patchModel);
+    undo(modeluri: URI): Promise<ModelUpdateResult> {
+        return this.process(
+            this.restClient.get(ModelServerPaths.UNDO, { params: { modeluri: modeluri.toString() } }),
+            MessageDataMapper.patchModel
+        );
     }
 
-    redo(modeluri: string): Promise<ModelUpdateResult> {
-        return this.process(this.restClient.get(ModelServerPaths.REDO, { params: { modeluri } }), MessageDataMapper.patchModel);
+    redo(modeluri: URI): Promise<ModelUpdateResult> {
+        return this.process(
+            this.restClient.get(ModelServerPaths.REDO, { params: { modeluri: modeluri.toString() } }),
+            MessageDataMapper.patchModel
+        );
     }
 
-    send(modelUri: string, message: ModelServerMessage): void {
-        const openSocket = this.openSockets.get(modelUri);
+    send(modeluri: URI, message: ModelServerMessage): void {
+        const openSocket = this.openSockets.get(modeluri.toString());
         if (openSocket) {
-            openSocket.send(message);
+            openSocket.send(JSON.stringify(message));
         }
     }
 
-    subscribe(modeluri: string, listener: SubscriptionListener, options: SubscriptionOptions = {}): SubscriptionListener {
+    subscribe(modeluri: URI, listener: SubscriptionListener, options: SubscriptionOptions = {}): SubscriptionListener {
         if (this.isSocketOpen(modeluri)) {
-            const errorMsg = `${modeluri} : Cannot open new socket, already subscribed!'`;
+            const errorMsg = `${modeluri.toString()} : Cannot open new socket, already subscribed!'`;
             console.warn(errorMsg);
             if (options.errorWhenUnsuccessful) {
                 throw new Error(errorMsg);
@@ -271,36 +303,37 @@ export class ModelServerClientV2 implements ModelServerClientApiV2 {
         return listener;
     }
 
-    unsubscribe(modeluri: string): void {
-        const openSocket = this.openSockets.get(modeluri);
+    unsubscribe(modeluri: URI): void {
+        const openSocket = this.openSockets.get(modeluri.toString());
         if (openSocket) {
             openSocket.close();
-            this.openSockets.delete(modeluri);
+            this.openSockets.delete(modeluri.toString());
         }
     }
 
-    protected createSubscriptionPath(modeluri: string, options: SubscriptionOptions): string {
-        const queryParams = new URLSearchParams();
-        queryParams.append('modeluri', modeluri);
-        if (!options.format) {
-            options.format = this.defaultFormat;
-        }
-        Object.entries(options).forEach(entry => queryParams.append(entry[0], entry[1]));
-        queryParams.delete('errorWhenUnsuccessful');
-        return `${this._baseUrl}/${ModelServerPaths.SUBSCRIPTION}?${queryParams.toString()}`.replace(/^(http|https):\/\//i, 'ws://');
+    protected createSubscriptionPath(modeluri: URI, options: SubscriptionOptions): URI {
+        const { ...paramOptions } = options;
+        const subscriptionUri = this._baseUrl.clone();
+        subscriptionUri.protocol('ws');
+        subscriptionUri.segment(ModelServerPaths.SUBSCRIPTION);
+        subscriptionUri.addQuery('modeluri', modeluri);
+        subscriptionUri.addQuery('format', options.format || this.defaultFormat);
+        Object.entries(paramOptions).forEach(entry => subscriptionUri.addQuery(entry[0], entry[1]));
+        subscriptionUri.removeQuery('errorWhenUnsuccessful');
+        return subscriptionUri;
     }
 
-    protected doSubscribe(listener: SubscriptionListener, modelUri: string, path: string): void {
-        const socket = new WebSocket(path.trim());
-        socket.onopen = event => listener.onOpen?.(modelUri, event);
-        socket.onclose = event => listener.onClose?.(modelUri, event);
-        socket.onerror = event => listener.onError?.(modelUri, event);
-        socket.onmessage = event => listener.onMessage?.(modelUri, event);
-        this.openSockets.set(modelUri, socket);
+    protected doSubscribe(listener: SubscriptionListener, modeluri: URI, path: URI): void {
+        const socket = new WebSocket(path.toString() /* .trim() */);
+        socket.onopen = event => listener.onOpen?.(modeluri, event);
+        socket.onclose = event => listener.onClose?.(modeluri, event);
+        socket.onerror = event => listener.onError?.(modeluri, event);
+        socket.onmessage = event => listener.onMessage?.(modeluri, event);
+        this.openSockets.set(modeluri.toString(), socket);
     }
 
-    protected isSocketOpen(modelUri: string): boolean {
-        return this.openSockets.get(modelUri) !== undefined;
+    protected isSocketOpen(modeluri: URI): boolean {
+        return this.openSockets.get(modeluri.toString()) !== undefined;
     }
 
     protected async process<T>(request: Promise<AxiosResponse<ModelServerMessage>>, mapper: MessageDataMapper<T>): Promise<T> {
@@ -332,11 +365,11 @@ function isAxiosError(error: any): error is AxiosError {
 type FormatOrGuard<M> = Format | TypeGuard<M>;
 
 function mapModel<M>(model: Model, guard?: TypeGuard<M>, toString = false): Model<AnyObject | M | string> {
-    const { modelUri, content } = model;
+    const { modeluri, content } = model;
     if (guard) {
-        return { modelUri, content: asType(content, guard) };
+        return { modeluri, content: asType(content, guard) };
     } else if (toString) {
-        return { modelUri, content: asString(content) };
+        return { modeluri, content: asString(content) };
     }
-    return { modelUri, content: asObject(content) };
+    return { modeluri, content: asObject(content) };
 }

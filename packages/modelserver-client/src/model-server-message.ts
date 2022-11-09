@@ -10,9 +10,10 @@
  *******************************************************************************/
 import * as jsonpatch from 'fast-json-patch';
 import { deepClone, Operation } from 'fast-json-patch';
+import URI from 'urijs';
 
-import { ModelServerElement } from './model/base-model';
 import { ModelPatch, ModelUpdateResult } from './model-server-client-api-v2';
+import { ModelServerElement } from './model/base-model';
 import { Operations } from './utils/patch-utils';
 import * as Type from './utils/type-util';
 
@@ -79,7 +80,7 @@ export namespace MessageType {
  */
 export interface Model<C = unknown> {
     /** The uri of the model. */
-    modelUri: string;
+    modeluri: string;
     /** The model content. */
     content: C;
 }
@@ -91,7 +92,11 @@ export namespace Model {
      * @returns The given object as {@link Model} or `false`.
      */
     export function is(object: unknown): object is Model {
-        return Type.AnyObject.is(object) && Type.isString(object, 'modelUri') && Type.isObject(object, 'content');
+        return Type.AnyObject.is(object) && Type.isString(object, 'modeluri') && Type.isObject(object, 'content');
+    }
+
+    export function toString(model: Model): string {
+        return JSON.stringify(model, undefined, 2);
     }
 }
 
@@ -154,6 +159,16 @@ export namespace MessageDataMapper {
     }
 
     /**
+     * Maps the {@link ModelServerMessage.data} property of the given message to a URI[].
+     * @param message The message to map.
+     * @returns The `data` property as `URI[]`.
+     * @throws {@link Error} if the 'data' property is not an URI array.
+     */
+    export function asURIArray(message: ModelServerMessage): URI[] {
+        return Type.asURIArray(message.data);
+    }
+
+    /**
      * Maps the {@link ModelServerMessage.data} property of the given message to an {@link AnyObject}.
      * @param message The message to map.
      * @returns The `data` property as `AnyObject`.
@@ -204,9 +219,9 @@ export namespace MessageDataMapper {
                 return {
                     success: isSuccess(message),
                     patch,
-                    patchModel: (oldModel, copy, modelUri) => {
+                    patchModel: (oldModel, copy, modeluri) => {
                         const modelToPatch = copy ? deepClone(oldModel) : oldModel;
-                        const patchToApply = modelUri ? getPatch(allPatches, modelUri) : Operations.isPatch(patch) ? patch : undefined;
+                        const patchToApply = modeluri ? getPatch(allPatches, modeluri) : Operations.isPatch(patch) ? patch : undefined;
                         return patchToApply
                             ? (jsonpatch.applyPatch(modelToPatch, patchToApply).newDocument as ModelServerElement)
                             : modelToPatch;
@@ -221,7 +236,7 @@ export namespace MessageDataMapper {
         }
     }
 
-    function getPatch(patches: ModelPatch[], modelUri: string): Operation[] | undefined {
-        return patches.find(mp => mp.modelUri === modelUri)?.patch;
+    function getPatch(patches: ModelPatch[], modeluri: URI): Operation[] | undefined {
+        return patches.find(mp => mp.modelUri === modeluri.toString())?.patch;
     }
 }

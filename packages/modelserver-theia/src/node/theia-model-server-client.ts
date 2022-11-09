@@ -10,6 +10,7 @@
  *******************************************************************************/
 import { ModelServerClient, SubscriptionOptions } from '@eclipse-emfcloud/modelserver-client';
 import { decorate, inject, injectable, optional } from '@theia/core/shared/inversify';
+import URI from 'urijs';
 import { CancellationToken } from 'vscode-jsonrpc';
 
 import { ModelServerFrontendClient, TheiaModelServerClient } from '../common';
@@ -25,8 +26,13 @@ export class TheiaBackendModelServerClient extends ModelServerClient implements 
         this.initialize(baseUrl);
     }
 
-    protected getBaseUrl(): string {
-        const baseUrl = `http://${this.launchOptions.hostname}:${this.launchOptions.serverPort}/${this.launchOptions.baseURL}`;
+    protected getBaseUrl(): URI {
+        const baseUrl = new URI({
+            protocol: 'http',
+            hostname: this.launchOptions.hostname,
+            port: this.launchOptions.serverPort,
+            path: this.launchOptions.baseURL
+        });
         return baseUrl;
     }
 
@@ -36,7 +42,7 @@ export class TheiaBackendModelServerClient extends ModelServerClient implements 
         this.subscriptionClient = client;
     }
 
-    subscribe(modeluri: string, options: SubscriptionOptions = {}): void {
+    subscribe(modeluri: URI, options: SubscriptionOptions = {}): void {
         // Handle optional arguments finding the RPC cancellation token in their place
         if (CancellationToken.is(options)) {
             options = {};

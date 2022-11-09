@@ -10,10 +10,9 @@
  *******************************************************************************/
 import { applyPatch, deepClone } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
+import URI from 'urijs';
 
 import { Operations } from '.';
-import { CommandExecutionResult } from './model/command-model';
-import { Diagnostic } from './model/diagnostic';
 import { MessageDataMapper, MessageType, ModelServerMessage } from './model-server-message';
 import {
     CloseNotification,
@@ -26,6 +25,8 @@ import {
     UnknownNotification,
     ValidationNotification
 } from './model-server-notification';
+import { CommandExecutionResult } from './model/command-model';
+import { Diagnostic } from './model/diagnostic';
 
 /**
  * A `SubscriptionListener` is used to react to subscription notifications received by the model server.
@@ -33,10 +34,10 @@ import {
  * notifications for the subscribed model.
  */
 export interface SubscriptionListener {
-    onOpen(modelUri: string, event: WebSocket.Event): void;
-    onClose(modelUri: string, event: WebSocket.CloseEvent): void;
-    onError(modelUri: string, event: WebSocket.ErrorEvent): void;
-    onMessage(modelUri: string, event: WebSocket.MessageEvent): void;
+    onOpen(modeluri: URI, event: WebSocket.Event): void;
+    onClose(modeluri: URI, event: WebSocket.CloseEvent): void;
+    onError(modeluri: URI, event: WebSocket.ErrorEvent): void;
+    onMessage(modeluri: URI, event: WebSocket.MessageEvent): void;
 }
 
 /**
@@ -107,54 +108,54 @@ export interface ModelServerNotificationListener {
 export class NotificationSubscriptionListener implements SubscriptionListener {
     constructor(protected notificationListener: ModelServerNotificationListener = {}) {}
 
-    onOpen(modelUri: string, _event: WebSocket.Event): void {
-        this.notificationListener.onOpen?.({ modelUri, type: MessageType.open });
+    onOpen(modeluri: URI, _event: WebSocket.Event): void {
+        this.notificationListener.onOpen?.({ modeluri, type: MessageType.open });
     }
 
-    onClose(modelUri: string, event: WebSocket.CloseEvent): void {
-        this.notificationListener.onClose?.({ modelUri, code: event.code, reason: event.reason, type: MessageType.close });
+    onClose(modeluri: URI, event: WebSocket.CloseEvent): void {
+        this.notificationListener.onClose?.({ modeluri, code: event.code, reason: event.reason, type: MessageType.close });
     }
 
-    onError(modelUri: string, event: WebSocket.ErrorEvent): void {
-        this.notificationListener.onError?.({ modelUri, error: event.error, type: MessageType.error });
+    onError(modeluri: URI, event: WebSocket.ErrorEvent): void {
+        this.notificationListener.onError?.({ modeluri, error: event.error, type: MessageType.error });
     }
 
-    onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
+    onMessage(modeluri: URI, event: WebSocket.MessageEvent): void {
         const message = JSON.parse(event.data.toString());
         if (ModelServerMessage.is(message)) {
             const type = MessageType.asMessageType(message.type);
             switch (type) {
                 case MessageType.dirtyState: {
-                    this.notificationListener.onDirtyStateChanged?.({ modelUri, isDirty: MessageDataMapper.asBoolean(message), type });
+                    this.notificationListener.onDirtyStateChanged?.({ modeluri, isDirty: MessageDataMapper.asBoolean(message), type });
                     break;
                 }
                 case MessageType.keepAlive:
                 case MessageType.success: {
-                    this.notificationListener.onSuccess?.({ modelUri, type });
+                    this.notificationListener.onSuccess?.({ modeluri, type });
                     break;
                 }
                 case MessageType.error: {
-                    this.notificationListener.onError?.({ modelUri, error: MessageDataMapper.asString(message), type });
+                    this.notificationListener.onError?.({ modeluri, error: MessageDataMapper.asString(message), type });
                     break;
                 }
                 case MessageType.incrementalUpdate: {
                     this.notificationListener.onIncrementalUpdate?.({
-                        modelUri,
+                        modeluri,
                         result: MessageDataMapper.as(message, CommandExecutionResult.is),
                         type
                     });
                     break;
                 }
                 case MessageType.fullUpdate: {
-                    this.notificationListener.onFullUpdate?.({ modelUri, model: MessageDataMapper.asObject(message), type });
+                    this.notificationListener.onFullUpdate?.({ modeluri, model: MessageDataMapper.asObject(message), type });
                     break;
                 }
                 case MessageType.validationResult: {
-                    this.notificationListener.onValidation?.({ modelUri, diagnostic: MessageDataMapper.as(message, Diagnostic.is), type });
+                    this.notificationListener.onValidation?.({ modeluri, diagnostic: MessageDataMapper.as(message, Diagnostic.is), type });
                     break;
                 }
                 default: {
-                    this.notificationListener.onUnknown?.({ ...message, modelUri });
+                    this.notificationListener.onUnknown?.({ ...message, modeluri });
                 }
             }
         }
@@ -173,7 +174,7 @@ export class NotificationSubscriptionListenerV2 extends NotificationSubscription
         super(notificationListener);
     }
 
-    onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
+    onMessage(modeluri: URI, event: WebSocket.MessageEvent): void {
         const message = JSON.parse(event.data.toString());
         if (ModelServerMessage.is(message)) {
             const type = MessageType.asMessageType(message.type);
@@ -182,7 +183,7 @@ export class NotificationSubscriptionListenerV2 extends NotificationSubscription
                     const patch = MessageDataMapper.as(message, Operations.isPatch);
                     this.notificationListener.onIncrementalUpdateV2?.({
                         type: message.type,
-                        modelUri,
+                        modeluri,
                         patch,
                         patchModel: (model, copy) => {
                             const modelToPatch = copy ? deepClone(model) : model;
@@ -192,7 +193,7 @@ export class NotificationSubscriptionListenerV2 extends NotificationSubscription
                     break;
                 }
                 default: {
-                    super.onMessage(modelUri, event);
+                    super.onMessage(modeluri, event);
                 }
             }
         }

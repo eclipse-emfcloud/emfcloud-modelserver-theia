@@ -8,6 +8,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
+
+import URI from 'urijs';
+
 import { Format, FORMAT_JSON_V1, FORMAT_JSON_V2, FORMAT_XMI, JsonFormat } from '../model-server-client-api-v2';
 import { Model } from '../model-server-message';
 
@@ -96,6 +99,19 @@ export function asString(object: unknown): string {
     if (typeof object === 'string') {
         return object;
     }
+    if (Model.is(object)) {
+        return Model.toString(object);
+    }
+    if (Array.isArray(object) && object.every(Model.is)) {
+        return object.map(e => Model.toString(e)).toString();
+    }
+    if (isURI(object)) {
+        return asURI(object).toString();
+    }
+    if (Array.isArray(object) && object.every(isURI)) {
+        const uriArray = object.map(e => asURI(e).toString());
+        return JSON.stringify(uriArray, undefined, 2);
+    }
     return JSON.stringify(object, undefined, 2);
 }
 
@@ -141,10 +157,47 @@ export function asType<T>(object: unknown, guard: TypeGuard<T>): T {
 
 export function asModelArray(object: unknown): Model[] {
     if (AnyObject.is(object)) {
-        return Object.entries(object).map(entry => ({ modelUri: entry[0], content: entry[1] }));
+        return Object.entries(object).map(entry => ({ modeluri: entry[0], content: entry[1] }));
     }
 
     throw new Error('Cannot map to Model[]. The given object is no defined or of type "object"!');
+}
+
+/**
+ * Validates whether the given object is a (deferred) instance of an URI object.
+ * @param object The object that should be validated
+ * @returns `true` if the object is an instance of URI
+ */
+export function isURI(object: unknown): object is URI {
+    return AnyObject.is(object) && isObject(object, '_parts') && isBoolean(object, '_deferred_build') && isString(object, '_string');
+}
+
+/**
+ * Maps the given object to an `URI` object.
+ * @param obj The object to map
+ * @returns The object as `URI`
+ */
+export function asURI(obj: unknown): URI {
+    if (typeof obj === 'string') {
+        return new URI(obj);
+    }
+    // reconstruct if URI object was deferred
+    if (isURI(obj)) {
+        return new URI((obj as any)._parts);
+    }
+    throw new Error('Cannot map to URI. Given parameter is not an URI!');
+}
+/**
+ * Maps the given object to a `string` array.
+ * @param object The object to map
+ * @returns The object as `URI` array
+ * @throws {@link Error} if the given object is not an array
+ */
+export function asURIArray(object: unknown): URI[] {
+    if (Array.isArray(object)) {
+        return object.map(asURI);
+    }
+    throw new Error('Cannot map to URI[]. Given parameter is not an array!');
 }
 
 /** Protocol of a message encoder. */

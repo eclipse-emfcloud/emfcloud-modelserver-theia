@@ -22,6 +22,7 @@ import {
     SubscriptionOptionsV2
 } from '@eclipse-emfcloud/modelserver-client';
 import { decorate, inject, injectable, optional } from '@theia/core/shared/inversify';
+import URI from 'urijs';
 import { CancellationToken } from 'vscode-jsonrpc';
 
 import { ModelServerFrontendClient, TheiaModelServerClientV2 } from '../common';
@@ -45,11 +46,13 @@ export class TheiaBackendModelServerClientV2 extends ModelServerClientV2 impleme
         Array.from(this.openSockets.values()).forEach(openSocket => openSocket.close());
     }
 
-    protected getBaseUrl(): string {
-        // We construct URLs by prepending and appending the base URL with '/' separators, so make
-        // sure that we won't be repeating those separators else we'll get 404s
-        const optionsUrl = trimSeparators(this.launchOptions.baseURL);
-        const baseUrl = `http://${this.launchOptions.hostname}:${this.launchOptions.serverPort}/${optionsUrl}`;
+    protected getBaseUrl(): URI {
+        const baseUrl = new URI({
+            protocol: 'http',
+            hostname: this.launchOptions.hostname,
+            port: this.launchOptions.serverPort,
+            path: this.launchOptions.baseURL
+        });
         return baseUrl;
     }
 
@@ -57,7 +60,7 @@ export class TheiaBackendModelServerClientV2 extends ModelServerClientV2 impleme
         this.subscriptionClient = client;
     }
 
-    subscribe(modeluri: string, listener?: SubscriptionListener, options: SubscriptionOptionsV2 = {}): SubscriptionListener {
+    subscribe(modeluri: URI, listener?: SubscriptionListener, options: SubscriptionOptionsV2 = {}): SubscriptionListener {
         // Handle optional arguments finding the RPC cancellation token in their place
         if (CancellationToken.is(listener)) {
             listener = undefined;
@@ -79,7 +82,7 @@ export class TheiaBackendModelServerClientV2 extends ModelServerClientV2 impleme
         return super.subscribe(modeluri, listener!, options);
     }
 
-    selfSubscribe(modeluri: string, options: SubscriptionOptionsV2 = {}): void {
+    selfSubscribe(modeluri: URI, options: SubscriptionOptionsV2 = {}): void {
         // Handle optional arguments finding the RPC cancellation token in their place
         if (CancellationToken.is(options)) {
             options = {};
@@ -88,7 +91,7 @@ export class TheiaBackendModelServerClientV2 extends ModelServerClientV2 impleme
         this.subscribe(modeluri, undefined, options);
     }
 
-    edit(modeluri: string, patchOrCommand: PatchOrCommand, format?: Format): Promise<ModelUpdateResult> {
+    edit(modeluri: URI, patchOrCommand: PatchOrCommand, format?: Format): Promise<ModelUpdateResult> {
         if (ModelServerCommand.is(patchOrCommand)) {
             return super.edit(modeluri, ensureCommandPrototype(patchOrCommand));
         }
@@ -117,24 +120,4 @@ function ensureCommandPrototype<T extends ModelServerCommand>(command: T): T {
         (command as CompoundCommand).commands.forEach(ensureCommandPrototype);
     }
     return Object.setPrototypeOf(command, ModelServerCommand.prototype);
-}
-
-/**
- * We construct URLs by prepending and appending the base URL with '/' separators, so
- * this function trims any leading and trailing separators to make sure that we won't
- * be repeating those separators else we'll get 404s.
- *
- * @param url the URL to trim
- * @returns the trimmed URL
- */
-function trimSeparators(url: string | undefined): string | undefined {
-    if (url) {
-        while (url.startsWith('/')) {
-            url = url.substring(1);
-        }
-        while (url.endsWith('/')) {
-            url = url.substring(0, url.length - 1);
-        }
-    }
-    return url;
 }

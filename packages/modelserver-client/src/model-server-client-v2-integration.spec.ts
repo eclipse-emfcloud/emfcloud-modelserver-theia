@@ -10,6 +10,7 @@
  *******************************************************************************/
 import { expect } from 'chai';
 import jsonpatch, { deepClone, Operation } from 'fast-json-patch';
+import URI from 'urijs';
 
 import {
     add,
@@ -30,9 +31,14 @@ import { ModelServerClientApiV2 } from './model-server-client-api-v2';
 
 describe('Integration tests for ModelServerClientV2', () => {
     let client: ModelServerClientV2;
-    const baseUrl = `http://localhost:8081${ModelServerClientApiV2.API_ENDPOINT}`;
+    const baseUrl = new URI({
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8081',
+        path: ModelServerClientApiV2.API_ENDPOINT
+    });
 
-    const testUndoRedo: (modeluri: string, originalModel: any, patchedModel: any) => Promise<void> = async (
+    const testUndoRedo: (modeluri: URI, originalModel: any, patchedModel: any) => Promise<void> = async (
         modeluri,
         originalModel,
         patchedModel
@@ -64,7 +70,7 @@ describe('Integration tests for ModelServerClientV2', () => {
 
     describe('test requests', () => {
         it('edit with patch', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const newName = 'Super Brewer 6000';
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
             const patch = replace(modeluri, machine, 'name', newName);
@@ -76,7 +82,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('create with patch', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
             const newWorkflowName = 'New Test Workflow';
             const initialWorkflowsCount: number = (originalModel as any).workflows.length;
@@ -103,7 +109,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('add with patch', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const initialModel = await client.get(modeluri, ModelServerObjectV2.is);
 
             // Add a second workflow to the model; we'll use it to move a Task from a workflow to the other
@@ -134,7 +140,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('delete with patch - index based', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
 
             const parentWorkflow = (originalModel as any).workflows[0];
@@ -150,7 +156,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('delete with patch - object', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
 
             const parentWorkflow = (originalModel as any).workflows[0];
@@ -168,12 +174,12 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('edit with command', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const newName = 'Super Brewer 6000';
             const originalModel = await client.get(modeluri, ModelServerObjectV2.is);
             const owner = {
                 eClass: originalModel.$type,
-                $ref: `SuperBrewer3000.coffee#${originalModel.$id}`
+                $ref: URI.build({ path: 'SuperBrewer3000.coffee', fragment: originalModel.$id })
             };
             const command = new SetCommand(owner, 'name', [newName]);
             await client.edit(modeluri, command);
@@ -184,7 +190,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('incremental patch update', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const newName = 'Super Brewer 6000';
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
             const patch = replace(modeluri, machine, 'name', newName);
@@ -206,12 +212,12 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('subscribe to changes', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const newName = 'Super Brewer 6000';
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
             const owner = {
                 eClass: machine.$type,
-                $ref: `SuperBrewer3000.coffee#${machine.$id}`
+                $ref: URI.build({ path: 'SuperBrewer3000.coffee', fragment: machine.$id })
             };
             const command = new SetCommand(owner, 'name', [newName]);
 
@@ -234,7 +240,7 @@ describe('Integration tests for ModelServerClientV2', () => {
             const notification = await patchNotification;
             const patch = notification.patch;
 
-            expect(notification.modelUri).to.be.equal(modeluri);
+            expect(notification.modeluri.toString()).to.be.equal(modeluri.toString());
             expect(patch.length).to.be.equal(1);
             const operation = patch[0];
             expect(Operations.isReplace(operation, 'string')).to.be.equal(true);
@@ -248,12 +254,12 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('subscribe to incremental updates', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const newName = 'Super Brewer 6000';
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
             const owner = {
                 eClass: machine.$type,
-                $ref: `SuperBrewer3000.coffee#${machine.$id}`
+                $ref: URI.build({ path: 'SuperBrewer3000.coffee', fragment: machine.$id })
             };
             const command = new SetCommand(owner, 'name', [newName]);
 
@@ -289,7 +295,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('pure Json Patch changes', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const newName = 'Super Brewer 6000';
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
 
@@ -311,7 +317,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('clear list with "remove" patch operation', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
 
             const initialWorkflowsSize = (machine as any).workflows.length;
@@ -334,7 +340,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('unset value with "remove" patch operation', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
 
             const initialValue = (machine as any).children[1].processor.thermalDesignPower;
@@ -357,7 +363,7 @@ describe('Integration tests for ModelServerClientV2', () => {
         });
 
         it('check all patch replies', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const newName = 'Super Brewer 6000';
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
 
@@ -382,14 +388,14 @@ describe('Integration tests for ModelServerClientV2', () => {
             expect(patchedMachine).to.deep.equal(updatedMachineMainPatch);
 
             // Patch the first resource
-            const updatedMachineFirstPatch = result.patchModel!(machine, true, result.allPatches![0].modelUri);
+            const updatedMachineFirstPatch = result.patchModel!(machine, true, new URI(result.allPatches![0].modelUri));
             expect(patchedMachine).to.deep.equal(updatedMachineFirstPatch);
 
             await testUndoRedo(modeluri, machine, updatedMachineFirstPatch);
         });
 
         it('test model patches', async () => {
-            const modeluri = 'SuperBrewer3000.coffee';
+            const modeluri = new URI('SuperBrewer3000.coffee');
             const newName = 'Super Brewer 6000';
             const machine = await client.get(modeluri, ModelServerObjectV2.is);
 
@@ -399,14 +405,10 @@ describe('Integration tests for ModelServerClientV2', () => {
             patchedMachine.name = newName;
             patchedMachine.children[1].processor.clockSpeed = 6;
 
-            // Generate patch by diffing the original model and the patched one
-            const patch = jsonpatch.compare(machine, patchedMachine);
-            const modelPatch = {
-                modelUri: modeluri,
-                patch
-            };
+            // Generate patches by diffing the original model and the patched one
+            const patches = jsonpatch.compare(machine, patchedMachine);
 
-            const result = await client.edit(modeluri, modelPatch);
+            const result = await client.edit(modeluri, patches);
             expect(result.success).to.be.true;
 
             expect(result.patch).to.not.be.undefined;
@@ -418,7 +420,7 @@ describe('Integration tests for ModelServerClientV2', () => {
             expect(patchedMachine).to.deep.equal(updatedMachineMainPatch);
 
             // Patch the first resource
-            const updatedMachineFirstPatch = result.patchModel!(machine, true, result.allPatches![0].modelUri);
+            const updatedMachineFirstPatch = result.patchModel!(machine, true, new URI(result.allPatches![0].modelUri));
             expect(patchedMachine).to.deep.equal(updatedMachineFirstPatch);
 
             await testUndoRedo(modeluri, machine, updatedMachineFirstPatch);

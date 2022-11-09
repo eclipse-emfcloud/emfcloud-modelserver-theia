@@ -50,7 +50,7 @@ export interface ModelServerNodeOptions {
 }
 
 export const DEFAULT_LAUNCH_OPTIONS: LaunchOptions = {
-    baseURL: 'api/v1',
+    baseURL: 'api/v2',
     serverPort: 8081,
     hostname: 'localhost'
 };

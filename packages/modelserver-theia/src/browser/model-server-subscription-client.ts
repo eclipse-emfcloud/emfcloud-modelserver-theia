@@ -30,6 +30,7 @@ import { Emitter, Event } from '@theia/core';
 import { injectable } from '@theia/core/shared/inversify';
 import { applyPatch, deepClone } from 'fast-json-patch';
 import WebSocket from 'isomorphic-ws';
+import URI from 'urijs';
 
 import { ModelServerFrontendClient } from '../common';
 
@@ -54,34 +55,34 @@ export interface ModelServerSubscriptionServiceV2 extends ModelServerSubscriptio
 
 @injectable()
 export class ModelServerSubscriptionClient implements ModelServerFrontendClient, ModelServerSubscriptionService {
-    onOpen(modelUri: string, _event: WebSocket.Event): void {
-        this.onOpenEmitter.fire({ modelUri, type: MessageType.open });
+    onOpen(modeluri: URI, _event: WebSocket.Event): void {
+        this.onOpenEmitter.fire({ modeluri, type: MessageType.open });
     }
 
-    onClose(modelUri: string, event: WebSocket.CloseEvent): void {
-        this.onClosedEmitter.fire({ modelUri, code: event.code, reason: event.reason, type: MessageType.close });
+    onClose(modeluri: URI, event: WebSocket.CloseEvent): void {
+        this.onClosedEmitter.fire({ modeluri, code: event.code, reason: event.reason, type: MessageType.close });
     }
 
-    onError(modelUri: string, event: WebSocket.ErrorEvent): void {
-        this.onErrorEmitter.fire({ modelUri, error: event.error, type: MessageType.error });
+    onError(modeluri: URI, event: WebSocket.ErrorEvent): void {
+        this.onErrorEmitter.fire({ modeluri, error: event.error, type: MessageType.error });
     }
 
-    onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
+    onMessage(modeluri: URI, event: WebSocket.MessageEvent): void {
         const message = JSON.parse(event.data.toString());
         if (ModelServerMessage.is(message)) {
             const type = MessageType.asMessageType(message.type);
             switch (type) {
                 case MessageType.dirtyState: {
-                    this.onDirtyStateEmitter.fire({ modelUri, isDirty: MessageDataMapper.asBoolean(message), type });
+                    this.onDirtyStateEmitter.fire({ modeluri, isDirty: MessageDataMapper.asBoolean(message), type });
                     break;
                 }
                 case MessageType.keepAlive:
                 case MessageType.success: {
-                    this.onSuccessEmitter.fire({ modelUri, type });
+                    this.onSuccessEmitter.fire({ modeluri, type });
                     break;
                 }
                 case MessageType.error: {
-                    this.onErrorEmitter.fire({ modelUri, error: MessageDataMapper.asString(message), type });
+                    this.onErrorEmitter.fire({ modeluri, error: MessageDataMapper.asString(message), type });
                     break;
                 }
                 case MessageType.incrementalUpdate: {
@@ -92,7 +93,7 @@ export class ModelServerSubscriptionClient implements ModelServerFrontendClient,
                         result = MessageDataMapper.asString(message);
                     }
                     this.onIncrementalUpdateEmitter.fire({
-                        modelUri,
+                        modeluri,
                         result,
                         type
                     });
@@ -105,15 +106,15 @@ export class ModelServerSubscriptionClient implements ModelServerFrontendClient,
                     } catch (error) {
                         model = MessageDataMapper.asString(message);
                     }
-                    this.onFullUpdateEmitter.fire({ modelUri, model, type });
+                    this.onFullUpdateEmitter.fire({ modeluri, model, type });
                     break;
                 }
                 case MessageType.validationResult: {
-                    this.onValidationResultEmitter.fire({ modelUri, diagnostic: MessageDataMapper.as(message, Diagnostic.is), type });
+                    this.onValidationResultEmitter.fire({ modeluri, diagnostic: MessageDataMapper.as(message, Diagnostic.is), type });
                     break;
                 }
                 default: {
-                    this.onUnknownMessageEmitter.fire({ ...message, modelUri });
+                    this.onUnknownMessageEmitter.fire({ ...message, modeluri });
                 }
             }
         }
@@ -175,7 +176,7 @@ export class ModelServerSubscriptionClientV2 extends ModelServerSubscriptionClie
         return this.onIncrementalUpdateEmitterV2.event;
     }
 
-    onMessage(modelUri: string, event: WebSocket.MessageEvent): void {
+    onMessage(modeluri: URI, event: WebSocket.MessageEvent): void {
         const message = JSON.parse(event.data.toString());
         if (ModelServerMessage.is(message)) {
             const type = MessageType.asMessageType(message.type);
@@ -184,7 +185,7 @@ export class ModelServerSubscriptionClientV2 extends ModelServerSubscriptionClie
                     const patch = MessageDataMapper.as(message, Operations.isPatch);
                     this.onIncrementalUpdateEmitterV2.fire({
                         type,
-                        modelUri,
+                        modeluri,
                         patch,
                         patchModel: (model, copy) => {
                             const modelToPatch = copy ? deepClone(model) : model;
@@ -195,6 +196,6 @@ export class ModelServerSubscriptionClientV2 extends ModelServerSubscriptionClie
                 }
             }
         }
-        super.onMessage(modelUri, event);
+        super.onMessage(modeluri, event);
     }
 }

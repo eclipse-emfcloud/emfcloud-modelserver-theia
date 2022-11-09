@@ -7,44 +7,44 @@ The interface declaration is as defined below. Please note that the `Model` clas
 
 ```typescript
 export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClient> {
-    initialize(): Promise<boolean>;
+  initialize(): Promise<boolean>;
 
-    get(modelUri: string, format?: string): Promise<Response<string>>;
-    getAll(format?: string): Promise<Response<Model[]>>;
-    getModelUris(): Promise<Response<string[]>>;
+  get(modeluri: URI, format?: string): Promise<Response<string>>;
+  getAll(format?: string): Promise<Response<Model[]>>;
+  getModelUris(): Promise<Response<URI[]>>;
 
-    getElementById(modelUri: string, elementid: string, format?: string): Promise<Response<string>>;
-    getElementByName(modelUri: string, elementname: string, format?: string): Promise<Response<string>>;
+  getElementById(modeluri: URI, elementid: string, format?: string): Promise<Response<string>>;
+  getElementByName(modeluri: URI, elementname: string, format?: string): Promise<Response<string>>;
 
-    delete(modelUri: string): Promise<Response<boolean>>;
-    update(modelUri: string, newModel: any): Promise<Response<string>>;
+  delete(modeluri: URI): Promise<Response<boolean>>;
+  update(modeluri: URI, newModel: any): Promise<Response<string>>;
 
-    configure(configuration?: ServerConfiguration): Promise<Response<boolean>>;
-    ping(): Promise<Response<boolean>>;
+  configure(configuration?: ServerConfiguration): Promise<Response<boolean>>;
+  ping(): Promise<Response<boolean>>;
 
-    undo(modelUri: string): Promise<Response<string>>;
-    redo(modelUri: string): Promise<Response<string>>;
-    save(modelUri: string): Promise<Response<boolean>>;
-    saveAll(): Promise<Response<boolean>>;
+  undo(modeluri: URI): Promise<Response<string>>;
+  redo(modeluri: URI): Promise<Response<string>>;
+  save(modeluri: URI): Promise<Response<boolean>>;
+  saveAll(): Promise<Response<boolean>>;
 
-    getLaunchOptions(): Promise<LaunchOptions>;
+  getLaunchOptions(): Promise<LaunchOptions>;
 
-    edit(modelUri: string, command: ModelServerCommand): Promise<Response<boolean>>;
+  edit(modeluri: URI, command: ModelServerCommand): Promise<Response<boolean>>;
 
-    getTypeSchema(modelUri: string): Promise<Response<string>>;
-    getUiSchema(schemaName: string): Promise<Response<string>>;
+  getTypeSchema(modeluri: URI): Promise<Response<string>>;
+  getUiSchema(schemaName: string): Promise<Response<string>>;
 
-    validation(modelUri: string): Promise<Response<string>>;
-    validationConstraints(modelUri: string): Promise<Response<string>>;
+  validation(modeluri: URI): Promise<Response<string>>;
+  validationConstraints(modeluri: URI): Promise<Response<string>>;
 
-    // WebSocket connection
-    subscribe(modelUri: string): void;
-    subscribeWithValidation(modelUri: string): void;
-    subscribeWithFormat(modelUri: string, format: string): void;
-    subscribeWithTimeout(modelUri: string, timeout: number): void;
-    subscribeWithTimeoutAndFormat(modelUri: string, timeout: number, format: string): void;
-    sendKeepAlive(modelUri: string): void;
-    unsubscribe(modelUri: string): void;
+  // WebSocket connection
+  subscribe(modeluri: URI): void;
+  subscribeWithValidation(modeluri: URI): void;
+  subscribeWithFormat(modeluri: URI, format: string): void;
+  subscribeWithTimeout(modeluri: URI, timeout: number): void;
+  subscribeWithTimeoutAndFormat(modeluri: URI, timeout: number, format: string): void;
+  sendKeepAlive(modeluri: URI): void;
+  unsubscribe(modeluri: URI): void;
 }
 ```
 
@@ -69,7 +69,7 @@ this.modelServerClient.getAll()
 // perform GET ELEMENT
 this.modelServerClient.getElementByName('SuperBrewer3000.json', 'Super Brewer 3000')
     .then((response: Response<any>) => this.messageService.info("GET ELEMENT: " + response.body()));
-            
+
 // perform ADD COMMAND (adds an AutomaticTask to the first Workflow and expects incremental update)
 const owner = {
     'eClass':
@@ -96,5 +96,5 @@ this.modelServerClient.subscribe('SuperBrewer3000.json');
 
 // unsubscribe
 this.modelServerClient.unsubscribe('SuperBrewer3000.json');
-            
+
 ```
