@@ -35,8 +35,8 @@ export class CustomDevModelServerClient extends TheiaBackendModelServerClientV2 
     private setKeepAliveInterval(modeluri: URI, timeout: number): void {
         if (!this.isSocketOpen(modeluri) && modeluri.toString() === 'Coffee.ecore') {
             this.intervalId = setInterval(
-                () => this.send(modeluri, { type: MessageType.keepAlive, data: '' }),
-                timeout > 1000 ? timeout - 50000 : 1
+                () => this.send(modeluri, { type: MessageType.keepAlive, data: undefined }),
+                timeout > 1000 ? timeout - 1000 : 1
             );
         }
     }

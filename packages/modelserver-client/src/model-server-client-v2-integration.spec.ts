@@ -240,7 +240,7 @@ describe('Integration tests for ModelServerClientV2', () => {
             const notification = await patchNotification;
             const patch = notification.patch;
 
-            expect(notification.modeluri.toString()).to.be.equal(modeluri.toString());
+            expect(notification.modeluri.equals(modeluri)).to.be.true;
             expect(patch.length).to.be.equal(1);
             const operation = patch[0];
             expect(Operations.isReplace(operation, 'string')).to.be.equal(true);

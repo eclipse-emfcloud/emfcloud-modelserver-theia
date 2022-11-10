@@ -524,7 +524,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     }
 
     protected printNotification(message: ModelServerNotification, level: MessageLevel = MessageLevel.Info): Promise<void> {
-        let details: string | object = { modeluri: asString(message.modeluri), type: message.type };
+        let details: object = { modeluri: asString(message.modeluri), type: message.type };
         // Prettyprinting for update notifications in non-json format
         switch (message.type) {
             case MessageType.incrementalUpdate: {
@@ -725,8 +725,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         });
         commands.registerCommand(UnsubscribeCommand, {
             execute: () => {
-                const uri = new URI('SuperBrewer3000.coffee');
-                this.modelServerClient.unsubscribe(uri);
+                this.modelServerClient.unsubscribe(new URI('SuperBrewer3000.coffee'));
             }
         });
 
