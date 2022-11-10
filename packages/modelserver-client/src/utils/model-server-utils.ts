@@ -19,7 +19,7 @@ export function isModelServerObjectArray(array: Array<DataValueType | ModelServe
 }
 
 export function isModelServerReferenceDescriptionArray(
-    array: Array<DataValueType | ModelServerReferenceDescription>
+    array: Array<DataValueType | ModelServerReferenceDescription | ModelServerObject>
 ): array is ModelServerReferenceDescription[] {
     return array.every(ModelServerReferenceDescription.is);
 }
