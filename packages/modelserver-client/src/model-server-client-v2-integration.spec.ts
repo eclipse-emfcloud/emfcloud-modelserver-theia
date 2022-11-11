@@ -240,7 +240,7 @@ describe('Integration tests for ModelServerClientV2', () => {
             const notification = await patchNotification;
             const patch = notification.patch;
 
-            expect(notification.modeluri.equals(modeluri)).to.be.true;
+            expect(notification.modeluri.toString()).to.be.equal(modeluri.toString());
             expect(patch.length).to.be.equal(1);
             const operation = patch[0];
             expect(Operations.isReplace(operation, 'string')).to.be.equal(true);
@@ -406,9 +406,9 @@ describe('Integration tests for ModelServerClientV2', () => {
             patchedMachine.children[1].processor.clockSpeed = 6;
 
             // Generate patches by diffing the original model and the patched one
-            const patches = jsonpatch.compare(machine, patchedMachine);
+            const patch = jsonpatch.compare(machine, patchedMachine);
 
-            const result = await client.edit(modeluri, patches);
+            const result = await client.edit(modeluri, patch);
             expect(result.success).to.be.true;
 
             expect(result.patch).to.not.be.undefined;
