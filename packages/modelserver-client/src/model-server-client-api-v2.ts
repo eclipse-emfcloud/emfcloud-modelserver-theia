@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 import { Operation } from 'fast-json-patch';
+import URI from 'urijs';
 
 import { ModelServerElement } from './model/base-model';
 import { ModelServerCommand } from './model/command-model';
@@ -70,14 +71,14 @@ export interface ModelServerClientApiV2 {
     /**
      * The `initialize` method should be executed before any other requests to the model server.
      * The given base url should point to the location of the model server API entry point.
-     * (e.g. `http://localhost:8081/api/v1/`). Once the initialization is completed the client is expected
+     * (e.g. `http://localhost:8081/api/v2/`). Once the initialization is completed the client is expected
      * to be ready and should be able to handle REST requests to & responses from the model server.
      * Any requests to the model server before the client has been initialized are expected to fail (i.e. throw an error)
      * @param baseUrl Url pointing to the API entry point
      * @param defaultFormat Optional fallback format that should used when a request method is invoked and no explicit format argument
      *                      has been passed. The default-default is `'json-v2'`
      */
-    initialize(baseUrl: string, defaultFormat?: Format): void | Promise<void>;
+    initialize(baseUrl: URI, defaultFormat?: Format): void | Promise<void>;
 
     /**
      * Retrieves all available models of the current workspace.
@@ -86,36 +87,36 @@ export interface ModelServerClientApiV2 {
     getAll<M>(typeGuard: TypeGuard<M>): Promise<Model<M>[]>;
     getAll(format: Format): Promise<Model<string>[]>;
 
-    get(modeluri: string, format?: Format): Promise<AnyObject>;
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    get(modeluri: URI, format?: Format): Promise<AnyObject>;
+    get<M>(modeluri: URI, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
-    getModelUris(): Promise<string[]>;
+    getModelUris(): Promise<URI[]>;
 
-    getElementById(modeluri: string, elementid: string, format?: Format): Promise<AnyObject>;
-    getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    getElementById(modeluri: URI, elementid: string, format?: Format): Promise<AnyObject>;
+    getElementById<M>(modeluri: URI, elementid: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
-    getElementByName(modeluri: string, elementname: string, format?: Format): Promise<AnyObject>;
-    getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    getElementByName(modeluri: URI, elementname: string, format?: Format): Promise<AnyObject>;
+    getElementByName<M>(modeluri: URI, elementname: string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
-    delete(modeluri: string): Promise<boolean>;
+    delete(modeluri: URI): Promise<boolean>;
 
-    close(modeluri: string): Promise<boolean>;
+    close(modeluri: URI): Promise<boolean>;
 
-    create(modeluri: string, model: AnyObject | string, format?: Format): Promise<AnyObject>;
-    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    create(modeluri: URI, model: AnyObject | string, format?: Format): Promise<AnyObject>;
+    create<M>(modeluri: URI, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
-    update(modeluri: string, model: AnyObject | string, format?: Format): Promise<AnyObject>;
-    update<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
+    update(modeluri: URI, model: AnyObject | string, format?: Format): Promise<AnyObject>;
+    update<M>(modeluri: URI, model: AnyObject | string, typeGuard: TypeGuard<M>, format?: Format): Promise<M>;
 
-    save(modeluri: string): Promise<boolean>;
+    save(modeluri: URI): Promise<boolean>;
 
     saveAll(): Promise<boolean>;
 
-    validate(modeluri: string): Promise<Diagnostic>;
+    validate(modeluri: URI): Promise<Diagnostic>;
 
-    getValidationConstraints(modeluri: string): Promise<string>;
+    getValidationConstraints(modeluri: URI): Promise<string>;
 
-    getTypeSchema(modeluri: string): Promise<string>;
+    getTypeSchema(modeluri: URI): Promise<string>;
 
     getUiSchema(schemaname: string): Promise<string>;
 
@@ -123,21 +124,21 @@ export interface ModelServerClientApiV2 {
 
     ping(): Promise<boolean>;
 
-    edit(modeluri: string, patchOrCommand: PatchOrCommand, format?: Format): Promise<ModelUpdateResult>;
+    edit(modeluri: URI, patchOrCommand: PatchOrCommand, format?: Format): Promise<ModelUpdateResult>;
 
-    undo(modeluri: string): Promise<ModelUpdateResult>;
+    undo(modeluri: URI): Promise<ModelUpdateResult>;
 
-    redo(modeluri: string): Promise<ModelUpdateResult>;
+    redo(modeluri: URI): Promise<ModelUpdateResult>;
 
     // WebSocket connection
-    subscribe(modeluri: string, listener: SubscriptionListener, options?: SubscriptionOptionsV2): SubscriptionListener;
+    subscribe(modeluri: URI, listener: SubscriptionListener, options?: SubscriptionOptionsV2): SubscriptionListener;
 
-    send(modelUri: string, message: ModelServerMessage): void;
-    unsubscribe(modelUri: string): void;
+    send(modeluri: URI, message: ModelServerMessage): void;
+    unsubscribe(modeluri: URI): void;
 }
 
 export namespace ModelServerClientApiV2 {
-    export const API_ENDPOINT = '/api/v2';
+    export const API_ENDPOINT = 'api/v2';
 }
 
 /**
@@ -173,12 +174,12 @@ export interface ModelUpdateResult {
      * @param copy by default, the patch will be directly applied to the oldModel, modifying
      * it in-place. If copy is true, the patch will be applied on a copy of the model, leaving
      * the original model unchanged.
-     * @param modelUri the uri of the model to patch. This can be used when the model is split in multiple
-     * resources, to identify the patch to apply. The modelUri should correspond to the oldModel object.
+     * @param modeluri the uri of the model to patch. This can be used when the model is split in multiple
+     * resources, to identify the patch to apply. The modeluri should correspond to the oldModel object.
      * It can be omitted when patching the main model (or in single-model cases).
      * @return the patched model.
      */
-    patchModel?(oldModel: ModelServerElement, copy?: boolean, modelUri?: string): ModelServerElement;
+    patchModel?(oldModel: ModelServerElement, copy?: boolean, modeluri?: URI): ModelServerElement;
 
     /**
      * The Json Patch describing the changes that were applied to the model. Only present if

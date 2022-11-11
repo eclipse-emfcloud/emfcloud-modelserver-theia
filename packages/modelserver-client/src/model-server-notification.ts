@@ -9,25 +9,26 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 import { Operation } from 'fast-json-patch';
+import * as URI from 'urijs';
 
 import { MessageType, ModelServerObjectV2 } from '.';
 import { CommandExecutionResult } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
 import { ModelServerMessage } from './model-server-message';
-import { AnyObject, isString } from './utils/type-util';
+import { AnyObject, isObject, isString } from './utils/type-util';
 
 /**
  * A `ModelServerNotification` represents the payload object that is sent by the modelserver over websocket to
  * notify subscribers about the current model state.
  */
 export interface ModelServerNotification {
-    modelUri: string;
+    modeluri: URI;
     type: string;
 }
 
 export namespace ModelServerNotification {
     export function is(object?: unknown): object is ModelServerNotification {
-        return AnyObject.is(object) && isString(object, 'modelUri') && isString(object, 'type');
+        return AnyObject.is(object) && isObject(object, 'modeluri') && isString(object, 'type');
     }
 }
 

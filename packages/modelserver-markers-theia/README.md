@@ -6,10 +6,10 @@ The model server client API provides validation methods which manipulate JSON ob
 
 ```typescript
 export interface ModelServerClient extends JsonRpcServer<ModelServerFrontendClient> {
-    validation(modelUri: string): Promise<Response<string>>;
+  validation(modeluri: URI): Promise<Response<string>>;
 
-    // WebSocket connection
-    subscribeWithValidation(modelUri: string): void;
+  // WebSocket connection
+  subscribeWithValidation(modeluri: URI): void;
 }
 ```
 
@@ -25,7 +25,7 @@ After calling the validation, you can create markers as simply as :
 @inject(MessageService) protected readonly messageService: MessageService;
 @inject(DiagnosticManager) protected readonly diagnosticManager: DiagnosticManager;
 
-const modelURI : URI;
+const modelURI : TheiaURI;
 // perform validation
 this.modelServerClient.validation(modelURI.toString())
     .then((response: Response<any>) => {
@@ -36,7 +36,7 @@ this.modelServerClient.validation(modelURI.toString())
         // display the validation status
         this.messageService.info(`Validation finished with level ${Diagnostic.getSeverityLabel(diagnostic)}.`)
     });
-            
+
 ```
 
 ## Selecting the model element from the marker

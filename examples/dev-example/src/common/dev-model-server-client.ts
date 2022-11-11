@@ -9,10 +9,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 import { AnyObject, ModelServerCommand } from '@eclipse-emfcloud/modelserver-client';
-import { TheiaModelServerClient } from '@eclipse-emfcloud/modelserver-theia';
+import { TheiaModelServerClientV2 } from '@eclipse-emfcloud/modelserver-theia';
 
 export const DevModelServerClient = Symbol('DevModelServerClient');
-export interface DevModelServerClient extends TheiaModelServerClient {
+export interface DevModelServerClient extends TheiaModelServerClientV2 {
     counter(operation: 'add' | 'subtract' | undefined, delta: number | undefined): Promise<AnyObject>;
 }
 

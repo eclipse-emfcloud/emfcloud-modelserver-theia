@@ -16,16 +16,17 @@ import {
 } from '@eclipse-emfcloud/modelserver-client';
 import { JsonRpcServer } from '@theia/core';
 import WebSocket from 'isomorphic-ws';
+import URI from 'urijs';
 
 export const MODEL_SERVER_CLIENT_SERVICE_PATH = '/services/modelserverclient';
 export const MODEL_SERVER_CLIENT_V2_SERVICE_PATH = '/services/modelserverclient/v2';
 
 export const ModelServerFrontendClient = Symbol('ModelServerFrontendClient');
 export interface ModelServerFrontendClient {
-    onOpen(modelUri: string, event: WebSocket.Event): void;
-    onClose(modelUri: string, event: WebSocket.CloseEvent): void;
-    onError(modelUri: string, event: WebSocket.ErrorEvent): void;
-    onMessage(modelUri: string, event: WebSocket.MessageEvent): void;
+    onOpen(modeluri: URI, event: WebSocket.Event): void;
+    onClose(modeluri: URI, event: WebSocket.CloseEvent): void;
+    onError(modeluri: URI, event: WebSocket.ErrorEvent): void;
+    onMessage(modeluri: URI, event: WebSocket.MessageEvent): void;
 }
 
 export const TheiaModelServerClient = Symbol('TheiaModelServerClient');
@@ -42,7 +43,7 @@ export interface TheiaModelServerClientV2 extends ModelServerClientApiV2, JsonRp
      * client handle both Theia RPC events and the messages from the _Model Server_
      * @param options optional subscription options, including message format, time-out, and message filtering
      */
-    subscribe(modeluri: string, listener?: SubscriptionListener, options?: SubscriptionOptionsV2): SubscriptionListener;
+    subscribe(modeluri: URI, listener?: SubscriptionListener, options?: SubscriptionOptionsV2): SubscriptionListener;
 
     /**
      * Subscribe the frontend client of the remote `TheiaModelServerClientV2` service as
@@ -52,5 +53,5 @@ export interface TheiaModelServerClientV2 extends ModelServerClientApiV2, JsonRp
      * @param modeluri the URI of the model to which to subscribe
      * @param options optional subscription options, including message format, time-out, and message filtering
      */
-    selfSubscribe(modeluri: string, options?: SubscriptionOptionsV2): void;
+    selfSubscribe(modeluri: URI, options?: SubscriptionOptionsV2): void;
 }

@@ -8,6 +8,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
+import URI from 'urijs';
+
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
 import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
@@ -28,7 +30,7 @@ export interface ModelServerClientApiV1 {
      * @param defaultFormat Optional fallback format that should used when a request method is invoked and no explicit format argument
      *                      has been passed.
      */
-    initialize(baseUrl: string, defaultFormat?: string): void | Promise<void>;
+    initialize(baseUrl: URI, defaultFormat?: string): void | Promise<void>;
 
     /**
      * Retrieves all available {@link Model}s of the current workspace as plain JSON objects.
@@ -56,7 +58,7 @@ export interface ModelServerClientApiV1 {
      * @param modeluri The URI of the model that should be retrieved
      * @returns The model typed as plain JSON object.
      */
-    get(modeluri: string): Promise<AnyObject>;
+    get(modeluri: URI): Promise<AnyObject>;
     /**
      * Retrieves the {@link Model} for a given URI as typed JSON object
      * The result promise is rejected if no matching model for the URI could be retrieved, or
@@ -65,7 +67,7 @@ export interface ModelServerClientApiV1 {
      * @param typeGuard A guard function to check if the received model is of the expected type.
      * @returns The model casted to the given type.
      */
-    get<M>(modeluri: string, typeGuard: TypeGuard<M>): Promise<M>;
+    get<M>(modeluri: URI, typeGuard: TypeGuard<M>): Promise<M>;
     /**
      * Retrieves the {@link Model} for a given URI in string representation derived from a given format (e.g. 'xml' or 'json').
      * The result promise is rejected if no matching model for the URI could be retrieved.
@@ -73,13 +75,13 @@ export interface ModelServerClientApiV1 {
      * @param format The desired format.
      * @returns The model in string representation.
      */
-    get(modeluri: string, format: string): Promise<string>;
+    get(modeluri: URI, format: string): Promise<string>;
 
     /**
      * Retrieves the URIs of all available {@link Model}s of the current workspace.
      * @returns A string array of all available model URIs.
      */
-    getModelUris(): Promise<string[]>;
+    getModelUris(): Promise<URI[]>;
 
     /**
      * Retrieves a specific model (sub)element by its `id` as plain JSON object.
@@ -88,7 +90,7 @@ export interface ModelServerClientApiV1 {
      * @param elementid The `id` of the element that should be retrieved.
      * @returns The model element typed as plain JSON object.
      */
-    getElementById(modeluri: string, elementid: string): Promise<AnyObject>;
+    getElementById(modeluri: URI, elementid: string): Promise<AnyObject>;
     /**
      * Retrieves a specific model (sub)element by its `id` as typed JSON object.
      * The result promise is rejected if no matching model element for the given URI and `id` could be retrieved, or
@@ -98,7 +100,7 @@ export interface ModelServerClientApiV1 {
      * @param typeGuard A guard function to check if the received model element is of the expected type.
      * @returns The model element casted to the given type.
      */
-    getElementById<M>(modeluri: string, elementid: string, typeGuard: TypeGuard<M>): Promise<M>;
+    getElementById<M>(modeluri: URI, elementid: string, typeGuard: TypeGuard<M>): Promise<M>;
     /**
      * Retrieves a specific model (sub)element by its `id` in string representation derived from a given format (e.g. 'xml' or 'json').
      * The result promise is rejected if no matching model element for the given URI and `id` could be retrieved.
@@ -107,7 +109,7 @@ export interface ModelServerClientApiV1 {
      * @param format The desired format.
      * @returns The model element in string representation.
      */
-    getElementById(modeluri: string, elementid: string, format: string): Promise<string>;
+    getElementById(modeluri: URI, elementid: string, format: string): Promise<string>;
 
     /**
      * Retrieves a specific model (sub)element by its `name` as plain JSON object.
@@ -116,7 +118,7 @@ export interface ModelServerClientApiV1 {
      * @param elementname The `name` of the element that should be retrieved.
      * @returns The model element typed as plain JSON object.
      */
-    getElementByName(modeluri: string, elementname: string): Promise<AnyObject>;
+    getElementByName(modeluri: URI, elementname: string): Promise<AnyObject>;
     /**
      * Retrieves a specific model (sub)element by its `name` as typed JSON object.
      * The result promise is rejected if no matching model element for the given URI and `name` could be retrieved, or
@@ -126,7 +128,7 @@ export interface ModelServerClientApiV1 {
      * @param typeGuard A guard function to check if the received model element is of the expected type.
      * @returns The model element casted to the given type.
      */
-    getElementByName<M>(modeluri: string, elementname: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
+    getElementByName<M>(modeluri: URI, elementname: string, typeGuard: TypeGuard<M>, format?: string): Promise<M>;
     /**
      * Retrieves a specific model (sub)element by its `name` in string representation derived from a given format (e.g. 'xml' or 'json').
      * The result promise is rejected if no matching model element for the given URI and `name` could be retrieved.
@@ -135,21 +137,21 @@ export interface ModelServerClientApiV1 {
      * @param format The desired format.
      * @returns The model element in string representation.
      */
-    getElementByName(modeluri: string, elementname: string, format: string): Promise<string>;
+    getElementByName(modeluri: URI, elementname: string, format: string): Promise<string>;
 
     /**
      * Deletes the {@link Model} with the given URI from the current workspace.
      * @param modeluri The URI of the model that should be deleted.
      * @returns A boolean value indicating whether the deletion was successful.
      */
-    delete(modeluri: string): Promise<boolean>;
+    delete(modeluri: URI): Promise<boolean>;
 
     /**
      * Closes (i.e. unloads) the model with the given URI from the current workspace. This discards all dirty changes.
      * @param modeluri The URI of the model that should be closed.
      * @returns A boolean value indicating whether the close operation was successful.
      */
-    close(modeluri: string): Promise<boolean>;
+    close(modeluri: URI): Promise<boolean>;
 
     /**
      * Creates a new model object with the given URI and content object in the current workspace.
@@ -157,7 +159,7 @@ export interface ModelServerClientApiV1 {
      * @param model The content of the new model object either as plain JSON object or string.
      * @returns The newly created model as plain JSON object.
      */
-    create(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
+    create(modeluri: URI, model: AnyObject | string): Promise<AnyObject>;
     /**
      * Creates a new model object with the given URI and content object in the current workspace.
      * The return type is derived from the given typeguard. The result promise is rejected if the newly created model didn't
@@ -167,7 +169,7 @@ export interface ModelServerClientApiV1 {
      * @param typeGuard A guard function to check if the received model element is of the expected type.
      * @returns The newly created model as typed JSON object `M`.
      */
-    create<M>(modeluri: string, model: AnyObject | string, typeGuard: TypeGuard<M>): Promise<M>;
+    create<M>(modeluri: URI, model: AnyObject | string, typeGuard: TypeGuard<M>): Promise<M>;
     /**
      * Creates a new model object with the given URI and content string in the current workspace.
      * A `format` string has to passed to let the modelserver know how the given content should be interpreted.
@@ -176,7 +178,7 @@ export interface ModelServerClientApiV1 {
      * @param format The desired format.
      * @returns The newly created model as string.
      */
-    create(modeluri: string, model: string, format: string): Promise<string>;
+    create(modeluri: URI, model: string, format: string): Promise<string>;
 
     /**
      * Updates an existing model with the given URI with the given content in the current workspace.
@@ -185,7 +187,7 @@ export interface ModelServerClientApiV1 {
      * @param model The content of the updated model object either as string.
      * @returns The updated model as plain JSON object.
      */
-    update(modeluri: string, model: AnyObject | string): Promise<AnyObject>;
+    update(modeluri: URI, model: AnyObject | string): Promise<AnyObject>;
     /**
      * Updates an existing model with the given URI with the given content in the current workspace.
      * The return type is derived from the given typeguard. The result promise is rejected if the updated model didn't
@@ -196,7 +198,7 @@ export interface ModelServerClientApiV1 {
      * @param typeGuard A guard function to check if the received model element is of the expected type.
      * @returns The updated model as typed JSON object `M`.
      */
-    update<M>(modeluri: string, model: string | string, typeGuard: TypeGuard<M>): Promise<M>;
+    update<M>(modeluri: URI, model: string | string, typeGuard: TypeGuard<M>): Promise<M>;
     /**
      * Updates an existing model with the given URI with the given content string in the current workspace.
      * A `format` string has to passed to let the modelserver know how the given content should be interpreted.
@@ -205,14 +207,14 @@ export interface ModelServerClientApiV1 {
      * @param format The desired format.
      * @returns The updated model as string.
      */
-    update(modeluri: string, model: string, format: string): Promise<AnyObject>;
+    update(modeluri: URI, model: string, format: string): Promise<AnyObject>;
 
     /**
      * Persists all `dirty` changes for the model with the given URI.
      * @param modeluri The URI of the model whose dirty changes should be saved.
      * @returns A boolean indicating whether the saving was successful.
      */
-    save(modeluri: string): Promise<boolean>;
+    save(modeluri: URI): Promise<boolean>;
 
     /**
      * Saves (i.e. persists the dirty changes of) all models that are loaded in the current workspace.
@@ -225,14 +227,14 @@ export interface ModelServerClientApiV1 {
      * @param modeluri The URI of the model that should be validated.
      * @returns The validation result as {@link Diagnostic}.
      */
-    validate(modeluri: string): Promise<Diagnostic>;
+    validate(modeluri: URI): Promise<Diagnostic>;
 
     /**
      * Retrieves the EMF validation constraints for the model with the given URI
      * @param modeluri THe URI of the model whose constraints should be retrieved.
      * @returns The validation constraints as string.
      */
-    getValidationConstraints(modeluri: string): Promise<string>;
+    getValidationConstraints(modeluri: URI): Promise<string>;
 
     /**
      * Retrieves the JSON schema representation of the Ecore model with the given URI.
@@ -241,7 +243,7 @@ export interface ModelServerClientApiV1 {
      * @param modeluri The URI of the Ecore model whose JSON schema should be retrieved
      * @returns The corresponding JSON schema  as string.
      */
-    getTypeSchema(modeluri: string): Promise<string>;
+    getTypeSchema(modeluri: URI): Promise<string>;
 
     /**
      * Retrieves the JSONForms UI schema for the given EClass literal.
@@ -270,21 +272,21 @@ export interface ModelServerClientApiV1 {
      * @param command The command that should be executed.
      * @returns A promise indicating whether the command execution was successful.
      */
-    edit(modeluri: string, command: ModelServerCommand): Promise<boolean>;
+    edit(modeluri: URI, command: ModelServerCommand): Promise<boolean>;
 
     /**
      * Can be used to undo the latest edit change (i.e. command execution) for the model with the given URI.
      * @param modeluri The URI the model whose change should be undone.
      * @returns A string message indicating whether the change was successfully undone.
      */
-    undo(modeluri: string): Promise<string>;
+    undo(modeluri: URI): Promise<string>;
 
     /**
      * Can be used to redo the latest edit change (i.e. command execution) for the model with the given URI.
      * @param modeluri The URI the model whose change should be redone.
      * @returns A string message indicating whether the change was successfully redone.
      */
-    redo(modeluri: string): Promise<string>;
+    redo(modeluri: URI): Promise<string>;
 
     /**
      * Can be used to subscribe for model server notifications for the model with the given URI. For subscription communication
@@ -292,26 +294,26 @@ export interface ModelServerClientApiV1 {
      * @param modeluri URI of the model to subscribe for.
      * @param options The options to configure the subscriptions behavior.
      */
-    subscribe(modeluri: string, options?: SubscriptionOptions): void;
+    subscribe(modeluri: URI, options?: SubscriptionOptions): void;
 
     /**
      * Can be used to send arbitrary {@link ModelServerMessage}s to the model server via a subscription channel.
-     * @param modelUri The URI of the subscribed model.
+     * @param modeluri The URI of the subscribed model.
      * @param message The model server message that should be sent.
      * @returns A boolean indicating whether the message submission was successful.
      */
-    send(modelUri: string, message: ModelServerMessage): boolean;
+    send(modeluri: URI, message: ModelServerMessage): boolean;
 
     /**
      * Can be used to unsubscribe from model server notifications for the model with the given URI.
      * @param modeluri URI of the model to whose subscription should be canceled.
      * @returns A boolean indicating whether the unsubscribe process was successful.
      */
-    unsubscribe(modelUri: string): boolean;
+    unsubscribe(modeluri: URI): boolean;
 }
 
 export namespace ModelServerClientApiV1 {
-    export const API_ENDPOINT = '/api/v1';
+    export const API_ENDPOINT = 'api/v1';
 }
 
 /**

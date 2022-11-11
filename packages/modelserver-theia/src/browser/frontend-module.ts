@@ -11,11 +11,12 @@
 import { ModelServerClient, ModelServerClientV2 } from '@eclipse-emfcloud/modelserver-client';
 import { FrontendApplicationContribution, WebSocketConnectionProvider } from '@theia/core/lib/browser';
 import { ContainerModule } from '@theia/core/shared/inversify';
+import { TheiaModelServerJsonRpcProxyFactory } from '../common/jsonrpc-proxy-factory';
 
 import {
+    ModelServerFrontendClient,
     MODEL_SERVER_CLIENT_SERVICE_PATH,
     MODEL_SERVER_CLIENT_V2_SERVICE_PATH,
-    ModelServerFrontendClient,
     TheiaModelServerClient,
     TheiaModelServerClientV2
 } from '../common';
@@ -33,18 +34,25 @@ export default new ContainerModule(bind => {
     bind(ModelServerSubscriptionClient).toSelf().inSingletonScope();
     bind(ModelServerFrontendClient).toService(ModelServerSubscriptionClient);
     bind(ModelServerSubscriptionService).toService(ModelServerSubscriptionClient);
+
     bind(TheiaModelServerClient)
         .toDynamicValue(ctx => {
             const connection = ctx.container.get(WebSocketConnectionProvider);
             const client: ModelServerFrontendClient = ctx.container.get(ModelServerFrontendClient);
-            return connection.createProxy<ModelServerClient>(MODEL_SERVER_CLIENT_SERVICE_PATH, client);
+            return connection.createProxy<ModelServerClient>(
+                MODEL_SERVER_CLIENT_SERVICE_PATH,
+                new TheiaModelServerJsonRpcProxyFactory(client)
+            );
         })
         .inSingletonScope();
     bind(TheiaModelServerClientV2)
         .toDynamicValue(ctx => {
             const connection = ctx.container.get(WebSocketConnectionProvider);
             const client: ModelServerFrontendClient = ctx.container.get(ModelServerFrontendClient);
-            return connection.createProxy<ModelServerClientV2>(MODEL_SERVER_CLIENT_V2_SERVICE_PATH, client);
+            return connection.createProxy<ModelServerClientV2>(
+                MODEL_SERVER_CLIENT_V2_SERVICE_PATH,
+                new TheiaModelServerJsonRpcProxyFactory(client)
+            );
         })
         .inSingletonScope();
 });

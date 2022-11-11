@@ -8,7 +8,7 @@
       "jsx": true
     }
   },
-  "plugins": ["@typescript-eslint", "header", "import", "simple-import-sort", "no-null", "prettier"],
+  "plugins": ["@typescript-eslint", "header", "import", "no-null", "prettier"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",

@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 import { AddOperation, Operation, RemoveOperation, ReplaceOperation } from 'fast-json-patch';
+import URI from 'urijs';
 
 import { ModelServerObjectV2, ModelServerReferenceDescriptionV2 } from '../model/base-model';
 import { AnyObject, TypeGuard } from './type-util';
@@ -41,7 +42,7 @@ export interface TypeDefinition {
  * @param value the value to set
  * @returns The Json Patch ReplaceOperation to set the property.
  */
-export function replace<T>(modeluri: string, object: ModelServerObjectV2, feature: string, value: T): ReplaceOperation<T> {
+export function replace<T>(modeluri: URI, object: ModelServerObjectV2, feature: string, value: T): ReplaceOperation<T> {
     return {
         op: REPLACE,
         path: getPropertyPath(modeluri, object, feature),
@@ -59,7 +60,7 @@ export function replace<T>(modeluri: string, object: ModelServerObjectV2, featur
  * @returns The Json Patch AddOperation to create the element.
  */
 export function create(
-    modeluri: string,
+    modeluri: URI,
     parent: ModelServerObjectV2,
     feature: string,
     $type: string,
@@ -84,7 +85,7 @@ export function create(
  * @returns The Json Patch AddOperation to add the element in the parent.
  */
 export function add(
-    modeluri: string,
+    modeluri: URI,
     parent: ModelServerObjectV2,
     feature: string,
     value: ModelServerObjectV2 | ModelServerReferenceDescriptionV2
@@ -105,7 +106,7 @@ export function add(
  * @param object the object to remove from the model
  * @returns The Json Patch RemoveOperation to remove the element.
  */
-export function deleteElement(modeluri: string, object: ModelServerObjectV2): RemoveOperation {
+export function deleteElement(modeluri: URI, object: ModelServerObjectV2): RemoveOperation {
     return {
         op: REMOVE,
         path: getObjectPath(modeluri, object)
@@ -119,7 +120,7 @@ export function deleteElement(modeluri: string, object: ModelServerObjectV2): Re
  * @param feature the property from which a value will be removed
  * @param index the index of the value to remove
  */
-export function removeValueAt(modeluri: string, object: ModelServerObjectV2, feature: string, index: number): RemoveOperation {
+export function removeValueAt(modeluri: URI, object: ModelServerObjectV2, feature: string, index: number): RemoveOperation {
     return {
         op: REMOVE,
         path: getPropertyPath(modeluri, object, feature, index)
@@ -133,7 +134,7 @@ export function removeValueAt(modeluri: string, object: ModelServerObjectV2, fea
  * @param feature the property from which a value will be removed
  * @param value the value to remove
  */
-export function removeValue(modeluri: string, object: ModelServerObjectV2, feature: string, value: AnyObject): RemoveOperation | undefined {
+export function removeValue(modeluri: URI, object: ModelServerObjectV2, feature: string, value: AnyObject): RemoveOperation | undefined {
     const index = findIndex(object, feature, value);
     if (index >= 0) {
         return removeValueAt(modeluri, object, feature, index);
@@ -146,7 +147,7 @@ export function removeValue(modeluri: string, object: ModelServerObjectV2, featu
  * @param modeluri the uri of the model to edit
  * @param objectToRemove the object to delete from the model
  */
-export function removeObject(modeluri: string, objectToRemove: ModelServerObjectV2): RemoveOperation {
+export function removeObject(modeluri: URI, objectToRemove: ModelServerObjectV2): RemoveOperation {
     return {
         op: REMOVE,
         path: getObjectPath(modeluri, objectToRemove)
@@ -163,9 +164,9 @@ export function removeObject(modeluri: string, objectToRemove: ModelServerObject
  * @param object The object.
  * @returns the custom Json Path for this object.
  */
-function getObjectPath(modeluri: string, object: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): string {
+function getObjectPath(modeluri: URI, object: ModelServerObjectV2 | ModelServerReferenceDescriptionV2): string {
     const id = ModelServerReferenceDescriptionV2.is(object) ? object.$ref : object.$id;
-    return `${modeluri}#${id}`;
+    return modeluri.clone().fragment(id).toString();
 }
 
 /**
@@ -180,7 +181,7 @@ function getObjectPath(modeluri: string, object: ModelServerObjectV2 | ModelServ
  * @param index An optional index, for list properties.
  * @returns the custom Json Path to edit this property.
  */
-function getPropertyPath(modeluri: string, object: ModelServerObjectV2, feature: string, index?: number): string {
+function getPropertyPath(modeluri: URI, object: ModelServerObjectV2, feature: string, index?: number): string {
     const indexSuffix = index === undefined ? '' : `/${index}`;
     return `${getObjectPath(modeluri, object)}/${feature}${indexSuffix}`;
 }
