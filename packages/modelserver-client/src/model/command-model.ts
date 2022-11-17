@@ -133,11 +133,13 @@ export class SetCommand extends ModelServerCommand {
     constructor(
         public owner: ModelServerReferenceDescription,
         public feature: string,
-        changedValues: DataValueType[] | ModelServerReferenceDescription[]
+        changedValues: DataValueType[] | ModelServerReferenceDescription[] | ModelServerObject[]
     ) {
         super(SetCommand.TYPE);
         if (isModelServerReferenceDescriptionArray(changedValues)) {
             this.objectValues = changedValues;
+        } else if (isModelServerObjectArray(changedValues)) {
+            this.objectsToAdd = changedValues;
         } else {
             this.dataValues = changedValues;
         }
