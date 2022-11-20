@@ -12,23 +12,24 @@ import { MaybePromise } from '@theia/core';
 import { FrontendApplication, FrontendApplicationContribution } from '@theia/core/lib/browser';
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
+import URI from 'urijs';
 
-import { TheiaModelServerClient } from '../common';
+import { TheiaModelServerClientV2 } from '../common';
 
 @injectable()
 export class ModelServerFrontendContribution implements FrontendApplicationContribution {
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
-    @inject(TheiaModelServerClient) protected readonly modelServerClient: TheiaModelServerClient;
+    @inject(TheiaModelServerClientV2) protected readonly modelServerClient: TheiaModelServerClientV2;
 
-    configure(app: FrontendApplication): MaybePromise<void> {
+    configure(_app: FrontendApplication): MaybePromise<void> {
         return this.setup();
     }
 
     async setup(): Promise<void> {
         this.workspaceService.onWorkspaceChanged(workspace => {
             if (workspace[0] && workspace[0].resource) {
-                const workspaceRoot = workspace[0].resource.toString();
-                const uiSchemaFolder = workspaceRoot + '/.ui-schemas';
+                const workspaceRoot = new URI(workspace[0].resource.toString());
+                const uiSchemaFolder = workspaceRoot.clone().segment('.ui-schemas');
                 this.modelServerClient.configureServer({ workspaceRoot, uiSchemaFolder });
             }
         });

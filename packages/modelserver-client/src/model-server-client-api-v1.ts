@@ -10,9 +10,9 @@
  *******************************************************************************/
 import URI from 'urijs';
 
+import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { ModelServerCommand } from './model/command-model';
 import { Diagnostic } from './model/diagnostic';
-import { MessageDataMapper, Model, ModelServerMessage } from './model-server-message';
 import { SubscriptionListener } from './subscription-listener';
 import { AnyObject, TypeGuard } from './utils/type-util';
 
@@ -334,8 +334,8 @@ export interface SubscriptionOptions {
  * the workspaceRoot and the ui schema folder.
  */
 export interface ServerConfiguration {
-    workspaceRoot: string;
-    uiSchemaFolder?: string;
+    workspaceRoot: URI;
+    uiSchemaFolder?: URI;
 }
 
 /**
