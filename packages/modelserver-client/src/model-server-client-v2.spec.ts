@@ -269,14 +269,19 @@ describe('tests for ModelServerClientV2', () => {
 
         it('configureServer', done => {
             const configuration: ServerConfiguration = {
-                workspaceRoot: 'myRoot',
-                uiSchemaFolder: 'mySchemaFolder'
+                workspaceRoot: new URI('myRoot'),
+                uiSchemaFolder: new URI('mySchemaFolder')
             };
             client.configureServer(configuration);
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent();
                 expect(request.config.method).to.be.equal('put');
-                expect(request.config.data).to.equal(JSON.stringify(configuration));
+                expect(request.config.data).to.equal(
+                    JSON.stringify({
+                        workspaceRoot: configuration.workspaceRoot.toString(),
+                        uiSchemaFolder: configuration.uiSchemaFolder!.toString()
+                    })
+                );
                 expect(request.config.params).to.be.undefined;
                 expect(request.config.baseURL).to.be.equal(baseUrl.toString());
                 expect(request.config.url).to.be.equal(ModelServerPaths.SERVER_CONFIGURE);

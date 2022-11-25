@@ -146,11 +146,11 @@ export class ModelServerClient implements ModelServerClientApiV1 {
     }
 
     configureServer(configuration: ServerConfiguration): Promise<boolean> {
-        let { workspaceRoot, uiSchemaFolder } = configuration;
-        workspaceRoot = workspaceRoot.replace('file://', '');
-        uiSchemaFolder = uiSchemaFolder?.replace('file://', '');
         return this.process(
-            this.restClient.put(ModelServerPaths.SERVER_CONFIGURE, { workspaceRoot, uiSchemaFolder }),
+            this.restClient.put(ModelServerPaths.SERVER_CONFIGURE, {
+                workspaceRoot: configuration.workspaceRoot.toString(),
+                uiSchemaFolder: configuration.uiSchemaFolder?.toString()
+            }),
             MessageDataMapper.isSuccess
         );
     }

@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 
-import { asURI, isURI } from '@eclipse-emfcloud/modelserver-client/lib/utils/type-util';
+import { AnyObject, asURI, isURI } from '@eclipse-emfcloud/modelserver-client/lib/utils/type-util';
 import { JsonRpcProxyFactory } from '@theia/core/lib/common/messaging/proxy-factory';
 import URI from 'urijs';
 
@@ -25,8 +25,29 @@ export class TheiaModelServerJsonRpcProxyFactory<T extends object> extends JsonR
     protected processArguments(args: any[]): any[] {
         const processedArgs: any[] = [];
         for (const arg of args) {
+            // process arguments and restore URI objects properly for JSON-rpc communication
             if (isURI(arg)) {
                 processedArgs.push(new URI(asURI(arg)));
+            } else if (AnyObject.is(arg)) {
+                const argObject: AnyObject = {};
+                for (const [key, value] of Object.entries(arg)) {
+                    if (isURI(value)) {
+                        argObject[key] = new URI(asURI(value));
+                    } else {
+                        argObject[key] = value;
+                    }
+                }
+                processedArgs.push(argObject);
+            } else if (Array.isArray(arg)) {
+                const argArray = [];
+                for (const argument of arg) {
+                    if (isURI(argument)) {
+                        argArray.push(new URI(asURI(argument)));
+                    } else {
+                        argArray.push(argument);
+                    }
+                }
+                processedArgs.push(argArray);
             } else {
                 processedArgs.push(arg);
             }
