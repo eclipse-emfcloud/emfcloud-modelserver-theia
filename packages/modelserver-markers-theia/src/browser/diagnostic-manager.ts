@@ -9,9 +9,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
 import { Diagnostic as EMFDiagnostic } from '@eclipse-emfcloud/modelserver-client';
-import { URI as TheiaURI } from '@theia/core/lib/common/uri';
+import { URIUtils } from '@eclipse-emfcloud/modelserver-client/lib/utils';
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { ProblemManager } from '@theia/markers/lib/browser';
+import URI from 'urijs';
 import { Diagnostic as LangServerDiagnostic } from 'vscode-languageserver-types';
 
 import { DiagnosticAdapter } from './diagnostic-adapter';
@@ -27,7 +28,7 @@ export class DiagnosticManager {
      * @param modeluri the model URI concerned by diagnostic
      * @param diagnostic the root diagnostic (children diagnostics will be collected if needed)
      */
-    setDiagnostic(modeluri: TheiaURI, diagnostic: EMFDiagnostic): void {
+    setDiagnostic(modeluri: URI, diagnostic: EMFDiagnostic): void {
         const leaves: EMFDiagnostic[] = EMFDiagnostic.collectLeaves(diagnostic);
         this.setDiagnosticLeaves(modeluri, leaves);
     }
@@ -37,7 +38,7 @@ export class DiagnosticManager {
      * @param modeluri the model URI concerned by diagnostic
      * @param diagnostics the diagnostics to take (children diagnostics will be collected if needed)
      */
-    setDiagnostics(modeluri: TheiaURI, diagnostics: EMFDiagnostic[]): void {
+    setDiagnostics(modeluri: URI, diagnostics: EMFDiagnostic[]): void {
         const leavesPerDiagnostic: EMFDiagnostic[][] = diagnostics.map(d => EMFDiagnostic.collectLeaves(d));
         const leaves: EMFDiagnostic[] = leavesPerDiagnostic.reduce((accumulator, values) => accumulator.concat(values), []);
         this.setDiagnosticLeaves(modeluri, leaves);
@@ -48,9 +49,9 @@ export class DiagnosticManager {
      * @param modeluri the model URI concerned by diagnostic
      * @param diagnostics the leaf diagnostics to take as is
      */
-    protected setDiagnosticLeaves(modeluri: TheiaURI, diagnostics: EMFDiagnostic[]): void {
+    protected setDiagnosticLeaves(modeluri: URI, diagnostics: EMFDiagnostic[]): void {
         // first clean old markers
-        this.problemManager.cleanAllMarkers(modeluri);
+        this.problemManager.cleanAllMarkers(URIUtils.convertToTheiaUri(modeluri));
         // then convert diagnostics
         const convertedDiagnosticsPerElementId: Map<string, LangServerDiagnostic[]> = new Map();
         diagnostics.forEach(d => {
@@ -65,7 +66,7 @@ export class DiagnosticManager {
         });
         // and log them by element id as owner
         for (const [id, converteds] of convertedDiagnosticsPerElementId) {
-            this.problemManager.setMarkers(modeluri, id, converteds);
+            this.problemManager.setMarkers(URIUtils.convertToTheiaUri(modeluri), id, converteds);
         }
     }
 }

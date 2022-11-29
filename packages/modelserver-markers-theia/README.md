@@ -25,7 +25,7 @@ After calling the validation, you can create markers as simply as :
 @inject(MessageService) protected readonly messageService: MessageService;
 @inject(DiagnosticManager) protected readonly diagnosticManager: DiagnosticManager;
 
-const modelURI : TheiaURI;
+const modelURI : URI;
 // perform validation
 this.modelServerClient.validation(modelURI.toString())
     .then((response: Response<any>) => {

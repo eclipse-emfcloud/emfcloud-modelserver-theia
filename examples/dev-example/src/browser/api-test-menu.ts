@@ -34,7 +34,6 @@ import {
     MessageType as MessageLevel
 } from '@theia/core';
 import { ConfirmDialog } from '@theia/core/lib/browser';
-import { URI as TheiaURI } from '@theia/core/lib/common/uri';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { Operation } from 'fast-json-patch';
 import URI from 'urijs';
@@ -701,7 +700,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(ValidationMarkersCommand, {
             execute: () => {
                 this.modelServerClient.validate(new URI('SuperBrewer3000.coffee')).then(result => {
-                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new TheiaURI('SuperBrewer3000.coffee'), result);
+                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('SuperBrewer3000.coffee'), result);
                     this.messageService.info(message);
                 });
             }
@@ -844,7 +843,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(ValidationMarkersCoffeeEcoreCommand, {
             execute: () => {
                 this.modelServerClient.validate(new URI('Coffee.ecore')).then(result => {
-                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new TheiaURI('Coffee.ecore'), result);
+                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('Coffee.ecore'), result);
                     this.messageService.info(message);
                 });
             }
@@ -1005,7 +1004,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(ValidationMarkersSuperBrewer3000JsonCommand, {
             execute: () => {
                 this.modelServerClient.validate(new URI('SuperBrewer3000.json')).then(result => {
-                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new TheiaURI('SuperBrewer3000.json'), result);
+                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('SuperBrewer3000.json'), result);
                     this.messageService.info(message);
                 });
             }
@@ -1183,13 +1182,13 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
 /**
  * Create the markers in the problem view
  * @param diagnosticManager the diagnostic manager
- * @param theiaURI the concerned model URI
+ * @param modeluri the concerned model URI
  * @param response the validation response
  * @returns the message to log
  */
-function createMarkersFromDiagnostic(diagnosticManager: DiagnosticManager, theiaURI: TheiaURI, diagnostic: Diagnostic): string {
+function createMarkersFromDiagnostic(diagnosticManager: DiagnosticManager, modeluri: URI, diagnostic: Diagnostic): string {
     // print markers in Problems view
-    diagnosticManager.setDiagnostic(theiaURI, diagnostic);
+    diagnosticManager.setDiagnostic(modeluri, diagnostic);
     const level = Diagnostic.getSeverityLabel(diagnostic);
     if (level === 'OK') {
         return `Validation is ${level}. There should be no new marker in Problems view.`;
