@@ -11,14 +11,14 @@
 import { ModelServerClient, ModelServerClientV2 } from '@eclipse-emfcloud/modelserver-client';
 import { FrontendApplicationContribution, WebSocketConnectionProvider } from '@theia/core/lib/browser';
 import { ContainerModule } from '@theia/core/shared/inversify';
-import { TheiaModelServerJsonRpcProxyFactory } from '../common/jsonrpc-proxy-factory';
 
 import {
     ModelServerFrontendClient,
     MODEL_SERVER_CLIENT_SERVICE_PATH,
     MODEL_SERVER_CLIENT_V2_SERVICE_PATH,
     TheiaModelServerClient,
-    TheiaModelServerClientV2
+    TheiaModelServerClientV2,
+    TheiaModelServerJsonRpcProxyFactory
 } from '../common';
 import { ModelServerFrontendContribution } from './model-server-frontend-contribution';
 import {

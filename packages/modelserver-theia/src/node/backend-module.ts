@@ -17,9 +17,9 @@ import {
     MODEL_SERVER_CLIENT_SERVICE_PATH,
     MODEL_SERVER_CLIENT_V2_SERVICE_PATH,
     TheiaModelServerClient,
-    TheiaModelServerClientV2
+    TheiaModelServerClientV2,
+    TheiaModelServerJsonRpcProxyFactory
 } from '../common';
-import { TheiaModelServerJsonRpcProxyFactory } from '../common/jsonrpc-proxy-factory';
 import { LaunchOptions } from './launch-options';
 import { DefaultModelServerLauncher, DefaultModelServerNodeLauncher, ModelServerLauncher } from './model-server-backend-contribution';
 import { TheiaBackendModelServerClient } from './theia-model-server-client';
