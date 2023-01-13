@@ -28,16 +28,6 @@ export class TheiaModelServerJsonRpcProxyFactory<T extends object> extends JsonR
             // process arguments and restore URI objects properly for JSON-rpc communication
             if (isURI(arg)) {
                 processedArgs.push(new URI(asURI(arg)));
-            } else if (AnyObject.is(arg)) {
-                const argObject: AnyObject = {};
-                for (const [key, value] of Object.entries(arg)) {
-                    if (isURI(value)) {
-                        argObject[key] = new URI(asURI(value));
-                    } else {
-                        argObject[key] = value;
-                    }
-                }
-                processedArgs.push(argObject);
             } else if (Array.isArray(arg)) {
                 const argArray = [];
                 for (const argument of arg) {
@@ -48,6 +38,16 @@ export class TheiaModelServerJsonRpcProxyFactory<T extends object> extends JsonR
                     }
                 }
                 processedArgs.push(argArray);
+            } else if (AnyObject.is(arg)) {
+                const argObject: AnyObject = {};
+                for (const [key, value] of Object.entries(arg)) {
+                    if (isURI(value)) {
+                        argObject[key] = new URI(asURI(value));
+                    } else {
+                        argObject[key] = value;
+                    }
+                }
+                processedArgs.push(argObject);
             } else {
                 processedArgs.push(arg);
             }
