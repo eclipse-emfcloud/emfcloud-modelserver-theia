@@ -27,14 +27,16 @@
     "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
   },
   "dependencies": {
-    "@theia/core": "^1.0.0",
-    "@theia/workspace": "^1.0.0",
     "@modelserver/coffee-theia": "0.7.0",
     "@eclipse-emfcloud/modelserver-markers-theia": "0.7.0"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
     "typescript": "^4.6.3"
+  },
+  "peerDependencies": {
+    "@theia/core": "^1.33.0",
+    "@theia/workspace": "^1.33.0"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",

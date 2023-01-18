@@ -41,7 +41,7 @@
     "@eclipse-emfcloud/modelserver-client": "0.7.0"
   },
   "peerDependencies": {
-    "@theia/markers": "^1.0.0"
+    "@theia/markers": "^1.33.0"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
