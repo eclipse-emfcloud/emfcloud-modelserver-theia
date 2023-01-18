@@ -38,7 +38,9 @@
     "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
   },
   "dependencies": {
-    "@eclipse-emfcloud/modelserver-client": "0.7.0",
+    "@eclipse-emfcloud/modelserver-client": "0.7.0"
+  },
+  "peerDependencies": {
     "@theia/markers": "^1.0.0"
   },
   "devDependencies": {
