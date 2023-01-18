@@ -33,11 +33,14 @@ import {
     MessageService,
     MessageType as MessageLevel
 } from '@theia/core';
+import { URI as TheiaURI } from '@theia/core/lib/common/uri';
+
 import { ConfirmDialog } from '@theia/core/lib/browser';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { Operation } from 'fast-json-patch';
 import URI from 'urijs';
 
+import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { DevModelServerClient, UpdateTaskNameCommand } from '../common/dev-model-server-client';
 
 /**
@@ -475,6 +478,8 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
     protected readonly messageService: MessageService;
     @inject(ModelServerSubscriptionService)
     protected readonly modelServerSubscriptionService: ModelServerSubscriptionService;
+    @inject(WorkspaceService)
+    protected readonly workspaceService: WorkspaceService;
 
     @postConstruct()
     init(): void {
@@ -700,7 +705,11 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(ValidationMarkersCommand, {
             execute: () => {
                 this.modelServerClient.validate(new URI('SuperBrewer3000.coffee')).then(result => {
-                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('SuperBrewer3000.coffee'), result);
+                    const message = createMarkersFromDiagnostic(
+                        this.diagnosticManager,
+                        this.getWorkspaceFileUri('SuperBrewer3000.coffee'),
+                        result
+                    );
                     this.messageService.info(message);
                 });
             }
@@ -843,7 +852,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(ValidationMarkersCoffeeEcoreCommand, {
             execute: () => {
                 this.modelServerClient.validate(new URI('Coffee.ecore')).then(result => {
-                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('Coffee.ecore'), result);
+                    const message = createMarkersFromDiagnostic(this.diagnosticManager, this.getWorkspaceFileUri('Coffee.ecore'), result);
                     this.messageService.info(message);
                 });
             }
@@ -1004,7 +1013,11 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         commands.registerCommand(ValidationMarkersSuperBrewer3000JsonCommand, {
             execute: () => {
                 this.modelServerClient.validate(new URI('SuperBrewer3000.json')).then(result => {
-                    const message = createMarkersFromDiagnostic(this.diagnosticManager, new URI('SuperBrewer3000.json'), result);
+                    const message = createMarkersFromDiagnostic(
+                        this.diagnosticManager,
+                        this.getWorkspaceFileUri('SuperBrewer3000.json'),
+                        result
+                    );
                     this.messageService.info(message);
                 });
             }
@@ -1177,6 +1190,10 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
         this.modelServerSubscriptionService.onErrorListener(msg => this.printNotification(msg));
         this.modelServerSubscriptionService.onValidationResultListener(msg => this.printNotification(msg));
     }
+
+    private getWorkspaceFileUri(fileName: string): TheiaURI {
+        return this.workspaceService.tryGetRoots()[0].resource.resolve(fileName);
+    }
 }
 
 /**
@@ -1186,7 +1203,7 @@ export class ApiTestMenuContribution implements MenuContribution, CommandContrib
  * @param response the validation response
  * @returns the message to log
  */
-function createMarkersFromDiagnostic(diagnosticManager: DiagnosticManager, modeluri: URI, diagnostic: Diagnostic): string {
+function createMarkersFromDiagnostic(diagnosticManager: DiagnosticManager, modeluri: TheiaURI, diagnostic: Diagnostic): string {
     // print markers in Problems view
     diagnosticManager.setDiagnostic(modeluri, diagnostic);
     const level = Diagnostic.getSeverityLabel(diagnostic);
