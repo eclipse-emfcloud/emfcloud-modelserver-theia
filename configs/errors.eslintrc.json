@@ -79,25 +79,6 @@
       }
     ],
     "@typescript-eslint/semi": ["error", "always"],
-    // eslint-plugin-header
-    "header/header": [
-      2,
-      "block",
-      [
-        "*******************************************************************************",
-        {
-          "pattern": " \\* Copyright \\([cC]\\) \\d{4}(-\\d{4})? .+"
-        },
-        " *",
-        " * This program and the accompanying materials are made available under the",
-        " * terms of the Eclipse Public License v. 2.0 which is available at",
-        " * https://www.eclipse.org/legal/epl-2.0, or the MIT License which is",
-        " * available at https://opensource.org/licenses/MIT.",
-        " *",
-        " * SPDX-License-Identifier: EPL-2.0 OR MIT",
-        " ******************************************************************************"
-      ]
-    ],
     // eslint-plugin-import
     "import/export": "off", // we have multiple exports due to namespaces, enums and classes that share the same name
     "import/no-deprecated": "error",

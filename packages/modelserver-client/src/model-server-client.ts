@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021-2022 STMicroelectronics and others.
+ * Copyright (c) 2021-2023 STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,7 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import WebSocket from 'isomorphic-ws';
 import URI from 'urijs';
 
@@ -266,7 +266,7 @@ export class ModelServerClient implements ModelServerClientApiV1 {
             }
             return mapper(response.data);
         } catch (error) {
-            if (isAxiosError(error)) {
+            if (axios.isAxiosError(error)) {
                 const message = error.response?.data ? error.response.data : error.message;
                 throw new ModelServerError(message, error.code);
             } else {
@@ -274,10 +274,6 @@ export class ModelServerClient implements ModelServerClientApiV1 {
             }
         }
     }
-}
-
-function isAxiosError(error: any): error is AxiosError {
-    return error !== undefined && error instanceof Error && 'isAxiosError' in error && error['isAxiosError'];
 }
 
 /**
