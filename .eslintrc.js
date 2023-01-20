@@ -27,7 +27,7 @@ module.exports = {
                         {
                             pattern: '[\n\r]+ \\* Copyright \\([cC]\\) \\d{4}(-\\d{4})? .*[\n\r]+',
                             template: `********************************************************************************
-  * Copyright (c) ${year} EclipseSource and others..
+  * Copyright (c) ${year} EclipseSource and others.
   *
   *
   * This program and the accompanying materials are made available under the
