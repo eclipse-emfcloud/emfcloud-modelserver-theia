@@ -35,11 +35,13 @@
   },
   "dependencies": {
     "@eclipse-emfcloud/modelserver-client": "0.7.0",
-    "@theia/core": "^1.0.0",
-    "@theia/process": "^1.0.0",
-    "@theia/workspace": "^1.0.0",
     "urijs": "^1.19.11",
     "ws": "8.5.0"
+  },
+  "peerDependencies": {
+    "@theia/core": "^1.33.0",
+    "@theia/process": "^1.33.0",
+    "@theia/workspace": "^1.33.0"
   },
   "devDependencies": {
     "@types/urijs": "^1.19.19",
