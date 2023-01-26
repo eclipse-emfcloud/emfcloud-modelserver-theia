@@ -1,4 +1,4 @@
-# Model Server Theia ![build-status](https://img.shields.io/jenkins/build?jobUrl=https://ci.eclipse.org/emfcloud/job/eclipse-emfcloud/job/emfcloud-modelserver-theia/job/master/)
+# Eclipse EMF.cloud Model Server Theia ![build-status](https://img.shields.io/jenkins/build?jobUrl=https://ci.eclipse.org/emfcloud/job/eclipse-emfcloud/job/emfcloud-modelserver-theia/job/master/)
 
 This projects offers the [Model Server](https://github.com/eclipse-emfcloud/emfcloud-modelserver) integration for Typescript clients.
 
