@@ -36,7 +36,7 @@
   "dependencies": {
     "@eclipse-emfcloud/modelserver-client": "0.7.0",
     "urijs": "^1.19.11",
-    "ws": "^8.5.0"
+    "ws": "^7.1.2"
   },
   "peerDependencies": {
     "@theia/core": "^1.33.0",
