@@ -10,6 +10,7 @@
  *******************************************************************************/
 import { MaybePromise } from '@theia/core';
 import { FrontendApplication, FrontendApplicationContribution } from '@theia/core/lib/browser';
+import { timeout } from '@theia/core/lib/common/promise-util';
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import URI from 'urijs';
@@ -26,12 +27,27 @@ export class ModelServerFrontendContribution implements FrontendApplicationContr
     }
 
     async setup(): Promise<void> {
-        this.workspaceService.onWorkspaceChanged(workspace => {
+        this.workspaceService.onWorkspaceChanged(async workspace => {
             if (workspace[0] && workspace[0].resource) {
                 const workspaceRoot = new URI(workspace[0].resource.toString());
                 const uiSchemaFolder = workspaceRoot.clone().segment('.ui-schemas');
-                this.modelServerClient.configureServer({ workspaceRoot, uiSchemaFolder });
+                await this.waitForReady();
+                console.log('Model Server ready');
+                await this.modelServerClient.configureServer({ workspaceRoot, uiSchemaFolder });
             }
         });
+    }
+
+    async waitForReady(ms = 1000): Promise<void> {
+        let available = await this.modelServerClient.ping().catch(e => {
+            console.log('Model Server not ready yet: ' + e);
+        });
+        while (!available) {
+            await timeout(ms);
+            available = await this.modelServerClient.ping().catch(e => {
+                console.log('Model Server not ready yet: ' + e);
+            });
+        }
+        return;
     }
 }
