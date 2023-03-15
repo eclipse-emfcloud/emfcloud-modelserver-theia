@@ -45,19 +45,13 @@ export class ModelServerFrontendContribution implements FrontendApplicationContr
     async waitForReady(ms = 1000, numberOfTries = 20): Promise<boolean> {
         let available = false;
         while (!available && numberOfTries > 0) {
-            await this.modelServerClient
-                .ping()
-                .then(async value => {
-                    if (value) {
-                        available = true;
-                    } else {
-                        await timeout(ms);
-                    }
-                })
-                .catch(async e => {
-                    console.log('Model Server not ready yet: ' + e);
-                    await timeout(ms);
-                });
+            available = await this.modelServerClient.ping().catch(async e => {
+                console.log('Model Server not ready yet: ' + e);
+                return false;
+            });
+            if (!available) {
+                await timeout(ms);
+            }
             numberOfTries--;
         }
         return available;
