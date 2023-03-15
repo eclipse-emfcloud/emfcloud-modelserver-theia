@@ -31,23 +31,35 @@ export class ModelServerFrontendContribution implements FrontendApplicationContr
             if (workspace[0] && workspace[0].resource) {
                 const workspaceRoot = new URI(workspace[0].resource.toString());
                 const uiSchemaFolder = workspaceRoot.clone().segment('.ui-schemas');
-                await this.waitForReady();
-                console.log('Model Server ready');
-                await this.modelServerClient.configureServer({ workspaceRoot, uiSchemaFolder });
+                const serverLoaded = await this.waitForReady();
+                if (serverLoaded) {
+                    console.log('Model Server ready');
+                    await this.modelServerClient.configureServer({ workspaceRoot, uiSchemaFolder });
+                } else {
+                    console.error('Model Server failed to load');
+                }
             }
         });
     }
 
-    async waitForReady(ms = 1000): Promise<void> {
-        let available = await this.modelServerClient.ping().catch(e => {
-            console.log('Model Server not ready yet: ' + e);
-        });
-        while (!available) {
-            await timeout(ms);
-            available = await this.modelServerClient.ping().catch(e => {
-                console.log('Model Server not ready yet: ' + e);
-            });
+    async waitForReady(ms = 1000, numberOfTries = 20): Promise<boolean> {
+        let available = false;
+        while (!available && numberOfTries > 0) {
+            await this.modelServerClient
+                .ping()
+                .then(async value => {
+                    if (value) {
+                        available = true;
+                    } else {
+                        await timeout(ms);
+                    }
+                })
+                .catch(async e => {
+                    console.log('Model Server not ready yet: ' + e);
+                    await timeout(ms);
+                });
+            numberOfTries--;
         }
-        return;
+        return available;
     }
 }
