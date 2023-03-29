@@ -18,7 +18,7 @@ import * as cp from 'child_process';
 import { TheiaModelServerClient, TheiaModelServerClientV2 } from '../common';
 import { DEFAULT_LAUNCH_OPTIONS, DEFAULT_MODELSERVER_NODE_LAUNCH_OPTIONS, LaunchOptions } from './launch-options';
 
-export const ModelServerLauncher = Symbol('ModelServerLauncher');
+export const ModelServerLauncher = Symbol.for('ModelServerLauncher');
 
 export interface ModelServerLauncher {
     startServer(): boolean;

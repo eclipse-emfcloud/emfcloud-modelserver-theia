@@ -34,7 +34,7 @@ import URI from 'urijs';
 
 import { ModelServerFrontendClient } from '../common';
 
-export const ModelServerSubscriptionService = Symbol('ModelServerSubscriptionService');
+export const ModelServerSubscriptionService = Symbol.for('ModelServerSubscriptionService');
 export interface ModelServerSubscriptionService {
     readonly onOpenListener: Event<ModelServerNotification>;
     readonly onClosedListener: Event<CloseNotification>;
@@ -48,7 +48,7 @@ export interface ModelServerSubscriptionService {
     readonly onValidationResultListener: Event<ValidationNotification>;
 }
 
-export const ModelServerSubscriptionServiceV2 = Symbol('ModelServerSubscriptionServiceV2');
+export const ModelServerSubscriptionServiceV2 = Symbol.for('ModelServerSubscriptionServiceV2');
 export interface ModelServerSubscriptionServiceV2 extends ModelServerSubscriptionService {
     readonly onIncrementalUpdateListenerV2: Event<IncrementalUpdateNotificationV2>;
 }
