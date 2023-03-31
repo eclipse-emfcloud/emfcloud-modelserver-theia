@@ -11,7 +11,7 @@
 import { AnyObject, ModelServerCommand } from '@eclipse-emfcloud/modelserver-client';
 import { TheiaModelServerClientV2 } from '@eclipse-emfcloud/modelserver-theia';
 
-export const DevModelServerClient = Symbol('DevModelServerClient');
+export const DevModelServerClient = Symbol.for('DevModelServerClient');
 export interface DevModelServerClient extends TheiaModelServerClientV2 {
     counter(operation: 'add' | 'subtract' | undefined, delta: number | undefined): Promise<AnyObject>;
 }

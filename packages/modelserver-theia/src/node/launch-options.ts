@@ -8,7 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR MIT
  *******************************************************************************/
-export const LaunchOptions = Symbol('LaunchOptions');
+export const LaunchOptions = Symbol.for('LaunchOptions');
 
 export interface LaunchOptions {
     baseURL: string;
