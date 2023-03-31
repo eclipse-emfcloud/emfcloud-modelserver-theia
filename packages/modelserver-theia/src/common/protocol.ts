@@ -21,7 +21,7 @@ import URI from 'urijs';
 export const MODEL_SERVER_CLIENT_SERVICE_PATH = '/services/modelserverclient';
 export const MODEL_SERVER_CLIENT_V2_SERVICE_PATH = '/services/modelserverclient/v2';
 
-export const ModelServerFrontendClient = Symbol.for('ModelServerFrontendClient');
+export const ModelServerFrontendClient = Symbol('ModelServerFrontendClient');
 export interface ModelServerFrontendClient {
     onOpen(modeluri: URI, event: WebSocket.Event): void;
     onClose(modeluri: URI, event: WebSocket.CloseEvent): void;
@@ -29,10 +29,10 @@ export interface ModelServerFrontendClient {
     onMessage(modeluri: URI, event: WebSocket.MessageEvent): void;
 }
 
-export const TheiaModelServerClient = Symbol.for('TheiaModelServerClient');
+export const TheiaModelServerClient = Symbol('TheiaModelServerClient');
 export interface TheiaModelServerClient extends ModelServerClientApiV1, JsonRpcServer<ModelServerFrontendClient> {}
 
-export const TheiaModelServerClientV2 = Symbol.for('TheiaModelServerClientV2');
+export const TheiaModelServerClientV2 = Symbol('TheiaModelServerClientV2');
 export interface TheiaModelServerClientV2 extends ModelServerClientApiV2, JsonRpcServer<ModelServerFrontendClient> {
     /**
      * Subscribe to model notifications. In the Theia context, the `listener` parameter is optional because
