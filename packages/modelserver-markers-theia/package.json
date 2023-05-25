@@ -12,7 +12,7 @@
   ],
   "homepage": "https://www.eclipse.org/emfcloud/",
   "bugs": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia/issues",
-  "version": "0.7.0",
+  "version": "0.8.0-theia-cr03",
   "files": [
     "lib",
     "src"
@@ -38,7 +38,7 @@
     "url": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia.git"
   },
   "dependencies": {
-    "@eclipse-emfcloud/modelserver-client": "0.7.0"
+    "@eclipse-emfcloud/modelserver-client": "^0.8.0-theia-cr03"
   },
   "peerDependencies": {
     "@theia/markers": "^1.33.0"

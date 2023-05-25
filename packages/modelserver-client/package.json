@@ -14,7 +14,7 @@
   ],
   "homepage": "https://www.eclipse.org/emfcloud/",
   "bugs": "https://github.com/eclipse-emfcloud/emfcloud-modelserver-theia/issues",
-  "version": "0.7.0",
+  "version": "0.8.0-theia-cr03",
   "files": [
     "lib",
     "src"
